@@ -11,10 +11,16 @@ Before 1.0, breaking changes ship as minor bumps.
 ### Changed
 
 - Orders now model the real submitted-basket payload: pharmacy and customer comments, delivery state and location, payment state and total, the sales channel, the submission time, and product lines with multilingual descriptions. Fixtures come from a real capture, redacted by a repeatable pipeline in `scripts/_redact.py`.
+- `FarmadClient.async_login` returns the issued token pair as `FarmadTokens`.
 
 ### Added
 
 - Prescription reads through the Belgian eHealth service. The platform currently rejects non-browser clients for eHealth, so these calls raise `FarmadEhealthAuthorizationRequiredError`. The `ehealth_cookie` argument carries a consent session for the day Farmad relaxes that gate.
+
+### Fixed
+
+- The token endpoint answering a body that is not JSON raises `FarmadInvalidResponseError` instead of a raw `JSONDecodeError`.
+- The built wheel ships the `LICENSE` file.
 
 ## [0.1.0] - 2026-10-01
 

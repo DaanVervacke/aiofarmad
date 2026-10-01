@@ -1,4 +1,4 @@
-"""Immutable result models for the Farmad Procura customer API."""
+"""Immutable input and result models for the Farmad Procura customer API."""
 
 from dataclasses import dataclass
 from datetime import date, datetime
@@ -221,6 +221,22 @@ class CustomerBasket:
     def item_count(self) -> int:
         """Total quantity across all order lines."""
         return sum(line.quantity_ordered for line in self.items)
+
+
+@dataclass(frozen=True, slots=True)
+class DraftProduct:
+    """One product line to write into a draft basket."""
+
+    product_cnk: str
+    quantity: int
+
+    def __post_init__(self) -> None:
+        if not self.product_cnk:
+            msg = "product_cnk must not be empty"
+            raise ValueError(msg)
+        if self.quantity < 1:
+            msg = "quantity must be positive"
+            raise ValueError(msg)
 
 
 @dataclass(frozen=True, slots=True)

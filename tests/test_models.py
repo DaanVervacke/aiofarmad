@@ -1,3 +1,5 @@
+"""FarmadTokens model tests."""
+
 from aiofarmad.models import FarmadTokens
 
 
@@ -9,3 +11,10 @@ def test_tokens_from_token_response() -> None:
     assert tokens.refresh_token == "r"
     assert tokens.expires_in == 36000
     assert tokens.scope == "s"
+
+
+def test_tokens_from_partial_response() -> None:
+    tokens = FarmadTokens.from_token_response({"access_token": "a"})
+    assert tokens.refresh_token is None
+    assert tokens.expires_in is None
+    assert tokens.scope is None

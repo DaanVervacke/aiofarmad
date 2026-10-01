@@ -40,7 +40,7 @@ The login scripts the same authorization-code flow the web app uses: PKCE agains
 
 ## Token persistence
 
-Log in once, store the token pair, and pass it back on the next start. The client refreshes before the access token expires and calls `on_token_refresh` whenever Farmad rotates the pair.
+Log in once, store the pair that `async_login` returns, and pass it back on the next start. The client refreshes before the access token expires and calls `on_token_refresh` whenever Farmad rotates the pair.
 
 ```python
 from aiofarmad import FarmadClient
@@ -84,7 +84,7 @@ Calls against a pharmacy the account has no role at raise `FarmadAuthorizationEr
 | `async_get_medication_nondaily_products(apb, day=...)` | Medications taken outside the daily scheme |
 | `async_get_conversations(apb)` | Conversations with the pharmacy |
 | `async_get_conversation_messages(apb, customer_account_id)` | Messages in one conversation |
-| `async_get_baskets(apb)` | Draft and submitted orders |
+| `async_get_baskets(apb)` | Submitted orders |
 | `async_get_draft_basket(apb)` | The current draft basket, or `None` |
 
 ## Ordering

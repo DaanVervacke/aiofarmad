@@ -154,7 +154,10 @@ def test_parse_nondaily_products(load_fixture: Callable[[str], Any]) -> None:
 
 def test_parse_nondaily_products_rejects_non_list() -> None:
     assert parse_nondaily_products({"cnk": "1"}) == ()
-    assert parse_nondaily_products([{"cnk": "1"}, 5]) is not None
+    products = parse_nondaily_products([{"cnk": "1"}, 5])
+    assert len(products) == 1
+    assert products[0].cnk == "1"
+    assert products[0].skipped_dosages == 1
 
 
 def test_parse_conversations(load_fixture: Callable[[str], Any]) -> None:
@@ -172,7 +175,9 @@ def test_parse_conversations(load_fixture: Callable[[str], Any]) -> None:
 
 
 def test_parse_conversations_skips_non_objects(load_fixture: Callable[[str], Any]) -> None:
-    assert parse_conversations([load_fixture("conversations.json")[0], "junk"])
+    conversations = parse_conversations([load_fixture("conversations.json")[0], "junk"])
+    assert len(conversations) == 1
+    assert conversations[0].customer_name == "Family Member"
 
 
 def test_parse_conversation_single(load_fixture: Callable[[str], Any]) -> None:

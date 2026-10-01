@@ -26,7 +26,6 @@ from aiofarmad._endpoints import (
     ConversationMessagesArgs,
     ConversationsArgs,
     DraftArgs,
-    DraftProduct,
     DraftUpdateArgs,
     DraftWriteArgs,
     PatientArgs,
@@ -40,6 +39,7 @@ from aiofarmad._endpoints import (
     _optional_id,
     _parse_messages,
 )
+from aiofarmad.models import DraftProduct
 
 START = datetime(2026, 10, 1, tzinfo=UTC)
 END = datetime(2026, 10, 7, tzinfo=UTC)

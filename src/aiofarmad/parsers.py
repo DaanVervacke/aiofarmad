@@ -147,14 +147,14 @@ def parse_pharmacy_preferences(data: Mapping[str, Any]) -> PharmacyPreferences:
 
 def parse_day_scheme(data: Mapping[str, Any]) -> MedicationDayScheme:
     """Build one day scheme from a single day payload."""
-    moments: list[MedicationSchemeProduct] = []
+    scheme_products: list[MedicationSchemeProduct] = []
     skipped = 0
     for row in _mapping_items(data.get("moments")):
         order = _int_field(row, "order")
         if order is None or order not in MEDICATION_MOMENT_TITLES:
             skipped += 1
             continue
-        moments.append(
+        scheme_products.append(
             MedicationSchemeProduct(
                 product_description=_str_field(row, "productDescription").lower(),
                 description=_str_field(row, "description"),
@@ -164,7 +164,7 @@ def parse_day_scheme(data: Mapping[str, Any]) -> MedicationDayScheme:
             )
         )
     grouped: dict[str, MedicationIntakeMoment] = {}
-    for product in moments:
+    for product in scheme_products:
         title = MEDICATION_MOMENT_TITLES[product.order]
         moment = grouped.get(title)
         if moment is None:
@@ -203,10 +203,8 @@ def parse_nondaily_products(data: Any) -> tuple[MedicationNondailyProduct, ...]:
     if not isinstance(data, list):
         return ()
     products: dict[str, MedicationNondailyProduct] = {}
-    skipped_dosages = 0
     for item in data:
         if not isinstance(item, Mapping):
-            skipped_dosages += 1
             continue
         cnk = _str_field(item, "cnk")
         dosage = _str_field(item, "dosage").strip()

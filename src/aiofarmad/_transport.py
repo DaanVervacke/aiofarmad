@@ -47,7 +47,6 @@ async def request(
     method: str,
     url: str,
     headers: dict[str, str] | None = None,
-    data: dict[str, str] | None = None,
     json_body: dict[str, Any] | None = None,
     params: dict[str, str] | None = None,
     allow_redirects: bool = False,
@@ -62,7 +61,6 @@ async def request(
                 method=method,
                 url=url,
                 headers=headers,
-                data=data,
                 json=json_body,
                 params=params,
                 allow_redirects=allow_redirects,
@@ -127,9 +125,7 @@ async def request_json(
     url: str,
     headers: dict[str, str] | None = None,
     json_body: dict[str, Any] | None = None,
-    data: dict[str, str] | None = None,
     params: dict[str, str] | None = None,
-    raise_on_error: bool = True,
     timeout: float = 30.0,  # noqa: ASYNC109
 ) -> Any:
     """Make a request and return the parsed JSON body."""
@@ -139,9 +135,7 @@ async def request_json(
         url=url,
         headers=headers,
         json_body=json_body,
-        data=data,
         params=params,
-        raise_on_error=raise_on_error,
         timeout=timeout,
     ) as response:
         return await json_payload(response)

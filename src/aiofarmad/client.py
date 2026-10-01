@@ -33,7 +33,6 @@ from ._endpoints import (
     ConversationMessagesArgs,
     ConversationsArgs,
     DraftArgs,
-    DraftProduct,
     DraftUpdateArgs,
     DraftWriteArgs,
     Endpoint,
@@ -59,9 +58,11 @@ from .models import (
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
+    DraftProduct,
     FarmadAccount,
     FarmadMessage,
     FarmadPatient,
+    FarmadTokens,
     MedicationDayScheme,
     MedicationNondailyProduct,
     Pharmacy,
@@ -127,8 +128,8 @@ class FarmadClient:
         """The patient id carried by the current access token."""
         return self._lifecycle.patient_id
 
-    async def async_login(self) -> None:
-        """Log in with the configured credentials and adopt the issued tokens."""
+    async def async_login(self) -> FarmadTokens:
+        """Log in with the configured credentials and return the issued token pair."""
         self._assert_open()
         if self._email is None or self._password is None:
             msg = "Credentials are required: pass email and password to the client"
@@ -140,6 +141,7 @@ class FarmadClient:
             timeout=self._request_timeout,
         )
         await self._lifecycle.adopt(tokens["access_token"], tokens.get("refresh_token"))
+        return FarmadTokens.from_token_response(tokens)
 
     async def async_get_account(self, account_id: str | None = None) -> FarmadAccount:
         """Fetch the account, defaulting to the account of the current token."""

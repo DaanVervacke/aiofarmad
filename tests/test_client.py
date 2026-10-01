@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
 
 from aiofarmad import (
+    DraftProduct,
     FarmadAuthenticationError,
     FarmadAuthorizationError,
     FarmadClient,
@@ -22,7 +23,6 @@ from aiofarmad import (
     FarmadEhealthAuthorizationRequiredError,
     FarmadNotFoundError,
 )
-from aiofarmad._endpoints import DraftProduct
 
 from .conftest import (
     ACCOUNT_ID,
@@ -65,7 +65,10 @@ async def test_login_adopts_tokens() -> None:
         with aioresponses() as m:
             register_login_flow(m)
             client = FarmadClient(session, email=USERNAME, password=PASSWORD)
-            await client.async_login()
+            tokens = await client.async_login()
+    assert tokens.access_token == "new-access-token"
+    assert tokens.refresh_token == "new-refresh-token"
+    assert tokens.expires_in == 36000
     assert client.access_token == "new-access-token"
     assert client.refresh_token == "new-refresh-token"
 

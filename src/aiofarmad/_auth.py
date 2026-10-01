@@ -5,7 +5,6 @@ import base64
 import hashlib
 import html
 import json
-import logging
 import re
 import secrets
 from http import HTTPStatus
@@ -32,8 +31,6 @@ from .exceptions import (
     FarmadMfaRequiredError,
     FarmadTimeoutError,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 _AUTHORIZE_PARAMS = {
     "response_type": "code",

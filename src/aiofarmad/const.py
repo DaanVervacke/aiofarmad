@@ -8,19 +8,9 @@ AUTH0_AUDIENCE = "api://procura.farmad.be"
 AUTH0_SCOPE = "openid profile email offline_access"
 AUTH_REDIRECT_URI = "https://procura.farmad.be/auth-callback.html"
 AUTH_UI_LOCALES = "nl"
-TOKEN_LIFETIME_MARGIN = 30.0
 
 ALB_BASE_URL = "https://alb-prod.procura.farmad.be"
 EHEALTH_BASE_URL = "https://procura.farmad.be/ehealth"
-
-SERVICE_VERSIONS = {
-    "usermanagement": "8.12",
-    "patientmanagement": "2.0",
-    "medicationscheme": "2.5",
-    "messaging": "4.0",
-    "customerbasket": "1.0",
-    "notifications": "2.1",
-}
 
 CLAIM_ACCOUNT_ID = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountId"
 CLAIM_PATIENT = "http://schemas.microsoft.com/ws/2008/06/identity/claims/patient"

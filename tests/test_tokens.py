@@ -2,7 +2,6 @@
 
 import asyncio
 import json
-import time
 from datetime import UTC, datetime
 
 import aiohttp
@@ -25,9 +24,7 @@ async def test_claims_from_access_token() -> None:
     assert lifecycle.account_id is not None
     assert lifecycle.patient_id is not None
     assert lifecycle.expiry is not None
-    assert lifecycle.expiry.year == time.gmtime().tm_year + 1 or lifecycle.expiry > datetime.now(
-        UTC
-    )
+    assert lifecycle.expiry > datetime.now(UTC)
 
 
 async def test_expiry_is_none_without_token() -> None:

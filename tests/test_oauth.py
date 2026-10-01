@@ -72,6 +72,14 @@ async def test_request_tokens_non_object_payload() -> None:
                 await async_request_tokens(session, BODY, timeout=5.0)
 
 
+async def test_request_tokens_non_json_body() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(TOKEN_URL, body="<html>server error</html>")
+            with pytest.raises(FarmadInvalidResponseError, match="not JSON"):
+                await async_request_tokens(session, BODY, timeout=5.0)
+
+
 async def test_request_tokens_timeout() -> None:
     async with aiohttp.ClientSession() as session:
         with aioresponses() as m:

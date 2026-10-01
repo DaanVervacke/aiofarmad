@@ -1,7 +1,6 @@
 """The OAuth token endpoint primitive shared by login and refresh."""
 
 import asyncio
-import logging
 from typing import Any
 
 import aiohttp
@@ -13,8 +12,6 @@ from .exceptions import (
     FarmadInvalidResponseError,
     FarmadTimeoutError,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 TOKEN_URL = f"https://{AUTH0_DOMAIN}/oauth/token"
 
@@ -39,6 +36,9 @@ async def async_request_tokens(
         except aiohttp.ClientError as err:
             msg = f"Token request failed: {err}"
             raise FarmadCommunicationError(msg) from err
+        except ValueError as err:
+            msg = "Token endpoint answered with a body that is not JSON"
+            raise FarmadInvalidResponseError(msg) from err
     if not isinstance(payload, dict):
         msg = "Token endpoint answered with JSON that is not an object"
         raise FarmadInvalidResponseError(msg)

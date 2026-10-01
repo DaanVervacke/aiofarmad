@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Unofficial asynchronous Python library to interact with the Mijn Farmad Apotheek API"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.14"
 authors = [{ name = "Daan Vervacke", email = "daan.vervacke@proton.me" }]
 classifiers = [

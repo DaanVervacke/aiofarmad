@@ -12,10 +12,6 @@ class FarmadError(Exception):
 class FarmadCommunicationError(FarmadError):
     """The Farmad API answered with an unexpected failure or could not be reached."""
 
-    def __init__(self, message: str, status: int | None = None) -> None:
-        super().__init__(message, status)
-        self.status = status
-
 
 class FarmadTimeoutError(FarmadCommunicationError):
     """A Farmad request exceeded the configured timeout."""

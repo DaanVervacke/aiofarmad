@@ -17,7 +17,6 @@ categories:
     labels: [dependencies]
     collapse-after: 5
 version-resolver:
-  # Pre-1.0 semver: breaking changes ship as minor bumps (0.2.0 -> 0.3.0).
   minor:
     labels: [breaking-change, new-feature]
   patch:

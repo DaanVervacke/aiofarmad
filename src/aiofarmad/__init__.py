@@ -2,8 +2,7 @@
 
 import importlib.metadata
 
-from ._endpoints import DraftProduct
-from .client import FarmadClient
+from .client import FarmadClient, TokenRefreshCallback
 from .exceptions import (
     FarmadAuthenticationError,
     FarmadAuthorizationError,
@@ -23,6 +22,7 @@ from .models import (
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
+    DraftProduct,
     FarmadAccount,
     FarmadMessage,
     FarmadPatient,
@@ -77,5 +77,6 @@ __all__ = [
     "PharmacyLinkResult",
     "PharmacyPreferences",
     "Prescription",
+    "TokenRefreshCallback",
     "__version__",
 ]
