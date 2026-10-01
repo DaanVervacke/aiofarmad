@@ -172,7 +172,7 @@ async def test_get_patient(load_fixture: Callable[[str], Any]) -> None:
             )
             patient = await make_client(session).async_get_patient()
     assert patient.patient_id == PATIENT_ID
-    assert len(patient.pharmacies) == 2
+    assert len(patient.pharmacies) == 8
 
 
 async def test_get_pharmacy_preferences(load_fixture: Callable[[str], Any]) -> None:
@@ -262,7 +262,8 @@ async def test_get_baskets(load_fixture: Callable[[str], Any]) -> None:
                 payload=load_fixture("baskets.json"),
             )
             baskets = await make_client(session).async_get_baskets(APB)
-    assert len(baskets) == 2
+    assert len(baskets) == 1
+    assert baskets[0].comment_pharmacy is not None
 
 
 async def test_get_draft_basket(load_fixture: Callable[[str], Any]) -> None:

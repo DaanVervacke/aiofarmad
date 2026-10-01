@@ -55,16 +55,21 @@ def test_parse_account_lenient_fields() -> None:
 def test_parse_patient(load_fixture: Callable[[str], Any]) -> None:
     patient = parse_patient(load_fixture("patient.json"))
     assert patient.patient_id == PATIENT_ID
-    assert [p.apb_number for p in patient.pharmacies] == ["343602", "344107"]
-    at_mahieu = patient.pharmacy("343602")
-    assert at_mahieu is not None
-    assert at_mahieu.customer_number == 31136
-    assert at_mahieu.date_of_birth is not None
-    assert at_mahieu.date_of_birth.year == 2001
-    assert at_mahieu.last_visit is None
-    at_other = patient.pharmacy("344107")
-    assert at_other is not None
-    assert at_other.last_visit is not None
+    apbs = sorted(patient.pharmacies, key=lambda p: p.apb_number)
+    assert len(apbs) == 8
+    assert apbs[0].apb_number < apbs[-1].apb_number
+    with_visits = [p for p in apbs if p.last_visit is not None]
+    assert len(with_visits) >= 1
+    without_visits = [p for p in apbs if p.last_visit is None]
+    assert len(without_visits) >= 1
+    first = apbs[0]
+    assert first.patient_id == PATIENT_ID
+    assert first.name == "USER"
+    assert first.first_name == "TEST"
+    assert first.customer_number is not None
+    assert first.date_of_birth is not None
+    assert first.date_of_birth.year == 1990
+    assert patient.pharmacy(apbs[0].apb_number) is first
     assert patient.pharmacy("000000") is None
 
 
@@ -194,23 +199,81 @@ def test_parse_message_lenient() -> None:
     assert message.body == ""
 
 
-def test_parse_baskets_resolves_patient_names(load_fixture: Callable[[str], Any]) -> None:
+def test_parse_baskets_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
     baskets = parse_baskets(load_fixture("baskets.json"))
-    assert len(baskets) == 2
-    first = baskets[0]
-    assert first.id == "basket-1"
-    assert first.customer_patient_name == "Test User"
-    assert first.state == "Ordered"
-    assert first.item_count == 3
-    assert first.total_price == 9.9
-    second = baskets[1]
-    assert second.customer_patient_name == "fallback@example.com"
-    assert second.items == ()
+    assert len(baskets) == 1
+    order = baskets[0]
+    assert order.id
+    assert order.customer_patient_id == PATIENT_ID
+    assert order.customer_patient_name == "TEST USER"
+    assert order.state == "Ordered"
+    assert order.sales_channel == "CustomerApp"
+    assert order.comment_customer is None
+    assert order.comment_pharmacy is not None
+    assert "apotheek" in order.comment_pharmacy.lower()
+    assert order.delivery_state == "Assigned"
+    assert order.delivery_location == "Counter"
+    assert order.payment_state == "Open"
+    assert order.total_amount_to_pay == 3.1
+    assert order.submitted_on is not None
+    assert order.submitted_on.year == 2026
+    assert order.item_count == 1
+    assert order.total_price == 3.1
+    line = order.items[0]
+    assert line.cnk == "3093242"
+    assert "FEBELCARE" in line.description_nl
+    assert "FEBELCARE" in line.description_fr
+    assert line.quantity_ordered == 1
+    assert line.unit_price == 3.1
 
 
 def test_parse_baskets_without_embedded() -> None:
-    baskets = parse_baskets({"results": [{"id": "b", "state": "Ordered"}]})
-    assert baskets[0].customer_patient_name is None
+    baskets = parse_baskets(
+        {
+            "results": [
+                {
+                    "id": "b",
+                    "state": "Ordered",
+                    "customerPatientId": "p",
+                    "notificationInfo": {"customEmailAddress": "fallback@example.com"},
+                }
+            ],
+            "embeddedPatients": [],
+        }
+    )
+    assert baskets[0].customer_patient_name == "fallback@example.com"
+
+
+def test_parse_baskets_lenient_blocks() -> None:
+    baskets = parse_baskets(
+        {
+            "results": [
+                {
+                    "id": "b",
+                    "state": "Ordered",
+                    "deliveryInfo": "junk",
+                    "paymentInfo": {"totalAmountToPay": "not-a-number"},
+                    "customerBasketLines": [
+                        "junk",
+                        {"product": "nope", "quantityOrdered": 2},
+                        {"product": {"cnk": "1", "description": "junk"}},
+                    ],
+                }
+            ],
+            "embeddedPatients": "junk",
+        }
+    )
+    order = baskets[0]
+    assert order.delivery_state is None
+    assert order.delivery_location is None
+    assert order.total_amount_to_pay is None
+    assert len(order.items) == 2
+    assert order.items[0].cnk == ""
+    assert order.items[0].quantity_ordered == 2
+    assert order.items[0].unit_price is None
+    assert order.items[1].cnk == "1"
+    assert order.items[1].description_nl == ""
+    assert order.items[1].description_fr == ""
 
 
 def test_parse_draft_basket(load_fixture: Callable[[str], Any]) -> None:

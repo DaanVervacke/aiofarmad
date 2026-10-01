@@ -1,39 +1,64 @@
 {
   "results": [
     {
-      "id": "basket-1",
-      "customerPatientId": "1c7a2c39-0000-4000-8000-000000000002",
-      "notificationInfo": {
-        "customEmailAddress": "fallback@example.com"
-      },
+      "id": "2a2558ca-bf36-5bbd-96d5-8cbc16ac284b",
+      "apb": "346369",
+      "customerPatientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "salesChannel": "CustomerApp",
+      "commentCustomer": null,
+      "commentPharmacy": "Beste, \nWe hebben gelijkaardige steriele compressen voorradig in de apotheek. U kan deze gaascompressen komen ophalen wanneer het u past. \nMet vriendelijke groeten \nTeam apotheek ",
       "state": "Ordered",
-      "basketItems": [
-        {
-          "productCnk": "1122334",
-          "quantity": 2,
-          "unitPrice": 4.95
-        },
-        {
-          "productCnk": "2233445",
-          "quantity": 1
-        }
-      ]
-    },
-    {
-      "id": "basket-2",
-      "customerPatientId": "missing-patient",
       "notificationInfo": {
-        "customEmailAddress": "fallback@example.com"
+        "accountId": "98d9e829-86de-5924-b6c9-f39470943eb8",
+        "customEmailAddress": null
       },
-      "state": "Delivered",
-      "basketItems": []
+      "deliveryInfo": {
+        "state": "Assigned",
+        "retrievalCode": null,
+        "readyForDeliveryTime": null,
+        "deliveryTime": null,
+        "deliveryLocation": "Counter"
+      },
+      "paymentInfo": {
+        "paymentState": "Open",
+        "paymentCompletedTime": null,
+        "totalAmountToPay": 3.1,
+        "paymentChannel": "Counter",
+        "commentPharmacy": null,
+        "paymentLinkSent": false
+      },
+      "twinInfo": {
+        "state": "NotRegistered",
+        "automaticExport": false
+      },
+      "customerBasketLines": [
+        {
+          "id": "43d7e924-a0a9-5fed-92fd-2198bc3839bc",
+          "twinSalesItemId": null,
+          "product": {
+            "cnk": "3093242",
+            "description": {
+              "nl": "FEBELCARE MED1 STERIELE GAASKOMPRES 5,0X5,0CM 40X1",
+              "fr": "FEBELCARE MED1 COMPRESSE GAZE STER. 5,0X5,0CM 40X1"
+            },
+            "isFmdProduct": false,
+            "isOnPrescription": false
+          },
+          "quantityOrdered": 1,
+          "unitPrice": 3.1,
+          "patientId": "36463335-baba-5a65-ad50-8da040599ab9"
+        }
+      ],
+      "submittedOn": "2026-10-01T14:36:06.378872Z",
+      "originalCustomerBasketId": null,
+      "externalIntegrator": null
     }
   ],
   "embeddedPatients": [
     {
-      "id": "1c7a2c39-0000-4000-8000-000000000002",
-      "firstName": "Test",
-      "name": "User"
+      "id": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST"
     }
   ]
 }

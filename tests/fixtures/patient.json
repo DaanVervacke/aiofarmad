@@ -1,31 +1,109 @@
 {
-  "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+  "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
   "patient_in_apbs": {
-    "343602": {
-      "apbNumber": "343602",
-      "customerNumber": 31136,
-      "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+    "343865": {
+      "apbNumber": "343865",
+      "customerNumber": 33696,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
       "name": "USER",
       "firstName": "TEST",
       "nameMyCareNet": "USER",
       "firstNameMyCareNet": "TEST",
       "gender": "m",
-      "dateOfBirth": "2001-08-08T00:00:00+00:00",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
       "communicationLanguageCode": "nl",
       "lastVisit": null
     },
-    "344107": {
-      "apbNumber": "344107",
-      "customerNumber": 23934,
-      "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+    "343838": {
+      "apbNumber": "343838",
+      "customerNumber": 37708,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
       "name": "USER",
       "firstName": "TEST",
       "nameMyCareNet": "USER",
       "firstNameMyCareNet": "TEST",
       "gender": "m",
-      "dateOfBirth": "2001-08-08T00:00:00+00:00",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
       "communicationLanguageCode": "nl",
-      "lastVisit": "2026-08-01T09:15:00+00:00"
+      "lastVisit": "2000-01-01T00:00:00+00:00"
+    },
+    "340140": {
+      "apbNumber": "340140",
+      "customerNumber": 63913,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": "2000-01-01T00:00:00+00:00"
+    },
+    "342692": {
+      "apbNumber": "342692",
+      "customerNumber": 47857,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": null
+    },
+    "343425": {
+      "apbNumber": "343425",
+      "customerNumber": 29945,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": null
+    },
+    "346177": {
+      "apbNumber": "346177",
+      "customerNumber": 63995,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": "2000-01-01T00:00:00+00:00"
+    },
+    "346248": {
+      "apbNumber": "346248",
+      "customerNumber": 46833,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": null
+    },
+    "346369": {
+      "apbNumber": "346369",
+      "customerNumber": 21463,
+      "patientId": "36463335-baba-5a65-ad50-8da040599ab9",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "1990-01-01T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": "2000-01-01T00:00:00+00:00"
     }
   }
 }

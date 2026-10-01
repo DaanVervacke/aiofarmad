@@ -88,6 +88,7 @@ ignore = [
 "scripts/check_bruno_drift.py" = ["T201"]
 "scripts/probe_farmad.py" = ["T201", "S105"]
 "scripts/capture_ehealth.py" = ["T201", "S105"]
+"scripts/capture_data.py" = ["T201", "S105"]
 "scripts/place_test_order.py" = ["T201"]
 "scripts/_redact.py" = ["T201"]
 "docs/conf.py" = ["INP001"]

@@ -39,6 +39,8 @@ Models
    :members:
 .. autoclass:: aiofarmad.CustomerBasket
    :members:
+.. autoclass:: aiofarmad.BasketLine
+   :members:
 .. autoclass:: aiofarmad.BasketItem
    :members:
 .. autoclass:: aiofarmad.DraftBasket

@@ -19,6 +19,7 @@ from .exceptions import (
 from .models import (
     AccountMembership,
     BasketItem,
+    BasketLine,
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
@@ -46,6 +47,7 @@ except importlib.metadata.PackageNotFoundError:
 __all__ = [
     "AccountMembership",
     "BasketItem",
+    "BasketLine",
     "ConversationSummary",
     "CustomerBasket",
     "DraftBasket",

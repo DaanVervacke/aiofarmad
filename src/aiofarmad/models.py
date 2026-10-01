@@ -179,27 +179,48 @@ class BasketItem:
 
 
 @dataclass(frozen=True, slots=True)
+class BasketLine:
+    """One product line in a submitted order."""
+
+    cnk: str
+    description_nl: str
+    description_fr: str
+    quantity_ordered: int
+    unit_price: float | None
+
+
+@dataclass(frozen=True, slots=True)
 class CustomerBasket:
-    """A basket: a draft order or a submitted order."""
+    """A submitted order at one pharmacy."""
 
     id: str
     customer_patient_id: str | None
     customer_patient_name: str | None
     state: str
-    items: tuple[BasketItem, ...] = ()
+    sales_channel: str | None = None
+    comment_customer: str | None = None
+    comment_pharmacy: str | None = None
+    delivery_state: str | None = None
+    delivery_location: str | None = None
+    payment_state: str | None = None
+    total_amount_to_pay: float | None = None
+    submitted_on: datetime | None = None
+    items: tuple[BasketLine, ...] = ()
     raw: dict[str, Any] | None = None
 
     @property
     def total_price(self) -> float:
-        """The basket total based on known unit prices."""
+        """The order total based on known unit prices."""
         return sum(
-            item.quantity * item.unit_price for item in self.items if item.unit_price is not None
+            line.quantity_ordered * line.unit_price
+            for line in self.items
+            if line.unit_price is not None
         )
 
     @property
     def item_count(self) -> int:
-        """Total quantity across all basket lines."""
-        return sum(item.quantity for item in self.items)
+        """Total quantity across all order lines."""
+        return sum(line.quantity_ordered for line in self.items)
 
 
 @dataclass(frozen=True, slots=True)

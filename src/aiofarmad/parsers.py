@@ -8,6 +8,7 @@ from .const import MEDICATION_MOMENT_TITLES
 from .models import (
     AccountMembership,
     BasketItem,
+    BasketLine,
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
@@ -282,7 +283,7 @@ def parse_conversations(data: Any) -> tuple[ConversationSummary, ...]:
 
 
 def parse_baskets(data: Mapping[str, Any]) -> tuple[CustomerBasket, ...]:
-    """Build baskets from the basket list payload, resolving patient names."""
+    """Build orders from the basket list payload, resolving patient names."""
     embedded: dict[str, str] = {}
     for patient in _mapping_items(data.get("embeddedPatients")):
         embedded_patient_id = _str_field(patient, "id")
@@ -296,17 +297,69 @@ def parse_baskets(data: Mapping[str, Any]) -> tuple[CustomerBasket, ...]:
         fallback_name = ""
         if isinstance(notification_info, Mapping):
             fallback_name = _str_field(notification_info, "customEmailAddress")
+        delivery_info = item.get("deliveryInfo")
+        delivery_state = None
+        delivery_location = None
+        if isinstance(delivery_info, Mapping):
+            delivery_state = _str_field(delivery_info, "state") or None
+            delivery_location = _str_field(delivery_info, "deliveryLocation") or None
+        payment_info = item.get("paymentInfo")
+        payment_state = None
+        total_amount = None
+        if isinstance(payment_info, Mapping):
+            payment_state = _str_field(payment_info, "paymentState") or None
+            amount = payment_info.get("totalAmountToPay")
+            total_amount = amount if isinstance(amount, int | float) else None
         baskets.append(
             CustomerBasket(
                 id=_str_field(item, "id"),
                 customer_patient_id=patient_id,
                 customer_patient_name=embedded.get(patient_id or "") or fallback_name or None,
                 state=_str_field(item, "state"),
-                items=parse_basket_items(item.get("basketItems")),
+                sales_channel=_str_field(item, "salesChannel") or None,
+                comment_customer=_str_field(item, "commentCustomer") or None,
+                comment_pharmacy=_str_field(item, "commentPharmacy") or None,
+                delivery_state=delivery_state,
+                delivery_location=delivery_location,
+                payment_state=payment_state,
+                total_amount_to_pay=total_amount,
+                submitted_on=_datetime_field(item, "submittedOn"),
+                items=parse_basket_lines(item.get("customerBasketLines")),
                 raw=dict(item),
             )
         )
     return tuple(baskets)
+
+
+def parse_basket_lines(data: Any) -> tuple[BasketLine, ...]:
+    """Build order lines from the customerBasketLines payload."""
+    if not isinstance(data, list):
+        return ()
+    lines: list[BasketLine] = []
+    for line in data:
+        if not isinstance(line, Mapping):
+            continue
+        product = line.get("product")
+        description_nl = ""
+        description_fr = ""
+        cnk = ""
+        if isinstance(product, Mapping):
+            cnk = _str_field(product, "cnk")
+            description = product.get("description")
+            if isinstance(description, Mapping):
+                description_nl = _str_field(description, "nl")
+                description_fr = _str_field(description, "fr")
+        unit_price = line.get("unitPrice")
+        lines.append(
+            BasketLine(
+                cnk=cnk,
+                description_nl=description_nl,
+                description_fr=description_fr,
+                quantity_ordered=_int_field(line, "quantityOrdered") or 0,
+                unit_price=unit_price if isinstance(unit_price, int | float) else None,
+            )
+        )
+    return tuple(lines)
 
 
 def parse_basket_items(data: Any) -> tuple[BasketItem, ...]:
