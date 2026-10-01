@@ -31,6 +31,8 @@ from aiofarmad._endpoints import (
     DraftWriteArgs,
     PatientArgs,
     PharmacyArgs,
+    PrescriptionArgs,
+    PrescriptionsArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -274,3 +276,13 @@ def test_draft_update_args_apb_and_account_validation() -> None:
         DraftUpdateArgs(apb="", account_id="c", patient_id="p", basket_id="b")
     with pytest.raises(ValueError, match="account_id must not be empty"):
         DraftUpdateArgs(apb="a", account_id="", patient_id="p", basket_id="b")
+
+
+def test_prescriptions_args_validation() -> None:
+    with pytest.raises(ValueError, match="page must not be negative"):
+        PrescriptionsArgs(page=-1)
+
+
+def test_prescription_args_validation() -> None:
+    with pytest.raises(ValueError, match="prescription_id must not be empty"):
+        PrescriptionArgs(prescription_id="")

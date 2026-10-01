@@ -1,0 +1,10 @@
+info:
+  name: 08-ehealth
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Prescriptions through the Belgian eHealth platform. Every request needs the
+  eHealth session cookie from a completed itsme consent, which the environment
+  variable EHEALTH_COOKIE carries.

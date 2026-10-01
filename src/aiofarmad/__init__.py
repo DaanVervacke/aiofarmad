@@ -35,6 +35,7 @@ from .models import (
     Pharmacy,
     PharmacyLinkResult,
     PharmacyPreferences,
+    Prescription,
 )
 
 try:
@@ -73,5 +74,6 @@ __all__ = [
     "Pharmacy",
     "PharmacyLinkResult",
     "PharmacyPreferences",
+    "Prescription",
     "__version__",
 ]

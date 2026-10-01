@@ -238,6 +238,18 @@ class FarmadTokens:
 
 
 @dataclass(frozen=True, slots=True)
+class Prescription:
+    """One prescription as the eHealth service reports it.
+
+    The payload shape stays in ``raw`` until a real consented session is
+    captured, because the app bundle embeds no field map for it.
+    """
+
+    prescription_id: str = ""
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class PharmacyLinkResult:
     """The outcome of a pharmacy self-onboarding request."""
 

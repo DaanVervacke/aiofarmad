@@ -20,6 +20,8 @@ from aiofarmad._endpoints import (
     ORGANIZATION,
     PATIENT,
     PHARMACY_PREFERENCES,
+    PRESCRIPTION,
+    PRESCRIPTIONS,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     SELF_ONBOARDING,
@@ -35,6 +37,8 @@ from aiofarmad._endpoints import (
     Endpoint,
     PatientArgs,
     PharmacyArgs,
+    PrescriptionArgs,
+    PrescriptionsArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -48,6 +52,8 @@ ENDPOINTS: tuple[Endpoint[Any, Any], ...] = (
     ORGANIZATION,
     PATIENT,
     PHARMACY_PREFERENCES,
+    PRESCRIPTION,
+    PRESCRIPTIONS,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     CONVERSATIONS,
@@ -61,6 +67,7 @@ ENDPOINTS: tuple[Endpoint[Any, Any], ...] = (
     CANCEL_BASKET,
     SELF_ONBOARDING,
 )
+
 
 WINDOW_START = datetime(2026, 10, 1, tzinfo=UTC)
 WINDOW_END = datetime(2026, 10, 7, tzinfo=UTC)
@@ -92,6 +99,8 @@ def dummy_args(endpoint: Endpoint[Any, Any]) -> object:
         "submit_basket": SubmitBasketArgs(apb="apb", basket_id="basketId", patient_id="patientId"),
         "cancel_basket": BasketIdArgs(apb="apb", basket_id="basketId"),
         "self_onboarding": SelfOnboardingArgs(account_id="id", apb="apb"),
+        "prescriptions": PrescriptionsArgs(page=0),
+        "prescription": PrescriptionArgs(prescription_id="prescriptionId"),
     }[endpoint.name]
 
 
@@ -121,6 +130,7 @@ PLACEHOLDERS = {
     "customerAccountId": "customerAccountId",
     "accountId": "accountId",
     "basketId": "basketId",
+    "prescriptionId": "prescriptionId",
 }
 
 

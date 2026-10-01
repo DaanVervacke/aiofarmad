@@ -19,6 +19,7 @@ from aiofarmad import (
     FarmadClient,
     FarmadClientClosedError,
     FarmadCommunicationError,
+    FarmadEhealthAuthorizationRequiredError,
     FarmadNotFoundError,
 )
 from aiofarmad._endpoints import DraftProduct
@@ -30,6 +31,7 @@ from .conftest import (
     PATIENT_ID,
     USERNAME,
     alb_url,
+    ehealth_url,
     make_jwt,
     register_login_flow,
 )
@@ -483,3 +485,76 @@ async def test_token_properties_expose_the_lifecycle() -> None:
     assert client.access_token == ACCESS
     assert client.refresh_token == REFRESH
     await client.async_close()
+
+
+async def test_get_prescriptions_sends_ehealth_cookie(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                ehealth_url("/ehealth/api/prescriptions"),
+                payload=load_fixture("prescriptions.json"),
+            )
+            client = FarmadClient(
+                session,
+                access_token=ACCESS,
+                refresh_token=REFRESH,
+                ehealth_cookie=".AspNetCore.Cookies=abc123",
+            )
+            prescriptions = await client.async_get_prescriptions()
+    assert len(prescriptions) == 2
+    request_log = m.requests
+    key = first_request_key(
+        request_log, "GET", "https://procura.farmad.be/ehealth/api/prescriptions"
+    )
+    headers = request_log[key][0].kwargs["headers"]
+    assert headers["Cookie"] == ".AspNetCore.Cookies=abc123"
+
+
+async def test_get_prescriptions_without_cookie_still_calls() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(ehealth_url("/ehealth/api/prescriptions"), payload=[])
+            client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
+            prescriptions = await client.async_get_prescriptions()
+    assert prescriptions == ()
+
+
+async def test_get_prescription_by_id(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                ehealth_url("/ehealth/api/prescriptions/BEP10S18PLM4"),
+                payload=load_fixture("prescription.json"),
+            )
+            client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
+            prescription = await client.async_get_prescription("BEP10S18PLM4")
+    assert prescription is not None
+    assert prescription.prescription_id == "BEP10S18PLM4"
+
+
+async def test_ehealth_401_raises_consent_error() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(ehealth_url("/ehealth/api/prescriptions"), status=401, payload={})
+            client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
+            with pytest.raises(FarmadEhealthAuthorizationRequiredError, match="eHealth session"):
+                await client.async_get_prescriptions()
+
+
+async def test_ehealth_401_does_not_burn_a_refresh() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(ehealth_url("/ehealth/api/prescriptions"), status=401, payload={})
+            client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
+            with pytest.raises(FarmadEhealthAuthorizationRequiredError):
+                await client.async_get_prescriptions()
+    assert client.refresh_token == REFRESH
+
+
+async def test_get_prescription_not_found_is_none() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(ehealth_url("/ehealth/api/prescriptions/BEP10S18PLM4"), status=404, payload={})
+            client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
+            prescription = await client.async_get_prescription("BEP10S18PLM4")
+    assert prescription is None

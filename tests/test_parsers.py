@@ -20,6 +20,8 @@ from aiofarmad.parsers import (
     parse_organization,
     parse_patient,
     parse_pharmacy_preferences,
+    parse_prescription,
+    parse_prescriptions,
 )
 
 from .conftest import ACCOUNT_ID, PATIENT_ID
@@ -335,3 +337,45 @@ def test_parse_nondaily_appends_distinct_dosages() -> None:
     )
     assert products[0].dosages == ("1 per dag", "2 per week")
     assert products[0].skipped_dosages == 0
+
+
+def test_parse_prescriptions_from_list(load_fixture: Callable[[str], Any]) -> None:
+    prescriptions = parse_prescriptions(load_fixture("prescriptions.json"))
+    assert len(prescriptions) == 2
+    assert prescriptions[0].raw is not None
+    assert prescriptions[0].raw["id"] == "BEP10S18PLM4"
+
+
+def test_parse_prescriptions_from_wrapped_list() -> None:
+    prescriptions = parse_prescriptions({"prescriptions": [{"id": "BE1"}]})
+    assert len(prescriptions) == 1
+    assert prescriptions[0].raw is not None
+
+
+def test_parse_prescriptions_from_object() -> None:
+    prescriptions = parse_prescriptions({"id": "BE1"})
+    assert len(prescriptions) == 1
+    assert prescriptions[0].raw is not None
+
+
+def test_parse_prescriptions_rejects_other_shapes() -> None:
+    assert parse_prescriptions("junk") == ()
+    assert parse_prescriptions(None) == ()
+
+
+def test_parse_prescription_single(load_fixture: Callable[[str], Any]) -> None:
+    prescription = parse_prescription(load_fixture("prescription.json"), "BEP10S18PLM4")
+    assert prescription is not None
+    assert prescription.prescription_id == "BEP10S18PLM4"
+    assert prescription.raw is not None
+
+
+def test_parse_prescription_none_payload() -> None:
+    assert parse_prescription(None) is None
+
+
+def test_parse_prescription_non_dict_payload() -> None:
+    prescription = parse_prescription("junk", "BE1")
+    assert prescription is not None
+    assert prescription.prescription_id == "BE1"
+    assert prescription.raw is None

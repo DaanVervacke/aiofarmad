@@ -17,4 +17,6 @@ variables:
   - name: ACCOUNT_ID
     value: "{{process.env.FARMAD_ACCOUNT_ID}}"
   - name: PATIENT_ID
+  - name: EHEALTH_COOKIE
+    value: "{{process.env.FARMAD_EHEALTH_COOKIE}}"
     value: "{{process.env.FARMAD_PATIENT_ID}}"

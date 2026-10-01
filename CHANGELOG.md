@@ -8,6 +8,10 @@ Before 1.0, breaking changes ship as minor bumps.
 
 ## [Unreleased]
 
+### Added
+
+- Prescription reads through the Belgian eHealth service, with the consent session passed in as a cookie and mapped to `FarmadEhealthAuthorizationRequiredError` when it is missing.
+
 ## [0.1.0] - 2026-10-01
 
 ### Added

@@ -45,6 +45,8 @@ Models
    :members:
 .. autoclass:: aiofarmad.FarmadTokens
    :members:
+.. autoclass:: aiofarmad.Prescription
+   :members:
 
 Exceptions
 ----------

@@ -110,7 +110,23 @@ Orders are paid at pickup by default. Most pharmacies do not allow online paymen
 
 ## Prescriptions
 
-Prescriptions sit behind the Belgian eHealth platform and need a one-time itsme consent that this library cannot script. Calls that need that session raise `FarmadEhealthAuthorizationRequiredError` until the consent exists.
+Prescriptions sit behind the Belgian eHealth platform. The itsme consent there cannot be scripted, so the library works with the session that consent creates:
+
+1. Open the web app at `https://procura.farmad.be/` and go to prescriptions once. Complete the itsme flow there.
+2. Copy the `Cookie` request header your browser sends to `https://procura.farmad.be/ehealth/api/...` (developer tools, network tab, any prescriptions request).
+3. Pass that value as `ehealth_cookie`. The client sends it on every eHealth call.
+
+```python
+async with FarmadClient(
+    access_token=stored_access,
+    refresh_token=stored_refresh,
+    ehealth_cookie=".AspNetCore.Cookies=...",
+) as client:
+    prescriptions = await client.async_get_prescriptions()
+    one = await client.async_get_prescription("BEP10S18PLM4")
+```
+
+When the cookie is missing or expired, eHealth answers 401 and the client raises `FarmadEhealthAuthorizationRequiredError`. Repeat the consent step to get a fresh cookie.
 
 ## Errors
 

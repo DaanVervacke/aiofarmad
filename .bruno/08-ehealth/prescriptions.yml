@@ -1,0 +1,33 @@
+info:
+  name: prescriptions
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{ehealthBaseUrl}}/api/prescriptions'
+  params:
+  - name: api-version
+    value: '1.1'
+    type: query
+  - name: page
+    value: '0'
+    type: query
+  - name: language
+    value: nl
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  - name: Cookie
+    value: '{{EHEALTH_COOKIE}}'
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  One page of prescriptions. The answer is 401 until the eHealth session cookie
+  from a completed itsme consent is sent.
+
+  Mirrors FarmadClient::async_get_prescriptions.

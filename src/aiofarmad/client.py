@@ -21,6 +21,8 @@ from ._endpoints import (
     ORGANIZATION,
     PATIENT,
     PHARMACY_PREFERENCES,
+    PRESCRIPTION,
+    PRESCRIPTIONS,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     SELF_ONBOARDING,
@@ -37,6 +39,8 @@ from ._endpoints import (
     Endpoint,
     PatientArgs,
     PharmacyArgs,
+    PrescriptionArgs,
+    PrescriptionsArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -44,10 +48,11 @@ from ._endpoints import (
 )
 from ._tokens import TokenLifecycle
 from ._transport import OwnedSession, request_json
-from .const import ALB_BASE_URL, USER_AGENT
+from .const import USER_AGENT
 from .exceptions import (
     FarmadAuthenticationError,
     FarmadClientClosedError,
+    FarmadEhealthAuthorizationRequiredError,
     FarmadNotFoundError,
 )
 from .models import (
@@ -61,6 +66,7 @@ from .models import (
     MedicationNondailyProduct,
     Pharmacy,
     PharmacyPreferences,
+    Prescription,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,6 +86,7 @@ class FarmadClient:
         access_token: str | None = None,
         refresh_token: str | None = None,
         on_token_refresh: TokenRefreshCallback | None = None,
+        ehealth_cookie: str | None = None,
         request_timeout: float = 30.0,
     ) -> None:
         """Create a client from a session, credentials, or an existing token pair."""
@@ -90,6 +97,7 @@ class FarmadClient:
         self._email = email
         self._password = password
         self._request_timeout = request_timeout
+        self._ehealth_cookie = ehealth_cookie
         self._closed = False
         self._lifecycle = TokenLifecycle(
             session_provider=lambda: self._owned_session.session,
@@ -339,6 +347,27 @@ class FarmadClient:
         """
         await self._call(CANCEL_BASKET, BasketIdArgs(apb=apb, basket_id=basket_id))
 
+    async def async_get_prescriptions(
+        self,
+        *,
+        page: int = 0,
+        language: str = "nl",
+    ) -> tuple[Prescription, ...]:
+        """Fetch one page of prescriptions through the eHealth service."""
+        return await self._call(PRESCRIPTIONS, PrescriptionsArgs(page=page, language=language))
+
+    async def async_get_prescription(
+        self,
+        prescription_id: str,
+        *,
+        language: str = "nl",
+    ) -> Prescription | None:
+        """Fetch one prescription by its Recip-e id through the eHealth service."""
+        return await self._call(
+            PRESCRIPTION,
+            PrescriptionArgs(prescription_id=prescription_id, language=language),
+        )
+
     async def async_link_pharmacy(self, apb: str) -> bool:
         """Link the account to one pharmacy through the app's self-onboarding."""
         resolved = self._require(self.account_id, "account_id")
@@ -357,7 +386,13 @@ class FarmadClient:
         await self._lifecycle.ensure_fresh()
         try:
             payload = await self._request_json_authenticated(endpoint, args)
-        except FarmadAuthenticationError:
+        except FarmadAuthenticationError as err:
+            if endpoint.ehealth:
+                msg = (
+                    "The eHealth session is missing or expired: complete the "
+                    "consent step and pass its session cookie to the client"
+                )
+                raise FarmadEhealthAuthorizationRequiredError(msg) from err
             if self._lifecycle.refresh_token is None:
                 raise
             _LOGGER.debug("401 with a live token: refreshing once and retrying")
@@ -377,15 +412,18 @@ class FarmadClient:
         """Request one endpoint with the current bearer token."""
         params = {"api-version": endpoint.version}
         params.update(endpoint.params(args))
+        headers = {
+            "Authorization": self._lifecycle.bearer(),
+            "Accept": "application/json",
+            "User-Agent": USER_AGENT,
+        }
+        if endpoint.ehealth and self._ehealth_cookie:
+            headers["Cookie"] = self._ehealth_cookie
         return await request_json(
             self._owned_session.session,
             method=endpoint.method,
-            url=f"{ALB_BASE_URL}{endpoint.url(args)}",
-            headers={
-                "Authorization": self._lifecycle.bearer(),
-                "Accept": "application/json",
-                "User-Agent": USER_AGENT,
-            },
+            url=f"{endpoint.base_url}{endpoint.url(args)}",
+            headers=headers,
             params=params,
             json_body=endpoint.json_body(args) if endpoint.json_body is not None else None,
             timeout=self._request_timeout,

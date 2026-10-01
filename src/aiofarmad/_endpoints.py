@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
+from .const import ALB_BASE_URL, EHEALTH_BASE_URL
 from .models import (
     ConversationSummary,
     CustomerBasket,
@@ -16,6 +17,7 @@ from .models import (
     MedicationNondailyProduct,
     Pharmacy,
     PharmacyPreferences,
+    Prescription,
 )
 from .parsers import (
     parse_account,
@@ -28,6 +30,8 @@ from .parsers import (
     parse_organization,
     parse_patient,
     parse_pharmacy_preferences,
+    parse_prescription,
+    parse_prescriptions,
 )
 
 DEFAULT_LANGUAGE = "nl"
@@ -288,6 +292,32 @@ class SelfOnboardingArgs(AccountArgs):
 
 
 @dataclass(frozen=True, slots=True)
+class PrescriptionsArgs:
+    """One page of prescriptions."""
+
+    page: int = 0
+    language: str = "nl"
+
+    def __post_init__(self) -> None:
+        if self.page < 0:
+            msg = "page must not be negative"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class PrescriptionArgs:
+    """One prescription, addressed by its Recip-e id."""
+
+    prescription_id: str
+    language: str = "nl"
+
+    def __post_init__(self) -> None:
+        if not self.prescription_id:
+            msg = "prescription_id must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
 class Endpoint[ArgsT, ModelT]:
     """One wire contract: method, url, params, body, and the parse step."""
 
@@ -297,8 +327,10 @@ class Endpoint[ArgsT, ModelT]:
     version: str
     parse: Callable[[Any, ArgsT], ModelT]
     params: Callable[[ArgsT], dict[str, str]]
+    base_url: str = ALB_BASE_URL
     json_body: Callable[[ArgsT], dict[str, Any]] | None = None
     not_found_is_none: bool = False
+    ehealth: bool = False
 
 
 def _draft_products(products: tuple[DraftProduct, ...], patient_id: str) -> list[dict[str, Any]]:
@@ -477,6 +509,32 @@ CANCEL_BASKET: Endpoint[BasketIdArgs, None] = Endpoint(
     version="1.0",
     params=lambda _args: {},
     parse=lambda _payload, _args: None,
+)
+
+
+_EHEALTH_HOST = EHEALTH_BASE_URL.removesuffix("/ehealth")
+
+PRESCRIPTIONS: Endpoint[PrescriptionsArgs, tuple[Prescription, ...]] = Endpoint(
+    name="prescriptions",
+    method="GET",
+    url=lambda _args: "/ehealth/api/prescriptions",
+    version="1.1",
+    base_url=_EHEALTH_HOST,
+    params=lambda args: {"page": str(args.page), "language": args.language},
+    parse=lambda payload, _args: parse_prescriptions(payload),
+    ehealth=True,
+)
+
+PRESCRIPTION: Endpoint[PrescriptionArgs, Prescription | None] = Endpoint(
+    name="prescription",
+    method="GET",
+    url=lambda args: f"/ehealth/api/prescriptions/{args.prescription_id}",
+    version="1.1",
+    base_url=_EHEALTH_HOST,
+    params=lambda args: {"language": args.language},
+    parse=lambda payload, args: parse_prescription(payload, args.prescription_id),
+    not_found_is_none=True,
+    ehealth=True,
 )
 
 

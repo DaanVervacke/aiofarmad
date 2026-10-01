@@ -22,6 +22,7 @@ from .models import (
     PatientInPharmacy,
     Pharmacy,
     PharmacyPreferences,
+    Prescription,
 )
 
 _TEMPORALITY_ORDER: dict[MedicationTemporality, int] = {
@@ -335,6 +336,30 @@ def parse_draft_basket(data: Mapping[str, Any]) -> DraftBasket:
         items=parse_basket_items(data.get("basketItems")),
         raw=dict(data),
     )
+
+
+def parse_prescription(payload: Any, prescription_id: str = "") -> Prescription | None:
+    """Build one prescription from its payload, keeping the shape in raw."""
+    if payload is None:
+        return None
+    if isinstance(payload, dict):
+        return Prescription(prescription_id=prescription_id, raw=payload)
+    return Prescription(prescription_id=prescription_id)
+
+
+def parse_prescriptions(payload: Any) -> tuple[Prescription, ...]:
+    """Build every prescription from the list payload, whatever shape it takes."""
+    if isinstance(payload, list):
+        return tuple(Prescription(raw=dict(item)) for item in payload if isinstance(item, dict))
+    if isinstance(payload, dict):
+        for key in ("items", "hits", "results", "prescriptions"):
+            nested = payload.get(key)
+            if isinstance(nested, list):
+                return tuple(
+                    Prescription(raw=dict(item)) for item in nested if isinstance(item, dict)
+                )
+        return (Prescription(raw=dict(payload)),)
+    return ()
 
 
 def _mapping_items(value: Any) -> tuple[Mapping[str, Any], ...]:
