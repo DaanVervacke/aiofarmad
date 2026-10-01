@@ -1,0 +1,33 @@
+info:
+  name: baskets
+  type: http
+  seq: 2
+http:
+  method: GET
+  url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/customerbaskets'
+  params:
+  - name: api-version
+    value: 1.0
+    type: query
+  - name: PatientId
+    value: '{{PATIENT_ID}}'
+    type: query
+  - name: Skip
+    value: 0
+    type: query
+  - name: Take
+    value: 50
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  One page of submitted orders. The response carries embeddedPatients, which resolve each basket to a patient name.
+
+  Mirrors FarmadClient::async_get_baskets.

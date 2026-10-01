@@ -1,0 +1,8 @@
+info:
+  name: 02-token
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Token refresh. Farmad rotates the refresh token on every use.

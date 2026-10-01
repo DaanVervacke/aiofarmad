@@ -1,0 +1,57 @@
+"""The OAuth token endpoint primitive shared by login and refresh."""
+
+import asyncio
+import logging
+from typing import Any
+
+import aiohttp
+
+from .const import AUTH0_DOMAIN
+from .exceptions import (
+    FarmadAuthenticationError,
+    FarmadCommunicationError,
+    FarmadInvalidResponseError,
+    FarmadTimeoutError,
+)
+
+_LOGGER = logging.getLogger(__name__)
+
+TOKEN_URL = f"https://{AUTH0_DOMAIN}/oauth/token"
+
+
+async def async_request_tokens(
+    session: aiohttp.ClientSession,
+    body: dict[str, Any],
+    timeout: float,  # noqa: ASYNC109
+) -> dict[str, str]:
+    """Post a token request and return the token fields as strings."""
+    async with asyncio.timeout(timeout):
+        try:
+            async with session.post(
+                TOKEN_URL,
+                json=body,
+                headers={"Accept": "application/json"},
+            ) as response:
+                payload = await response.json(content_type=None)
+        except TimeoutError as err:
+            msg = "Token request timed out"
+            raise FarmadTimeoutError(msg) from err
+        except aiohttp.ClientError as err:
+            msg = f"Token request failed: {err}"
+            raise FarmadCommunicationError(msg) from err
+    if not isinstance(payload, dict):
+        msg = "Token endpoint answered with JSON that is not an object"
+        raise FarmadInvalidResponseError(msg)
+    if "access_token" not in payload:
+        raise FarmadAuthenticationError(_auth_error_message(payload))
+    return {key: value for key, value in payload.items() if isinstance(value, str)}
+
+
+def _auth_error_message(payload: dict[str, Any]) -> str:
+    error = payload.get("error")
+    description = payload.get("error_description")
+    if isinstance(error, str) and isinstance(description, str):
+        return f"Token request rejected: {description} ({error})"
+    if isinstance(error, str):
+        return f"Token request rejected: {error}"
+    return "Token request answered without an access token"

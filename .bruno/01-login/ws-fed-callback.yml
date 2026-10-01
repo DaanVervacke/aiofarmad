@@ -1,0 +1,19 @@
+info:
+  name: ws-fed-callback
+  type: http
+  seq: 4
+http:
+  method: POST
+  url: '{{auth0Domain}}/login/callback'
+  headers:
+  - name: Content-Type
+    value: application/x-www-form-urlencoded
+  body: wa=wsignin1.0&wresult=WRESULT&wctx=WCTX
+  auth: none
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Fourth hop. Replays the hidden WS-Federation form from the password response. The answer is a redirect to authorize/resume.

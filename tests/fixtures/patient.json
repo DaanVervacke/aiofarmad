@@ -1,0 +1,31 @@
+{
+  "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+  "patient_in_apbs": {
+    "343602": {
+      "apbNumber": "343602",
+      "customerNumber": 31136,
+      "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "2001-08-08T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": null
+    },
+    "344107": {
+      "apbNumber": "344107",
+      "customerNumber": 23934,
+      "patientId": "1c7a2c39-0000-4000-8000-000000000002",
+      "name": "USER",
+      "firstName": "TEST",
+      "nameMyCareNet": "USER",
+      "firstNameMyCareNet": "TEST",
+      "gender": "m",
+      "dateOfBirth": "2001-08-08T00:00:00+00:00",
+      "communicationLanguageCode": "nl",
+      "lastVisit": "2026-08-01T09:15:00+00:00"
+    }
+  }
+}

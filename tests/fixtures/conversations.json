@@ -1,0 +1,26 @@
+[
+  {
+    "customerId": "0b6f1b28-0000-4000-8000-000000000003",
+    "customerName": "Family Member",
+    "lastMessage": {
+      "id": "message-1",
+      "reference": "ref-1",
+      "body": "Uw bestelling ligt klaar.",
+      "send": "2026-09-30T10:00:00+00:00",
+      "sender": {
+        "id": "343602-actor",
+        "displayName": "Apotheek Voorbeeld",
+        "picture": ""
+      },
+      "readByReceiver": false,
+      "attachments": []
+    },
+    "unreadMessageCount": 2
+  },
+  {
+    "customerId": "0b6f1b28-0000-4000-8000-000000000001",
+    "customerName": "",
+    "lastMessage": null,
+    "unreadMessageCount": 0
+  }
+]

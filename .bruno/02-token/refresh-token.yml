@@ -1,0 +1,19 @@
+info:
+  name: refresh-token
+  type: http
+  seq: 1
+http:
+  method: POST
+  url: '{{auth0Domain}}/oauth/token'
+  headers:
+  - name: Content-Type
+    value: application/json
+  body: {"grant_type":"refresh_token","client_id":"5xlNthD37j7PK1vItdDKFC9H3cV0s8FN","refresh_token":"{{refreshToken}}"}
+  auth: none
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Refreshes the access token. Farmad rotates the refresh token on every use, so the answer carries a new pair every time.

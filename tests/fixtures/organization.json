@@ -1,0 +1,18 @@
+{
+  "apb": "343602",
+  "name": "Apotheek Voorbeeld",
+  "city": "Voorbeeldstad",
+  "email": "info@apotheekvoorbeeld.example",
+  "logos": [
+    {
+      "name": "Original",
+      "size": null,
+      "uri": "api/organization/343602/logo/original?api-Version=8.12"
+    },
+    {
+      "name": "Thumbnail",
+      "size": "96, 96",
+      "uri": "api/organization/343602/logo/96x96?api-Version=8.12"
+    }
+  ]
+}

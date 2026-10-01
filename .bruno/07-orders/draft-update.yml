@@ -1,0 +1,27 @@
+info:
+  name: draft-update
+  type: http
+  seq: 5
+http:
+  method: PATCH
+  url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/drafts/{{ACCOUNT_ID}}/BASKET_ID'
+  params:
+  - name: api-version
+    value: '1.0'
+    type: query
+  headers:
+  - name: Content-Type
+    value: application/json-patch+json
+  - name: Accept
+    value: application/json
+  body: '{"patientId":"{{PATIENT_ID}}","products":[{"productCnk":"CNK","quantityOrdered":1,"patientId":"{{PATIENT_ID}}"}]}'
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Replaces the product lines of an existing draft basket.
+
+  Mirrors FarmadClient::async_update_draft_basket.

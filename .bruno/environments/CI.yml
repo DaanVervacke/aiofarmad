@@ -1,0 +1,20 @@
+name: CI
+variables:
+  - name: accessToken
+    value: "{{process.env.FARMAD_ACCESS_TOKEN}}"
+  - name: refreshToken
+    value: "{{process.env.FARMAD_REFRESH_TOKEN}}"
+  - name: auth0Domain
+    value: https://signin.procura.farmad.be
+  - name: authRedirectUri
+    value: https://procura.farmad.be/auth-callback.html
+  - name: albBaseUrl
+    value: https://alb-prod.procura.farmad.be
+  - name: ehealthBaseUrl
+    value: https://procura.farmad.be/ehealth
+  - name: APB
+    value: "{{process.env.FARMAD_APB}}"
+  - name: ACCOUNT_ID
+    value: "{{process.env.FARMAD_ACCOUNT_ID}}"
+  - name: PATIENT_ID
+    value: "{{process.env.FARMAD_PATIENT_ID}}"

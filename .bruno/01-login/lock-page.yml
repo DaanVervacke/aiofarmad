@@ -1,0 +1,18 @@
+info:
+  name: lock-page
+  type: http
+  seq: 2
+http:
+  method: GET
+  url: '{{auth0Domain}}/login?state=LOGIN_STATE'
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Second hop. The response embeds the Lock configuration in a base64 blob inside window.atob, which carries the login state, the csrf token, and the code challenge bound to this login.

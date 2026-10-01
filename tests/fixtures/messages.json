@@ -1,0 +1,28 @@
+[
+  {
+    "id": "message-1",
+    "reference": "ref-1",
+    "body": "Uw bestelling ligt klaar.",
+    "send": "2026-09-30T10:00:00+00:00",
+    "sender": {
+      "id": "343602-actor",
+      "displayName": "Apotheek Voorbeeld",
+      "picture": ""
+    },
+    "readByReceiver": false,
+    "attachments": []
+  },
+  {
+    "id": "message-2",
+    "reference": "ref-2",
+    "body": "Bedankt, tot morgen.",
+    "send": "2026-09-30T11:30:00+00:00",
+    "sender": {
+      "id": "0b6f1b28-0000-4000-8000-000000000001",
+      "displayName": "Test User",
+      "picture": "https://example.com/avatar.png"
+    },
+    "readByReceiver": true,
+    "attachments": []
+  }
+]

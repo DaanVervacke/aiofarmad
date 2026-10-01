@@ -1,0 +1,8 @@
+info:
+  name: 07-orders
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Order reads and writes. submit-basket places a real order with the pharmacy.

@@ -1,0 +1,27 @@
+info:
+  name: submit-basket
+  type: http
+  seq: 7
+http:
+  method: PATCH
+  url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/customerbaskets/BASKET_ID/submit'
+  params:
+  - name: api-version
+    value: 1.0
+    type: query
+  headers:
+  - name: Content-Type
+    value: application/json-patch+json
+  - name: Accept
+    value: application/json
+  body: {"patientId":"{{PATIENT_ID}}","commentCustomer":null,"products":[{"productCnk":"CNK","quantityOrdered":1,"patientId":"{{PATIENT_ID}}"}],"unitPrices":[{"productCnk":"CNK","price":1.0}],"preferPaymentAtPickup":true,"redirectUrl":null}
+  auth: none
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Submits a draft basket as an order. This is a real transaction with the pharmacy.
+
+  Mirrors FarmadClient::async_submit_basket.

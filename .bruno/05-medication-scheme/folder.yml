@@ -1,0 +1,8 @@
+info:
+  name: 05-medication-scheme
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Medication scheme reads.

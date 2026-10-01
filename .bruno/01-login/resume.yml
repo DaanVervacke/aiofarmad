@@ -1,0 +1,18 @@
+info:
+  name: resume
+  type: http
+  seq: 5
+http:
+  method: GET
+  url: '{{auth0Domain}}/authorize/resume?state=RESUME_STATE'
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Fifth hop. The answer redirects to the app callback with the authorization code attached.

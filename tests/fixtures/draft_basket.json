@@ -1,0 +1,11 @@
+{
+  "id": "draft-1",
+  "comment": null,
+  "basketItems": [
+    {
+      "productCnk": "1122334",
+      "quantity": 1,
+      "unitPrice": 4.95
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "allowOnlinePayments": false,
+  "canReceivePaymentAtDeliveryHatch": true,
+  "allowAutomaticExport": true,
+  "isLochtingPharmacy": false
+}

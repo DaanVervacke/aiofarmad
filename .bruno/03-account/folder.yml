@@ -1,0 +1,8 @@
+info:
+  name: 03-account
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Account and pharmacy identity. Run account first: it is where ACCOUNT_ID comes from.

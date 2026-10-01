@@ -1,0 +1,61 @@
+API reference
+=============
+
+Client
+------
+
+.. autoclass:: aiofarmad.FarmadClient
+   :members:
+   :undoc-members:
+
+Models
+------
+
+.. autoclass:: aiofarmad.FarmadAccount
+   :members:
+.. autoclass:: aiofarmad.AccountMembership
+   :members:
+.. autoclass:: aiofarmad.FarmadPatient
+   :members:
+.. autoclass:: aiofarmad.PatientInPharmacy
+   :members:
+.. autoclass:: aiofarmad.Pharmacy
+   :members:
+.. autoclass:: aiofarmad.PharmacyPreferences
+   :members:
+.. autoclass:: aiofarmad.MedicationDayScheme
+   :members:
+.. autoclass:: aiofarmad.MedicationIntakeMoment
+   :members:
+.. autoclass:: aiofarmad.MedicationSchemeProduct
+   :members:
+.. autoclass:: aiofarmad.MedicationNondailyProduct
+   :members:
+.. autoclass:: aiofarmad.MedicationTemporality
+   :members:
+.. autoclass:: aiofarmad.ConversationSummary
+   :members:
+.. autoclass:: aiofarmad.FarmadMessage
+   :members:
+.. autoclass:: aiofarmad.CustomerBasket
+   :members:
+.. autoclass:: aiofarmad.BasketItem
+   :members:
+.. autoclass:: aiofarmad.DraftBasket
+   :members:
+.. autoclass:: aiofarmad.FarmadTokens
+   :members:
+
+Exceptions
+----------
+
+.. autoclass:: aiofarmad.FarmadError
+.. autoclass:: aiofarmad.FarmadCommunicationError
+.. autoclass:: aiofarmad.FarmadTimeoutError
+.. autoclass:: aiofarmad.FarmadAuthenticationError
+.. autoclass:: aiofarmad.FarmadMfaRequiredError
+.. autoclass:: aiofarmad.FarmadAuthorizationError
+.. autoclass:: aiofarmad.FarmadEhealthAuthorizationRequiredError
+.. autoclass:: aiofarmad.FarmadInvalidResponseError
+.. autoclass:: aiofarmad.FarmadNotFoundError
+.. autoclass:: aiofarmad.FarmadClientClosedError

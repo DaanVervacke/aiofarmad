@@ -1,0 +1,30 @@
+info:
+  name: conversations
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{albBaseUrl}}/messaging/api/message/{{APB}}'
+  params:
+  - name: api-version
+    value: 4.0
+    type: query
+  - name: Limit
+    value: 25
+    type: query
+  - name: Page
+    value: 0
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  One page of conversations with one pharmacy. The pharmacy must have a patient file for the account, otherwise the answer is 403.
+
+  Mirrors FarmadClient::async_get_conversations.

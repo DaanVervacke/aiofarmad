@@ -1,0 +1,64 @@
+{
+  "id": "0b6f1b28-0000-4000-8000-000000000001",
+  "email": "user@example.com",
+  "emailConfirmed": true,
+  "oAuthSubject": "auth0|test-subject",
+  "oAuthIdpType": "auth0",
+  "userName": "auth0|test-subject",
+  "normalizedUserName": "auth0|test-subject",
+  "lastIpAddress": "203.0.113.10",
+  "lastLogin": "2026-10-01T13:51:08.218+00:00",
+  "lastPasswordReset": null,
+  "loginsCount": 7,
+  "locale": null,
+  "language": "nl",
+  "nickName": null,
+  "firstName": "Test",
+  "fullName": "Test User",
+  "customFullName": "Test User",
+  "displayName": "Test User",
+  "lastName": "User",
+  "picture": "https://example.com/avatar.png",
+  "phoneNumber": null,
+  "phoneNumberConfirmed": false,
+  "blocked": false,
+  "acceptedTermsConditions": 2,
+  "twoFactorEnabled": false,
+  "twoFactorAuthenticationMethod": null,
+  "notarizations": [
+    {
+      "value": "1c7a2c39-0000-4000-8000-000000000002",
+      "notarizationType": "Patient",
+      "from": "2026-10-01T13:39:51.038402+00:00",
+      "until": null,
+      "notarizationConfirmedByCsamOn": "2026-10-01T13:39:51.038402+00:00",
+      "notarizationConfirmedByCsam": true
+    }
+  ],
+  "userClaims": [],
+  "memberships": [
+    {
+      "userId": "00000000-0000-0000-0000-000000000000",
+      "groupId": "33dce5aa-eaf9-4a5e-ad26-8307f02753e3",
+      "groupName": "Patients",
+      "groupDescription": "Pati\u00ebnten",
+      "groupOwner": "343602",
+      "from": "2026-10-01T13:39:51.038402+00:00",
+      "until": null
+    }
+  ],
+  "activeRoles": {
+    "userRoles": [],
+    "groupRoles": [
+      {
+        "id": "e3704289-369e-42ad-b528-13cc2e221da2",
+        "role": {
+          "id": "68958460-3c6f-486d-8a20-8b9e9e07030f",
+          "name": "CanUseMessaging",
+          "normalizedName": "CanUseMessaging",
+          "description": null
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "results": [
+    {
+      "id": "basket-1",
+      "customerPatientId": "1c7a2c39-0000-4000-8000-000000000002",
+      "notificationInfo": {
+        "customEmailAddress": "fallback@example.com"
+      },
+      "state": "Ordered",
+      "basketItems": [
+        {
+          "productCnk": "1122334",
+          "quantity": 2,
+          "unitPrice": 4.95
+        },
+        {
+          "productCnk": "2233445",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "id": "basket-2",
+      "customerPatientId": "missing-patient",
+      "notificationInfo": {
+        "customEmailAddress": "fallback@example.com"
+      },
+      "state": "Delivered",
+      "basketItems": []
+    }
+  ],
+  "embeddedPatients": [
+    {
+      "id": "1c7a2c39-0000-4000-8000-000000000002",
+      "firstName": "Test",
+      "name": "User"
+    }
+  ]
+}

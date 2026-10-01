@@ -1,0 +1,123 @@
+{
+  "source": {
+    "appVersion": "2.2.8",
+    "appPackageId": "be.farmad.procura.prod",
+    "bundleBuild": "13237",
+    "bundleFile": "main.2ba421e258d1f7c6.js",
+    "bundleDate": "2026-07-28T12:56:27.545Z"
+  },
+  "endpoints": [
+    {
+      "name": "account",
+      "method": "GET",
+      "service": "usermanagement",
+      "version": "8.12",
+      "path": "/api/account/{id}"
+    },
+    {
+      "name": "organization",
+      "method": "GET",
+      "service": "usermanagement",
+      "version": "8.12",
+      "path": "/api/organization/{apb}"
+    },
+    {
+      "name": "patient",
+      "method": "GET",
+      "service": "patientmanagement",
+      "version": "2.0",
+      "path": "/api/patients/{patientId}"
+    },
+    {
+      "name": "pharmacy_preferences",
+      "method": "GET",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/pharmacypreferences/for-customer"
+    },
+    {
+      "name": "scheme_day",
+      "method": "GET",
+      "service": "medicationscheme",
+      "version": "2.5",
+      "path": "/api/medicationscheme/{patientId}/scheme/{apb}/day"
+    },
+    {
+      "name": "scheme_nondaily",
+      "method": "GET",
+      "service": "medicationscheme",
+      "version": "2.5",
+      "path": "/api/medicationscheme/{patientId}/scheme/{apb}/nondaily"
+    },
+    {
+      "name": "conversations",
+      "method": "GET",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/message/{apb}"
+    },
+    {
+      "name": "conversation_messages",
+      "method": "GET",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/message/{apb}/{customerAccountId}"
+    },
+    {
+      "name": "baskets",
+      "method": "GET",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/customerbaskets"
+    },
+    {
+      "name": "draft_basket",
+      "method": "GET",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/drafts/{accountId}"
+    },
+    {
+      "name": "draft_save",
+      "method": "POST",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/drafts/{accountId}"
+    },
+    {
+      "name": "draft_update",
+      "method": "PATCH",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/drafts/{accountId}/{basketId}"
+    },
+    {
+      "name": "draft_clear",
+      "method": "DELETE",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/drafts/{accountId}"
+    },
+    {
+      "name": "submit_basket",
+      "method": "PATCH",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/customerbaskets/{basketId}/submit"
+    },
+    {
+      "name": "cancel_basket",
+      "method": "PUT",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/customerbaskets/{basketId}/cancel"
+    },
+    {
+      "name": "self_onboarding",
+      "method": "POST",
+      "service": "usermanagement",
+      "version": "8.12",
+      "path": "/api/account/{id}/self-onboarding"
+    }
+  ]
+}

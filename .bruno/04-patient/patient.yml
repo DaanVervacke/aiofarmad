@@ -1,0 +1,24 @@
+info:
+  name: patient
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{albBaseUrl}}/patientmanagement/api/patients/{{PATIENT_ID}}'
+  params:
+  - name: api-version
+    value: 2.0
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The patient record as every pharmacy knows it, keyed by apb number.
+
+  Mirrors FarmadClient::async_get_patient.

@@ -1,0 +1,8 @@
+info:
+  name: 04-patient
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Patient records per pharmacy.

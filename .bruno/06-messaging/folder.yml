@@ -1,0 +1,8 @@
+info:
+  name: 06-messaging
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Pharmacy messaging.

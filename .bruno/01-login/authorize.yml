@@ -1,0 +1,18 @@
+info:
+  name: authorize
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{auth0Domain}}/authorize?response_type=code&client_id=5xlNthD37j7PK1vItdDKFC9H3cV0s8FN&redirect_uri=https%3A%2F%2Fprocura.farmad.be%2Fauth-callback.html&scope=openid%20profile%20email%20offline_access&audience=api%3A%2F%2Fprocura.farmad.be&code_challenge=CHALLENGE&code_challenge_method=S256&response_mode=query&ui_locales=nl'
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  First hop of the scripted login. Generate a PKCE pair, put the challenge in the query, and read the Location header for the login page redirect. The client does this with allow_redirects disabled.
