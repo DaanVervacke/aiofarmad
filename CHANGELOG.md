@@ -10,7 +10,7 @@ Before 1.0, breaking changes ship as minor bumps.
 
 ### Added
 
-- Prescription reads through the Belgian eHealth service, with the consent session passed in as a cookie and mapped to `FarmadEhealthAuthorizationRequiredError` when it is missing.
+- Prescription reads through the Belgian eHealth service. The platform currently rejects non-browser clients for eHealth, so these calls raise `FarmadEhealthAuthorizationRequiredError`. The `ehealth_cookie` argument carries a consent session for the day Farmad relaxes that gate.
 
 ## [0.1.0] - 2026-10-01
 

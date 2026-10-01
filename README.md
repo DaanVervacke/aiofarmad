@@ -110,23 +110,15 @@ Orders are paid at pickup by default. Most pharmacies do not allow online paymen
 
 ## Prescriptions
 
-Prescriptions sit behind the Belgian eHealth platform. The itsme consent there cannot be scripted, so the library works with the session that consent creates:
+Prescriptions sit behind the Belgian eHealth platform, and Farmad gates the eHealth session to the browser that completed the itsme consent. Tested against the platform: replaying a live consent session from any non-browser client, with the exact cookies, the exact tokens, and a browser TLS fingerprint, answers 401 every time. No cookie transfer, token pairing, or fingerprint trick carries the session out of the browser.
 
-1. Open the web app at `https://procura.farmad.be/` and go to prescriptions once. Complete the itsme flow there.
-2. Copy the `Cookie` request header your browser sends to `https://procura.farmad.be/ehealth/api/...` (developer tools, network tab, any prescriptions request).
-3. Pass that value as `ehealth_cookie`. The client sends it on every eHealth call.
+The library models this honestly:
 
-```python
-async with FarmadClient(
-    access_token=stored_access,
-    refresh_token=stored_refresh,
-    ehealth_cookie=".AspNetCore.Cookies=...",
-) as client:
-    prescriptions = await client.async_get_prescriptions()
-    one = await client.async_get_prescription("BEP10S18PLM4")
-```
+- `async_get_prescriptions` and `async_get_prescription` carry the verified wire paths.
+- Every eHealth call from a non-browser client raises `FarmadEhealthAuthorizationRequiredError`, without burning a refresh token cycle.
+- `ehealth_cookie` exists to pass a consent session through, so the library works the day Farmad relaxes the gate. It currently does not open the prescriptions.
 
-When the cookie is missing or expired, eHealth answers 401 and the client raises `FarmadEhealthAuthorizationRequiredError`. Repeat the consent step to get a fresh cookie.
+Until Farmad changes the platform, prescriptions work in the web app only.
 
 ## Errors
 
