@@ -1,0 +1,9 @@
+info:
+  name: 09-catalog
+  type: folder
+  seq: 1
+request:
+  auth: inherit
+docs: |-
+  Product lookups on the catalog service, which lives on its own host and
+  needs the bearer token for these two reads.

@@ -1,0 +1,27 @@
+info:
+  name: product-in-apb
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{catalogBaseUrl}}/api/catalog/products/1799121/{{APB}}'
+  params:
+  - name: api-version
+    value: '5.3'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The product at one pharmacy by its CNK product code. The answer carries the
+  real descriptions per language, the online prices, and the stock. A product
+  the pharmacy does not carry answers 404 or an empty body, which the client
+  returns as None.
+
+  Mirrors FarmadClient::async_get_product_in_apb.

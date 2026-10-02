@@ -1,0 +1,45 @@
+{
+  "cnk": "3093242",
+  "versionNumber": 0,
+  "apb": "346369",
+  "description": {
+    "nl": "FEBELCARE MED1 STERIELE GAASKOMPRES 5,0X5,0CM 40X1",
+    "fr": "FEBELCARE MED1 COMPRESSE GAZE STER. 5,0X5,0CM 40X1"
+  },
+  "category": [],
+  "isOnPrescription": false,
+  "productGroupCode": "G ",
+  "productGroupDescription": {},
+  "productType": "Product",
+  "productLegalCode": "",
+  "isOwnProduct": false,
+  "packageCode": "STUK",
+  "packageQuantity": 40.0,
+  "currentPriceInfo": {
+    "salesPrice": 3.1,
+    "promoPriceOnline": null,
+    "discountPercentageOnline": null,
+    "salesTvaPercentage": 6,
+    "basePrice": 3.1,
+    "purchasePrice": 1.5,
+    "profitMarginPurchase": 94.97,
+    "profitMarginSales": 48.71,
+    "discountPercentageExternal": null,
+    "promoPriceExternal": null,
+    "ownPurchasePrice": null,
+    "manualPriceType": "ONE_TIME_SALES_PRICE"
+  },
+  "currentStockInfo": {
+    "hasRobotLocation": false,
+    "totalQuantityInStock": 0,
+    "quantityInRobot": 0,
+    "preservationCode": "   ",
+    "availabilityCode": "NotInStock"
+  },
+  "productCodes": [],
+  "brand": "Febelcare",
+  "labo": "FEBELCARE TEAM",
+  "popularity": 345423,
+  "isMedicine": false,
+  "isForVeterinaryUse": false
+}

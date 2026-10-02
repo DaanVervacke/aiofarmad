@@ -17,6 +17,8 @@ from aiofarmad._endpoints import (
     ORGANIZATION,
     PATIENT,
     PHARMACY_PREFERENCES,
+    PRODUCT_IN_APB,
+    PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     SELF_ONBOARDING,
@@ -32,6 +34,8 @@ from aiofarmad._endpoints import (
     PharmacyArgs,
     PrescriptionArgs,
     PrescriptionsArgs,
+    ProductInApbArgs,
+    ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -165,9 +169,24 @@ def test_self_onboarding_args_validation() -> None:
         SelfOnboardingArgs(account_id="c", apb="")
 
 
-def test_draft_basket_marks_not_found_as_none() -> None:
-    assert DRAFT_BASKET.not_found_is_none is True
-    for endpoint in (
+def test_product_in_apb_args_validation() -> None:
+    with pytest.raises(ValueError, match="cnk must not be empty"):
+        ProductInApbArgs(cnk="", apb="a")
+    with pytest.raises(ValueError, match="apb must not be empty"):
+        ProductInApbArgs(cnk="1234567", apb="")
+
+
+def test_product_in_apb_by_gtin_args_validation() -> None:
+    with pytest.raises(ValueError, match="gtin must not be empty"):
+        ProductInApbByGtinArgs(gtin="", apb="a")
+    with pytest.raises(ValueError, match="apb must not be empty"):
+        ProductInApbByGtinArgs(gtin="03585552783337", apb="")
+
+
+def test_lookups_mark_not_found_as_none() -> None:
+    for endpoint in (DRAFT_BASKET, PRODUCT_IN_APB, PRODUCT_IN_APB_BY_GTIN):
+        assert endpoint.not_found_is_none is True
+    for other in (
         ACCOUNT,
         ORGANIZATION,
         PATIENT,
@@ -184,7 +203,16 @@ def test_draft_basket_marks_not_found_as_none() -> None:
         CANCEL_BASKET,
         SELF_ONBOARDING,
     ):
-        assert endpoint.not_found_is_none is False
+        assert other.not_found_is_none is False
+
+
+def test_product_lookups_target_the_catalog_host() -> None:
+    args = ProductInApbArgs(cnk="1234567", apb="a")
+    gtin_args = ProductInApbByGtinArgs(gtin="03585552783337", apb="a")
+    assert PRODUCT_IN_APB.base_url == "https://api.catalog.procura.farmad.be"
+    assert PRODUCT_IN_APB.url(args) == "/api/catalog/products/1234567/a"
+    assert PRODUCT_IN_APB_BY_GTIN.base_url == "https://api.catalog.procura.farmad.be"
+    assert PRODUCT_IN_APB_BY_GTIN.url(gtin_args) == "/api/catalog/products/gtin/03585552783337/a"
 
 
 def test_scheme_day_params_render_the_window() -> None:

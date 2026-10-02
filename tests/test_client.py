@@ -31,6 +31,7 @@ from .conftest import (
     PATIENT_ID,
     USERNAME,
     alb_url,
+    catalog_url,
     ehealth_url,
     make_jwt,
     register_login_flow,
@@ -370,6 +371,84 @@ async def test_cancel_basket() -> None:
                 body="",
             )
             await make_client(session).async_cancel_basket(APB, "basket-9")
+
+
+async def test_get_product_in_apb(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                payload=load_fixture("product_in_apb.json"),
+            )
+            product = await make_client(session).async_get_product_in_apb(APB, "3093242")
+    assert product is not None
+    assert product.cnk == "3093242"
+    assert product.descriptions["nl"] == "FEBELCARE MED1 STERIELE GAASKOMPRES 5,0X5,0CM 40X1"
+    assert product.brand == "Febelcare"
+    assert product.price is not None
+    assert product.price.sales_price == 3.1
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        f"https://api.catalog.procura.farmad.be/api/catalog/products/3093242/{APB}",
+    )
+    assert request_log[key][0].kwargs["params"]["api-version"] == "5.3"
+
+
+async def test_get_product_in_apb_by_gtin(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/gtin/03585552783337/{APB}"),
+                payload=load_fixture("product_in_apb_by_gtin.json"),
+            )
+            product = await make_client(session).async_get_product_in_apb_by_gtin(
+                APB, "03585552783337"
+            )
+    assert product is not None
+    assert product.cnk == "1799121"
+    assert product.stock is not None
+    assert product.stock.availability == "Pharmacy"
+    assert product.product_codes[0].code_type == "Gtin"
+
+
+async def test_get_product_in_apb_not_found_is_none() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/0000000/{APB}"),
+                status=404,
+                payload={},
+            )
+            product = await make_client(session).async_get_product_in_apb(APB, "0000000")
+    assert product is None
+
+
+async def test_get_product_in_apb_empty_answer_is_none() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/gtin/0000000000000/{APB}"),
+                status=204,
+                body="",
+            )
+            product = await make_client(session).async_get_product_in_apb_by_gtin(
+                APB, "0000000000000"
+            )
+    assert product is None
+
+
+async def test_get_product_in_apb_requires_a_role() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                status=403,
+                payload={},
+            )
+            with pytest.raises(FarmadAuthorizationError):
+                await make_client(session).async_get_product_in_apb(APB, "3093242")
 
 
 async def test_link_pharmacy_posts_apb() -> None:

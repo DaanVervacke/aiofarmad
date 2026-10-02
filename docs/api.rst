@@ -37,6 +37,14 @@ Models
    :members:
 .. autoclass:: aiofarmad.FarmadMessage
    :members:
+.. autoclass:: aiofarmad.CatalogProduct
+   :members:
+.. autoclass:: aiofarmad.CatalogProductCode
+   :members:
+.. autoclass:: aiofarmad.CatalogProductPrice
+   :members:
+.. autoclass:: aiofarmad.CatalogProductStock
+   :members:
 .. autoclass:: aiofarmad.CustomerBasket
    :members:
 .. autoclass:: aiofarmad.BasketLine

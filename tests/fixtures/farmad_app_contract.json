@@ -120,6 +120,22 @@
       "path": "/api/account/{id}/self-onboarding"
     },
     {
+      "name": "product_in_apb",
+      "method": "GET",
+      "service": "catalog",
+      "version": "5.3",
+      "path": "/api/catalog/products/{cnk}/{apb}",
+      "gateway": false
+    },
+    {
+      "name": "product_in_apb_by_gtin",
+      "method": "GET",
+      "service": "catalog",
+      "version": "5.3",
+      "path": "/api/catalog/products/gtin/{gtin}/{apb}",
+      "gateway": false
+    },
+    {
       "name": "prescriptions",
       "method": "GET",
       "service": "ehealth",

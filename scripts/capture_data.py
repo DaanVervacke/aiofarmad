@@ -13,6 +13,7 @@ from aiofarmad import FarmadClient
 
 APB = "343602"
 ALB = "https://alb-prod.procura.farmad.be"
+CATALOG = "https://api.catalog.procura.farmad.be"
 CAPTURES = Path("captures")
 
 
@@ -41,10 +42,10 @@ def save(name: str, payload: Any, status: int) -> None:
     print("captured", name, status, "->", target.name)
 
 
-async def raw_get(session: aiohttp.ClientSession, access_token: str, path: str) -> tuple[int, Any]:
-    """Fetch one path with the bearer token and return status with payload."""
+async def raw_get(session: aiohttp.ClientSession, access_token: str, url: str) -> tuple[int, Any]:
+    """Fetch one URL with the bearer token and return status with payload."""
     async with session.get(
-        f"{ALB}{path}",
+        url,
         headers={
             "Authorization": f"Bearer {access_token}",
             "Accept": "application/json",
@@ -54,6 +55,39 @@ async def raw_get(session: aiohttp.ClientSession, access_token: str, path: str) 
         if not text.strip():
             return response.status, None
         return response.status, json.loads(text)
+
+
+def first_ordered_cnk(payload: Any) -> str | None:
+    """Return the CNK of the first line in the first submitted order."""
+    if not isinstance(payload, dict):
+        return None
+    results = payload.get("results")
+    if not isinstance(results, list) or not results or not isinstance(results[0], dict):
+        return None
+    lines = results[0].get("customerBasketLines")
+    if not isinstance(lines, list) or not lines or not isinstance(lines[0], dict):
+        return None
+    product = lines[0].get("product")
+    if not isinstance(product, dict):
+        return None
+    cnk = product.get("cnk")
+    return cnk if isinstance(cnk, str) and cnk else None
+
+
+def first_gtin(payload: Any) -> str | None:
+    """Return the first GTIN code of one product payload."""
+    if not isinstance(payload, dict):
+        return None
+    codes = payload.get("productCodes")
+    if not isinstance(codes, list):
+        return None
+    for code in codes:
+        if not isinstance(code, dict) or code.get("codeType") != "Gtin":
+            continue
+        value = code.get("codeValue")
+        if isinstance(value, str) and value:
+            return value
+    return None
 
 
 async def main() -> None:
@@ -73,47 +107,56 @@ async def main() -> None:
         patient_id = client.patient_id or ""
 
         calls: list[tuple[str, str]] = [
-            ("account", f"/usermanagement/api/account/{account_id}?api-version=8.12"),
-            ("organization", f"/usermanagement/api/organization/{APB}?api-version=8.12"),
-            ("patient", f"/patientmanagement/api/patients/{patient_id}?api-version=2.0"),
+            ("account", f"{ALB}/usermanagement/api/account/{account_id}?api-version=8.12"),
+            (
+                "organization",
+                f"{ALB}/usermanagement/api/organization/{APB}?api-version=8.12",
+            ),
+            (
+                "patient",
+                f"{ALB}/patientmanagement/api/patients/{patient_id}?api-version=2.0",
+            ),
             (
                 "patientcontents",
-                f"/patientmanagement/api/patientcontents/{APB}/{patient_id}?api-version=2.0",
+                f"{ALB}/patientmanagement/api/patientcontents/{APB}/{patient_id}?api-version=2.0",
             ),
             (
                 "pharmacy_preferences",
-                f"/customerbasket/api/{APB}/pharmacypreferences/for-customer?api-version=1.0",
+                f"{ALB}/customerbasket/api/{APB}/pharmacypreferences/for-customer?api-version=1.0",
             ),
             (
                 "scheme_day",
                 (
-                    f"/medicationscheme/api/medicationscheme/{patient_id}/scheme/{APB}/day"
+                    f"{ALB}/medicationscheme/api/medicationscheme/{patient_id}/scheme/{APB}/day"
                     f"?from={start}&until={end}&language=nl&api-version=2.5"
                 ),
             ),
             (
                 "scheme_nondaily",
                 (
-                    f"/medicationscheme/api/medicationscheme/{patient_id}/scheme/{APB}/nondaily"
-                    f"?day={date.today().isoformat()}"  # noqa: DTZ011
-                    f"T00:00:00.000Z&language=nl&api-version=2.5"
+                    f"{ALB}/medicationscheme/api/medicationscheme/{patient_id}"
+                    f"/scheme/{APB}/nondaily?day={date.today().isoformat()}"  # noqa: DTZ011
+                    "T00:00:00.000Z&language=nl&api-version=2.5"
                 ),
             ),
             (
                 "baskets",
                 (
-                    f"/customerbasket/api/{APB}/customerbaskets"
+                    f"{ALB}/customerbasket/api/{APB}/customerbaskets"
                     f"?PatientId={patient_id}&Skip=0&Take=50&api-version=1.0"
                 ),
             ),
             (
                 "conversations",
-                f"/messaging/api/message/{APB}?Limit=25&Page=0&api-version=4.0",
+                f"{ALB}/messaging/api/message/{APB}?Limit=25&Page=0&api-version=4.0",
             ),
         ]
-        for name, path in calls:
-            status, payload = await raw_get(session, access, path)
+        baskets_payload: Any = None
+        for name, url in calls:
+            status, payload = await raw_get(session, access, url)
             save(name, payload, status)
+            if name == "baskets":
+                baskets_payload = payload
             if name == "conversations" and isinstance(payload, list):
                 for conversation in payload:
                     customer_account_id = conversation.get("customerId")
@@ -122,10 +165,27 @@ async def main() -> None:
                     status, messages = await raw_get(
                         session,
                         access,
-                        f"/messaging/api/message/{APB}/{customer_account_id}"
+                        f"{ALB}/messaging/api/message/{APB}/{customer_account_id}"
                         f"?Limit=25&Page=0&api-version=4.0",
                     )
                     save(f"conversation_messages_{customer_account_id}", messages, status)
+
+        cnk = first_ordered_cnk(baskets_payload)
+        if cnk:
+            status, product = await raw_get(
+                session,
+                access,
+                f"{CATALOG}/api/catalog/products/{cnk}/{APB}?api-version=5.3",
+            )
+            save("product_in_apb", product, status)
+            gtin = first_gtin(product)
+            if gtin:
+                status, by_gtin = await raw_get(
+                    session,
+                    access,
+                    f"{CATALOG}/api/catalog/products/gtin/{gtin}/{APB}?api-version=5.3",
+                )
+                save("product_in_apb_by_gtin", by_gtin, status)
 
 
 asyncio.run(main())

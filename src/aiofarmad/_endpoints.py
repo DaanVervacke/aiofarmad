@@ -5,8 +5,9 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
-from .const import ALB_BASE_URL, EHEALTH_BASE_URL
+from .const import ALB_BASE_URL, CATALOG_BASE_URL, EHEALTH_BASE_URL
 from .models import (
+    CatalogProduct,
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
@@ -23,6 +24,7 @@ from .models import (
 from .parsers import (
     parse_account,
     parse_baskets,
+    parse_catalog_product,
     parse_conversations,
     parse_day_scheme_range,
     parse_draft_basket,
@@ -494,6 +496,65 @@ CANCEL_BASKET: Endpoint[BasketIdArgs, None] = Endpoint(
     version="1.0",
     params=lambda _args: {},
     parse=lambda _payload, _args: None,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ProductInApbArgs:
+    """One product at one pharmacy, addressed by its CNK."""
+
+    cnk: str
+    apb: str
+
+    def __post_init__(self) -> None:
+        if not self.cnk:
+            msg = "cnk must not be empty"
+            raise ValueError(msg)
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class ProductInApbByGtinArgs:
+    """One product at one pharmacy, addressed by its GTIN barcode."""
+
+    gtin: str
+    apb: str
+
+    def __post_init__(self) -> None:
+        if not self.gtin:
+            msg = "gtin must not be empty"
+            raise ValueError(msg)
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+
+
+PRODUCT_IN_APB: Endpoint[ProductInApbArgs, CatalogProduct | None] = Endpoint(
+    name="product_in_apb",
+    method="GET",
+    url=lambda args: f"/api/catalog/products/{args.cnk}/{args.apb}",
+    version="5.3",
+    base_url=CATALOG_BASE_URL,
+    params=lambda _args: {},
+    parse=lambda payload, _args: (
+        parse_catalog_product(payload) if isinstance(payload, dict) else None
+    ),
+    not_found_is_none=True,
+)
+
+PRODUCT_IN_APB_BY_GTIN: Endpoint[ProductInApbByGtinArgs, CatalogProduct | None] = Endpoint(
+    name="product_in_apb_by_gtin",
+    method="GET",
+    url=lambda args: f"/api/catalog/products/gtin/{args.gtin}/{args.apb}",
+    version="5.3",
+    base_url=CATALOG_BASE_URL,
+    params=lambda _args: {},
+    parse=lambda payload, _args: (
+        parse_catalog_product(payload) if isinstance(payload, dict) else None
+    ),
+    not_found_is_none=True,
 )
 
 

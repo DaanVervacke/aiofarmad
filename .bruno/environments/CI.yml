@@ -10,6 +10,8 @@ variables:
     value: https://procura.farmad.be/auth-callback.html
   - name: albBaseUrl
     value: https://alb-prod.procura.farmad.be
+  - name: catalogBaseUrl
+    value: https://api.catalog.procura.farmad.be
   - name: ehealthBaseUrl
     value: https://procura.farmad.be/ehealth
   - name: APB

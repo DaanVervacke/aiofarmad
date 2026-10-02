@@ -22,6 +22,8 @@ from aiofarmad._endpoints import (
     PHARMACY_PREFERENCES,
     PRESCRIPTION,
     PRESCRIPTIONS,
+    PRODUCT_IN_APB,
+    PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     SELF_ONBOARDING,
@@ -39,6 +41,8 @@ from aiofarmad._endpoints import (
     PharmacyArgs,
     PrescriptionArgs,
     PrescriptionsArgs,
+    ProductInApbArgs,
+    ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -54,6 +58,8 @@ ENDPOINTS: tuple[Endpoint[Any, Any], ...] = (
     PHARMACY_PREFERENCES,
     PRESCRIPTION,
     PRESCRIPTIONS,
+    PRODUCT_IN_APB,
+    PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     CONVERSATIONS,
@@ -99,6 +105,8 @@ def dummy_args(endpoint: Endpoint[Any, Any]) -> object:
         "submit_basket": SubmitBasketArgs(apb="apb", basket_id="basketId", patient_id="patientId"),
         "cancel_basket": BasketIdArgs(apb="apb", basket_id="basketId"),
         "self_onboarding": SelfOnboardingArgs(account_id="id", apb="apb"),
+        "product_in_apb": ProductInApbArgs(cnk="cnk", apb="apb"),
+        "product_in_apb_by_gtin": ProductInApbByGtinArgs(gtin="gtin", apb="apb"),
         "prescriptions": PrescriptionsArgs(page=0),
         "prescription": PrescriptionArgs(prescription_id="prescriptionId"),
     }[endpoint.name]
@@ -131,6 +139,8 @@ PLACEHOLDERS = {
     "accountId": "accountId",
     "basketId": "basketId",
     "prescriptionId": "prescriptionId",
+    "cnk": "cnk",
+    "gtin": "gtin",
 }
 
 
@@ -138,12 +148,12 @@ def test_wire_paths_match_the_app(contract: dict[str, Any]) -> None:
     rows = {row["name"]: row for row in contract["endpoints"]}
     for endpoint in ENDPOINTS:
         row = rows[endpoint.name]
-        path = row["path"]
+        prefix = f"/{row['service']}" if row.get("gateway", True) else ""
+        path = f"{prefix}{row['path']}"
         for placeholder, value in PLACEHOLDERS.items():
             path = path.replace("{" + placeholder + "}", value)
-        expected = f"/{row['service']}{path}"
         rendered = endpoint.url(dummy_args(endpoint))
-        assert rendered == expected, f"{endpoint.name} drifted: {rendered} != {expected}"
+        assert rendered == path, f"{endpoint.name} drifted: {rendered} != {path}"
 
 
 def test_versions_match_the_app(contract: dict[str, Any]) -> None:

@@ -10,6 +10,7 @@ AUTH_REDIRECT_URI = "https://procura.farmad.be/auth-callback.html"
 AUTH_UI_LOCALES = "nl"
 
 ALB_BASE_URL = "https://alb-prod.procura.farmad.be"
+CATALOG_BASE_URL = "https://api.catalog.procura.farmad.be"
 EHEALTH_BASE_URL = "https://procura.farmad.be/ehealth"
 
 CLAIM_ACCOUNT_ID = "http://schemas.microsoft.com/ws/2008/06/identity/claims/accountId"

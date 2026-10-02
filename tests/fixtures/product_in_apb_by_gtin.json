@@ -1,0 +1,72 @@
+{
+  "cnk": "1799121",
+  "versionNumber": 0,
+  "apb": "346369",
+  "description": {
+    "nl": "DAFALGAN FORTE DROOG 1G TABL 50",
+    "fr": "DAFALGAN FORTE SEC 1G TABL 50"
+  },
+  "category": [
+    {
+      "categoryType": "PharmaPhoto",
+      "pathText": "1.7.25.663",
+      "displayName": ""
+    }
+  ],
+  "isOnPrescription": false,
+  "productGroupCode": "SP",
+  "productGroupDescription": {},
+  "productType": "Product",
+  "productLegalCode": "M  ",
+  "isOwnProduct": false,
+  "packageCode": "TABL",
+  "packageQuantity": 50.0,
+  "currentPriceInfo": {
+    "salesPrice": 15.05,
+    "promoPriceOnline": null,
+    "discountPercentageOnline": null,
+    "salesTvaPercentage": 6,
+    "basePrice": 15.05,
+    "purchasePrice": 9.8,
+    "profitMarginPurchase": 44.88,
+    "profitMarginSales": 30.98,
+    "discountPercentageExternal": null,
+    "promoPriceExternal": null,
+    "ownPurchasePrice": null,
+    "manualPriceType": "ONE_TIME_SALES_PRICE"
+  },
+  "currentStockInfo": {
+    "hasRobotLocation": false,
+    "totalQuantityInStock": 653,
+    "quantityInRobot": 0,
+    "preservationCode": "   ",
+    "availabilityCode": "Pharmacy"
+  },
+  "productCodes": [
+    {
+      "codeType": "Gtin",
+      "codeValue": "08027950500468"
+    },
+    {
+      "codeType": "Gtin",
+      "codeValue": "03585552783337"
+    },
+    {
+      "codeType": "Gtin",
+      "codeValue": "03585554007257"
+    },
+    {
+      "codeType": "BasisProductNr",
+      "codeValue": "23867"
+    },
+    {
+      "codeType": "Gip",
+      "codeValue": "19022"
+    }
+  ],
+  "brand": "Dafalgan",
+  "labo": "UPSA SAS",
+  "popularity": 2176922,
+  "isMedicine": true,
+  "isForVeterinaryUse": false
+}

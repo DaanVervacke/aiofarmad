@@ -1,0 +1,26 @@
+info:
+  name: product-in-apb-by-gtin
+  type: http
+  seq: 2
+http:
+  method: GET
+  url: '{{catalogBaseUrl}}/api/catalog/products/gtin/03585552783337/{{APB}}'
+  params:
+  - name: api-version
+    value: '5.3'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The product at one pharmacy by the GTIN barcode on its box, the lookup the
+  app runs after a barcode scan. The answer shape matches the CNK lookup and an
+  unknown barcode answers an empty body, which the client returns as None.
+
+  Mirrors FarmadClient::async_get_product_in_apb_by_gtin.

@@ -23,6 +23,8 @@ from ._endpoints import (
     PHARMACY_PREFERENCES,
     PRESCRIPTION,
     PRESCRIPTIONS,
+    PRODUCT_IN_APB,
+    PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     SELF_ONBOARDING,
@@ -40,6 +42,8 @@ from ._endpoints import (
     PharmacyArgs,
     PrescriptionArgs,
     PrescriptionsArgs,
+    ProductInApbArgs,
+    ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
     SelfOnboardingArgs,
@@ -55,6 +59,7 @@ from .exceptions import (
     FarmadNotFoundError,
 )
 from .models import (
+    CatalogProduct,
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
@@ -348,6 +353,23 @@ class FarmadClient:
         FarmadAuthorizationError.
         """
         await self._call(CANCEL_BASKET, BasketIdArgs(apb=apb, basket_id=basket_id))
+
+    async def async_get_product_in_apb(self, apb: str, cnk: str) -> CatalogProduct | None:
+        """Fetch one product by its CNK as one pharmacy sells it.
+
+        The answer is None when the pharmacy does not carry the product.
+        """
+        return await self._call(PRODUCT_IN_APB, ProductInApbArgs(cnk=cnk, apb=apb))
+
+    async def async_get_product_in_apb_by_gtin(self, apb: str, gtin: str) -> CatalogProduct | None:
+        """Fetch one product by its GTIN barcode as one pharmacy sells it.
+
+        The answer is None when the pharmacy does not carry the product.
+        """
+        return await self._call(
+            PRODUCT_IN_APB_BY_GTIN,
+            ProductInApbByGtinArgs(gtin=gtin, apb=apb),
+        )
 
     async def async_get_prescriptions(
         self,

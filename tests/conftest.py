@@ -194,6 +194,11 @@ def alb_url(path: str) -> re.Pattern[str]:
     return re.compile(rf"^https://alb-prod\.procura\.farmad\.be{re.escape(path)}(\?.*)?$")
 
 
+def catalog_url(path: str) -> re.Pattern[str]:
+    """Match one catalog path regardless of its query string."""
+    return re.compile(rf"^https://api\.catalog\.procura\.farmad\.be{re.escape(path)}(\?.*)?$")
+
+
 def ehealth_url(path: str) -> re.Pattern[str]:
     """Match one eHealth path regardless of its query string."""
     return re.compile(rf"^https://procura\.farmad\.be{re.escape(path)}(\?.*)?$")

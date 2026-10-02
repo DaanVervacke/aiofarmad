@@ -1,5 +1,6 @@
 """Immutable input and result models for the Farmad Procura customer API."""
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import StrEnum
@@ -166,6 +167,55 @@ class ConversationSummary:
     customer_name: str
     last_message: FarmadMessage | None
     unread_message_count: int
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CatalogProductCode:
+    """One external code for a product, such as a GTIN barcode."""
+
+    code_type: str
+    code_value: str
+
+
+@dataclass(frozen=True, slots=True)
+class CatalogProductPrice:
+    """The prices one pharmacy charges for one product online."""
+
+    sales_price: float | None
+    promo_price_online: float | None
+    discount_percentage_online: float | None
+    sales_tva_percentage: float | None
+    base_price: float | None
+
+
+@dataclass(frozen=True, slots=True)
+class CatalogProductStock:
+    """The stock one pharmacy holds of one product."""
+
+    availability: str
+    total_in_stock: int | None
+    quantity_in_robot: int | None
+    has_robot_location: bool
+
+
+@dataclass(frozen=True, slots=True)
+class CatalogProduct:
+    """One product as one pharmacy sells it."""
+
+    cnk: str
+    apb: str
+    descriptions: Mapping[str, str]
+    brand: str
+    labo: str
+    package_code: str
+    package_quantity: float | None
+    is_on_prescription: bool
+    is_medicine: bool
+    is_own_product: bool
+    price: CatalogProductPrice | None = None
+    stock: CatalogProductStock | None = None
+    product_codes: tuple[CatalogProductCode, ...] = ()
     raw: dict[str, Any] | None = None
 
 

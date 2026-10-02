@@ -9,6 +9,10 @@ from .models import (
     AccountMembership,
     BasketItem,
     BasketLine,
+    CatalogProduct,
+    CatalogProductCode,
+    CatalogProductPrice,
+    CatalogProductStock,
     ConversationSummary,
     CustomerBasket,
     DraftBasket,
@@ -53,6 +57,15 @@ def _int_field(data: Mapping[str, Any], key: str) -> int | None:
         return value
     if isinstance(value, str) and value.isdigit():
         return int(value)
+    return None
+
+
+def _float_field(data: Mapping[str, Any], key: str) -> float | None:
+    value = data.get(key)
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int | float):
+        return float(value)
     return None
 
 
@@ -278,6 +291,70 @@ def parse_conversations(data: Any) -> tuple[ConversationSummary, ...]:
     if not isinstance(data, list):
         return ()
     return tuple(parse_conversation(item) for item in data if isinstance(item, Mapping))
+
+
+def _descriptions_field(value: Any) -> Mapping[str, str]:
+    if not isinstance(value, Mapping):
+        return {}
+    return {str(name): item for name, item in value.items() if isinstance(item, str)}
+
+
+def _product_codes_field(value: Any) -> tuple[CatalogProductCode, ...]:
+    if not isinstance(value, list):
+        return ()
+    return tuple(
+        CatalogProductCode(
+            code_type=_str_field(item, "codeType"),
+            code_value=_str_field(item, "codeValue"),
+        )
+        for item in value
+        if isinstance(item, Mapping)
+    )
+
+
+def parse_catalog_product_price(data: Any) -> CatalogProductPrice | None:
+    """Build the price model from the currentPriceInfo payload."""
+    if not isinstance(data, Mapping):
+        return None
+    return CatalogProductPrice(
+        sales_price=_float_field(data, "salesPrice"),
+        promo_price_online=_float_field(data, "promoPriceOnline"),
+        discount_percentage_online=_float_field(data, "discountPercentageOnline"),
+        sales_tva_percentage=_float_field(data, "salesTvaPercentage"),
+        base_price=_float_field(data, "basePrice"),
+    )
+
+
+def parse_catalog_product_stock(data: Any) -> CatalogProductStock | None:
+    """Build the stock model from the currentStockInfo payload."""
+    if not isinstance(data, Mapping):
+        return None
+    return CatalogProductStock(
+        availability=_str_field(data, "availabilityCode"),
+        total_in_stock=_int_field(data, "totalQuantityInStock"),
+        quantity_in_robot=_int_field(data, "quantityInRobot"),
+        has_robot_location=_bool_field(data, "hasRobotLocation"),
+    )
+
+
+def parse_catalog_product(data: Mapping[str, Any]) -> CatalogProduct:
+    """Build the product model from the catalog product payload."""
+    return CatalogProduct(
+        cnk=_str_field(data, "cnk"),
+        apb=_str_field(data, "apb"),
+        descriptions=_descriptions_field(data.get("description")),
+        brand=_str_field(data, "brand"),
+        labo=_str_field(data, "labo"),
+        package_code=_str_field(data, "packageCode"),
+        package_quantity=_float_field(data, "packageQuantity"),
+        is_on_prescription=_bool_field(data, "isOnPrescription"),
+        is_medicine=_bool_field(data, "isMedicine"),
+        is_own_product=_bool_field(data, "isOwnProduct"),
+        price=parse_catalog_product_price(data.get("currentPriceInfo")),
+        stock=parse_catalog_product_stock(data.get("currentStockInfo")),
+        product_codes=_product_codes_field(data.get("productCodes")),
+        raw=dict(data),
+    )
 
 
 def parse_baskets(data: Mapping[str, Any]) -> tuple[CustomerBasket, ...]:

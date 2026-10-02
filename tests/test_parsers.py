@@ -4,12 +4,15 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any
 
-from aiofarmad.models import MedicationTemporality
+from aiofarmad.models import CatalogProductCode, MedicationTemporality
 from aiofarmad.parsers import (
     _TEMPORALITY_ORDER,
     parse_account,
     parse_basket_items,
     parse_baskets,
+    parse_catalog_product,
+    parse_catalog_product_price,
+    parse_catalog_product_stock,
     parse_conversation,
     parse_conversations,
     parse_day_scheme,
@@ -202,6 +205,86 @@ def test_parse_message_lenient() -> None:
     assert message.sent is None
     assert message.sender_id == ""
     assert message.body == ""
+
+
+def test_parse_catalog_product_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
+    product = parse_catalog_product(load_fixture("product_in_apb.json"))
+    assert product.cnk == "3093242"
+    assert product.apb == "346369"
+    assert product.descriptions["nl"].startswith("FEBELCARE MED1")
+    assert product.descriptions["fr"].startswith("FEBELCARE MED1")
+    assert product.brand == "Febelcare"
+    assert product.package_code == "STUK"
+    assert product.package_quantity == 40.0
+    assert product.is_medicine is False
+    assert product.is_on_prescription is False
+    assert product.price is not None
+    assert product.price.sales_price == 3.1
+    assert product.price.promo_price_online is None
+    assert product.price.sales_tva_percentage == 6.0
+    assert product.stock is not None
+    assert product.stock.availability == "NotInStock"
+    assert product.stock.total_in_stock == 0
+    assert product.stock.has_robot_location is False
+    assert product.product_codes == ()
+    assert product.raw is not None
+    assert product.raw["cnk"] == "3093242"
+
+
+def test_parse_catalog_product_by_gtin_payload(load_fixture: Callable[[str], Any]) -> None:
+    product = parse_catalog_product(load_fixture("product_in_apb_by_gtin.json"))
+    assert product.cnk == "1799121"
+    assert product.is_medicine is True
+    assert product.brand == "Dafalgan"
+    assert product.stock is not None
+    assert product.stock.availability == "Pharmacy"
+    assert product.stock.total_in_stock == 653
+    assert len(product.product_codes) == 5
+    assert product.product_codes[0] == CatalogProductCode(
+        code_type="Gtin", code_value="08027950500468"
+    )
+
+
+def test_parse_catalog_product_lenient_blocks() -> None:
+    product = parse_catalog_product(
+        {
+            "cnk": "1234567",
+            "description": {"nl": "Name", "fr": 3},
+            "productCodes": ["junk", {"codeType": "Gtin", "codeValue": "03585552783337"}],
+            "currentPriceInfo": "junk",
+            "currentStockInfo": {"totalQuantityInStock": "x", "availabilityCode": "Pharmacy"},
+            "packageQuantity": True,
+        }
+    )
+    assert product.descriptions == {"nl": "Name"}
+    assert len(product.product_codes) == 1
+    assert product.price is None
+    assert product.stock is not None
+    assert product.stock.total_in_stock is None
+    assert product.stock.availability == "Pharmacy"
+    assert product.package_quantity is None
+
+
+def test_parse_catalog_product_absent_blocks() -> None:
+    product = parse_catalog_product({"cnk": "1234567"})
+    assert product.descriptions == {}
+    assert product.product_codes == ()
+    assert product.price is None
+    assert product.stock is None
+    assert product.package_quantity is None
+
+
+def test_parse_catalog_product_price_and_stock_reject_non_objects() -> None:
+    assert parse_catalog_product_price(None) is None
+    assert parse_catalog_product_price("junk") is None
+    assert parse_catalog_product_stock(None) is None
+    assert parse_catalog_product_stock([]) is None
+
+
+def test_parse_catalog_product_price_from_int() -> None:
+    price = parse_catalog_product_price({"salesPrice": 4})
+    assert price is not None
+    assert price.sales_price == 4.0
 
 
 def test_parse_baskets_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
