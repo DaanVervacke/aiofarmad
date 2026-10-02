@@ -11,14 +11,18 @@ Before 1.0, breaking changes ship as minor bumps.
 ### Bug Fixes
 
 - Map bad token bodies, ship the wheel license, drop dead code
-
+- Repair the pinned upload-artifact revision in the release workflow
 ### Documentation
 
 - Describe the eHealth browser session gate
-
 ### Features
 
 - Create the aiofarmad library
 - Add prescription reads through the eHealth consent session
 - Model the real submitted order from a live capture
+### Maintenance
 
+- Complete the uv toolchain migration
+- Strip the workflow version comments
+- Migrate the release drafter config and label workflows
+- Manage the changelog with git-cliff
