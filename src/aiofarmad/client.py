@@ -7,7 +7,7 @@ from typing import Self
 
 import aiohttp
 
-from ._auth import async_login
+from ._auth import OtpProvider, async_login
 from ._endpoints import (
     ACCOUNT,
     BASKETS,
@@ -93,9 +93,14 @@ class FarmadClient:
         refresh_token: str | None = None,
         on_token_refresh: TokenRefreshCallback | None = None,
         ehealth_cookie: str | None = None,
+        otp_provider: OtpProvider | None = None,
         request_timeout: float = 30.0,
     ) -> None:
-        """Create a client from a session, credentials, or an existing token pair."""
+        """Create a client from a session, credentials, or an existing token pair.
+
+        The otp provider is awaited only when the login demands a
+        one-time code.
+        """
         self._owned_session = OwnedSession(
             session=aiohttp.ClientSession() if session is None else session,
             owned=session is None,
@@ -104,6 +109,7 @@ class FarmadClient:
         self._password = password
         self._request_timeout = request_timeout
         self._ehealth_cookie = ehealth_cookie
+        self._otp_provider = otp_provider
         self._closed = False
         self._lifecycle = TokenLifecycle(
             session_provider=lambda: self._owned_session.session,
@@ -134,7 +140,11 @@ class FarmadClient:
         return self._lifecycle.patient_id
 
     async def async_login(self) -> FarmadTokens:
-        """Log in with the configured credentials and return the issued token pair."""
+        """Log in with the configured credentials and return the issued token pair.
+
+        The otp provider is awaited only when the account requires a
+        one-time code.
+        """
         self._assert_open()
         if self._email is None or self._password is None:
             msg = "Credentials are required: pass email and password to the client"
@@ -144,6 +154,7 @@ class FarmadClient:
             self._email,
             self._password,
             timeout=self._request_timeout,
+            otp_provider=self._otp_provider,
         )
         await self._lifecycle.adopt(tokens["access_token"], tokens.get("refresh_token"))
         return FarmadTokens.from_token_response(tokens)

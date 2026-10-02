@@ -1,4 +1,4 @@
-"""The scripted Auth0 Lock login: PKCE, the hosted login form, and the code exchange."""
+"""The scripted Auth0 Lock login: PKCE, the hosted form, the code step, and the token exchange."""
 
 import asyncio
 import base64
@@ -7,6 +7,8 @@ import html
 import json
 import re
 import secrets
+from collections.abc import Awaitable, Callable
+from dataclasses import dataclass
 from http import HTTPStatus
 from typing import Any
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -32,6 +34,8 @@ from .exceptions import (
     FarmadTimeoutError,
 )
 
+OtpProvider = Callable[[], Awaitable[str]]
+
 _AUTHORIZE_PARAMS = {
     "response_type": "code",
     "client_id": AUTH0_CLIENT_ID,
@@ -42,8 +46,19 @@ _AUTHORIZE_PARAMS = {
     "ui_locales": AUTH_UI_LOCALES,
 }
 
+_OTP_CHALLENGE_PATH = "/u/mfa-otp-challenge"
+_MAX_REDIRECT_HOPS = 5
+
 _WS_FED_INPUT = re.compile(r"<input[^>]*name=\"([^\"]+)\"[^>]*value=\"([^\"]*)\"")
 _LOCK_CONFIG = re.compile(r"window\.atob\('([^']+)'\)")
+
+
+@dataclass(frozen=True, slots=True)
+class _OtpChallenge:
+    """The pending one-time-code page the hosted login issued."""
+
+    url: str
+    state: str
 
 
 def _code_challenge(verifier: str) -> str:
@@ -73,23 +88,41 @@ async def async_login(
     email: str,
     password: str,
     timeout: float,  # noqa: ASYNC109
+    otp_provider: OtpProvider | None = None,
 ) -> dict[str, str]:
-    """Log in with the hosted login form and return the issued token fields."""
+    """Log in with the hosted login form and return the issued token fields.
+
+    The otp provider is awaited only when the account requires a
+    one-time code, and its wait does not count against the timeout.
+    """
     verifier = secrets.token_urlsafe(64)[:86]
     params = dict(_AUTHORIZE_PARAMS)
     params["code_challenge"] = _code_challenge(verifier)
     params["code_challenge_method"] = "S256"
     url = f"https://{AUTH0_DOMAIN}/authorize?{urlencode(params)}"
 
-    async with asyncio.timeout(timeout):
-        try:
-            code = await _resolve_authorization_code(session, url, email, password)
-        except TimeoutError as err:
-            msg = "Login timed out"
-            raise FarmadTimeoutError(msg) from err
-        except aiohttp.ClientError as err:
-            msg = f"Login failed: {err}"
-            raise FarmadCommunicationError(msg) from err
+    try:
+        async with asyncio.timeout(timeout):
+            location = await _first_location(session, url)
+            outcome: str | _OtpChallenge
+            if location.startswith(AUTH_REDIRECT_URI):
+                outcome = _code_from_callback(location)
+            else:
+                location = await _post_credentials(session, location, email, password)
+                outcome = await _resolve_login_outcome(session, location)
+        if isinstance(outcome, _OtpChallenge):
+            if otp_provider is None:
+                msg = "The account requires a one-time code, so pass otp_provider"
+                raise FarmadMfaRequiredError(msg)
+            otp = await otp_provider()
+            async with asyncio.timeout(timeout):
+                outcome = await _complete_challenge(session, outcome, otp)
+    except TimeoutError as err:
+        msg = "Login timed out"
+        raise FarmadTimeoutError(msg) from err
+    except aiohttp.ClientError as err:
+        msg = f"Login failed: {err}"
+        raise FarmadCommunicationError(msg) from err
 
     return await async_request_tokens(
         session,
@@ -97,24 +130,21 @@ async def async_login(
             "grant_type": "authorization_code",
             "client_id": AUTH0_CLIENT_ID,
             "code_verifier": verifier,
-            "code": code,
+            "code": outcome,
             "redirect_uri": AUTH_REDIRECT_URI,
         },
         timeout=timeout,
     )
 
 
-async def _resolve_authorization_code(
+async def _post_credentials(
     session: aiohttp.ClientSession,
-    authorize_url: str,
+    login_location: str,
     email: str,
     password: str,
 ) -> str:
-    location = await _first_location(session, authorize_url)
-    if location.startswith(AUTH_REDIRECT_URI):
-        return _code_from_callback(location)
-
-    login_url = f"https://{AUTH0_DOMAIN}{location}"
+    """Submit the credentials to the hosted login form and return where the login continues."""
+    login_url = _absolute(login_location)
     async with session.get(
         login_url,
         headers={"User-Agent": USER_AGENT},
@@ -177,11 +207,8 @@ async def _resolve_authorization_code(
     action_match = re.search(r"action=\"([^\"]+)\"", body)
     fields = _hidden_fields(body)
     if action_match is None or "wresult" not in fields:
-        msg = (
-            "The login answered with an unexpected page, which means multi-factor "
-            "authentication or another interactive step is required"
-        )
-        raise FarmadMfaRequiredError(msg)
+        msg = "The hosted login form answered with an unexpected page"
+        raise FarmadAuthenticationError(msg)
 
     async with session.post(
         action_match.group(1),
@@ -195,24 +222,81 @@ async def _resolve_authorization_code(
         allow_redirects=False,
     ) as response:
         await response.read()
-        location = response.headers.get("Location", "")
+        return response.headers.get("Location", "")
 
-    for _ in range(5):
+
+async def _resolve_login_outcome(
+    session: aiohttp.ClientSession,
+    location: str,
+) -> str | _OtpChallenge:
+    """Follow the login redirects until the callback or the one-time-code page."""
+    for _ in range(_MAX_REDIRECT_HOPS):
         if not location:
             msg = "The login stopped before reaching the callback"
             raise FarmadAuthenticationError(msg)
         if location.startswith(AUTH_REDIRECT_URI):
             return _code_from_callback(location)
-        async with session.get(
-            _absolute(location),
-            headers={"Referer": f"https://{AUTH0_DOMAIN}/login", "User-Agent": USER_AGENT},
-            allow_redirects=False,
-        ) as response:
-            await response.read()
-            location = response.headers.get("Location", "")
-
+        if _OTP_CHALLENGE_PATH in location:
+            return await _read_challenge(session, location)
+        location = await _hop(session, location, f"https://{AUTH0_DOMAIN}/login")
     msg = "The login followed too many redirects before reaching the callback"
     raise FarmadAuthenticationError(msg)
+
+
+async def _read_challenge(session: aiohttp.ClientSession, location: str) -> _OtpChallenge:
+    """Read the one-time-code page and return the challenge it carries."""
+    challenge_url = _absolute(location)
+    async with session.get(
+        challenge_url,
+        headers={"Referer": f"https://{AUTH0_DOMAIN}/login", "User-Agent": USER_AGENT},
+        allow_redirects=False,
+    ) as response:
+        body = await response.text()
+    state = _hidden_fields(body).get("state")
+    if not state:
+        msg = "The one-time-code page did not carry its state"
+        raise FarmadAuthenticationError(msg)
+    return _OtpChallenge(url=challenge_url, state=state)
+
+
+async def _complete_challenge(
+    session: aiohttp.ClientSession,
+    challenge: _OtpChallenge,
+    otp: str,
+) -> str:
+    """Submit the one-time code and return the authorization code."""
+    async with session.post(
+        challenge.url,
+        data={"state": challenge.state, "code": otp},
+        headers={
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Origin": f"https://{AUTH0_DOMAIN}",
+            "Referer": challenge.url,
+            "User-Agent": USER_AGENT,
+        },
+        allow_redirects=False,
+    ) as response:
+        status = response.status
+        location = response.headers.get("Location", "")
+    if status != HTTPStatus.FOUND:
+        msg = "Wrong one-time code"
+        raise FarmadAuthenticationError(msg)
+    outcome = await _resolve_login_outcome(session, location)
+    if isinstance(outcome, _OtpChallenge):
+        msg = "Wrong one-time code"
+        raise FarmadAuthenticationError(msg)
+    return outcome
+
+
+async def _hop(session: aiohttp.ClientSession, location: str, referer: str) -> str:
+    """Request one redirect hop and return the next location."""
+    async with session.get(
+        _absolute(location),
+        headers={"Referer": referer, "User-Agent": USER_AGENT},
+        allow_redirects=False,
+    ) as response:
+        await response.read()
+        return response.headers.get("Location", "")
 
 
 async def _first_location(session: aiohttp.ClientSession, url: str) -> str:

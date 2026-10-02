@@ -22,7 +22,7 @@ class FarmadAuthenticationError(FarmadError):
 
 
 class FarmadMfaRequiredError(FarmadAuthenticationError):
-    """The account requires multi-factor authentication, which this client cannot complete."""
+    """The account requires a one-time code and no otp provider was passed to supply it."""
 
 
 class FarmadAuthorizationError(FarmadError):

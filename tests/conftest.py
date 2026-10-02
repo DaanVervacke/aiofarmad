@@ -26,11 +26,15 @@ PASSWORD_POST_URL = f"https://{AUTH0_DOMAIN}/usernamepassword/login"
 WS_FED_CALLBACK_URL = f"https://{AUTH0_DOMAIN}/login/callback"
 RESUME_URL = f"https://{AUTH0_DOMAIN}/authorize/resume"
 TOKEN_URL = f"https://{AUTH0_DOMAIN}/oauth/token"
+OTP_CHALLENGE_URL = f"https://{AUTH0_DOMAIN}/u/mfa-otp-challenge"
 
 LOGIN_STATE = "login-state-token"
 CSRF = "csrf-token-value"
 AUTH_CODE = "test-authorization-code"
 WS_FED_ACTION = f"https://{AUTH0_DOMAIN}/login/callback"
+OTP_CHALLENGE_LOCATION = "/u/mfa-otp-challenge"
+OTP_STATE = "otp-transaction-state"
+OTP = "123456"
 
 USERNAME = "user@example.com"
 PASSWORD = "hunter2"
@@ -111,12 +115,41 @@ def _ws_fed_page() -> str:
     )
 
 
+def otp_challenge_page(state: str = OTP_STATE) -> str:
+    """The universal login page that asks for the one-time code."""
+    return (
+        '<form data-form-primary="true" method="POST">'
+        f'<input type="hidden" name="state" value="{state}">'
+        '<input id="code" type="text" name="code" value="">'
+        "</form>"
+        '<form class="ulp-action-form-pick-authenticator" method="POST">'
+        f'<input type="hidden" name="state" value="{state}">'
+        "</form>"
+    )
+
+
+def _otp_rejected_page() -> str:
+    return (
+        '<form data-form-primary="true" method="POST">'
+        '<input id="code" type="text" name="code" value="">'
+        '<span class="ulp-input-error-message" data-error-code="invalid-code">'
+        "De code is ongeldig</span>"
+        "</form>"
+    )
+
+
 def callback_url(code: str = AUTH_CODE) -> str:
     return f"{AUTH_REDIRECT_URI}?code={code}&state={LOGIN_STATE}"
 
 
-def register_login_flow(m: aioresponses, *, token_response: dict[str, str] | None = None) -> None:
-    """Mock every hop of the scripted Lock login."""
+def register_login_flow(
+    m: aioresponses,
+    *,
+    token_response: dict[str, str] | None = None,
+    mfa: bool = False,
+    otp_rejected: bool = False,
+) -> None:
+    """Mock every hop of the scripted Lock login, including the code step when mfa is set."""
     m.get(
         _q(AUTHORIZE_URL),
         status=302,
@@ -131,12 +164,24 @@ def register_login_flow(m: aioresponses, *, token_response: dict[str, str] | Non
         headers={"Location": "/authorize/resume?state=resume-state"},
         body="",
     )
-    m.get(
-        _q(RESUME_URL),
-        status=302,
-        headers={"Location": callback_url()},
-        body="",
-    )
+    if mfa:
+        m.get(
+            _q(RESUME_URL),
+            status=302,
+            headers={"Location": OTP_CHALLENGE_LOCATION},
+            body="",
+        )
+        m.get(_q(OTP_CHALLENGE_URL), body=otp_challenge_page())
+        if otp_rejected:
+            m.post(_q(OTP_CHALLENGE_URL), status=400, body=_otp_rejected_page())
+        else:
+            m.post(
+                _q(OTP_CHALLENGE_URL),
+                status=302,
+                headers={"Location": "/authorize/resume?state=resume-after-otp"},
+                body="",
+            )
+    m.get(_q(RESUME_URL), status=302, headers={"Location": callback_url()}, body="")
     m.post(_q(TOKEN_URL), payload=token_response or TOKEN_RESPONSE)
 
 

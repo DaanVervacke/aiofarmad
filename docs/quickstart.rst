@@ -33,3 +33,19 @@ when you select it, and store the apb number it returns.
 
 Reads that need a patient id or an account id default to the values the
 access token carries.
+
+Accounts with multi-factor authentication pass an otp provider to the
+client. The login awaits it only when the hosted form demands a one-time
+code.
+
+.. code-block:: python
+
+   async def read_code() -> str:
+       return input("code: ")
+
+
+   client = FarmadClient(
+       email="you@example.com",
+       password="your-password",
+       otp_provider=read_code,
+   )

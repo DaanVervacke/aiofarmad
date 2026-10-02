@@ -27,6 +27,7 @@ from aiofarmad import (
 from .conftest import (
     ACCOUNT_ID,
     APB,
+    OTP,
     PASSWORD,
     PATIENT_ID,
     USERNAME,
@@ -72,6 +73,23 @@ async def test_login_adopts_tokens() -> None:
     assert tokens.expires_in == 36000
     assert client.access_token == "new-access-token"
     assert client.refresh_token == "new-refresh-token"
+
+
+async def test_mfa_login_awaits_the_otp_provider() -> None:
+    calls: list[str] = []
+
+    async def provider() -> str:
+        calls.append("called")
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True)
+            client = FarmadClient(session, email=USERNAME, password=PASSWORD, otp_provider=provider)
+            tokens = await client.async_login()
+    assert calls == ["called"]
+    assert tokens.access_token == "new-access-token"
+    assert client.access_token == "new-access-token"
 
 
 async def test_login_requires_credentials() -> None:

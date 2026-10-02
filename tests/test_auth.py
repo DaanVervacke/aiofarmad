@@ -1,5 +1,6 @@
 """Login flow tests: every hop, plus every failure mode."""
 
+import asyncio
 import base64
 import json
 import re
@@ -22,6 +23,10 @@ from .conftest import (
     CSRF,
     LOGIN_STATE,
     LOGIN_URL,
+    OTP,
+    OTP_CHALLENGE_LOCATION,
+    OTP_CHALLENGE_URL,
+    OTP_STATE,
     PASSWORD,
     PASSWORD_POST_URL,
     RESUME_URL,
@@ -31,6 +36,7 @@ from .conftest import (
     WS_FED_ACTION,
     WS_FED_CALLBACK_URL,
     callback_url,
+    otp_challenge_page,
     register_login_flow,
 )
 
@@ -81,7 +87,7 @@ async def test_login_with_wrong_password_raises() -> None:
                 await async_login(session, USERNAME, "bad", timeout=5.0)
 
 
-async def test_login_with_mfa_page_raises() -> None:
+async def test_login_with_unexpected_password_answer_raises() -> None:
     async with aiohttp.ClientSession() as session:
         with aioresponses() as m:
             m.get(
@@ -91,9 +97,145 @@ async def test_login_with_mfa_page_raises() -> None:
                 body="",
             )
             m.get(_q(LOGIN_URL), body=_lock_page())
-            m.post(_q(PASSWORD_POST_URL), body="<html>mfa required</html>")
-            with pytest.raises(FarmadMfaRequiredError):
+            m.post(_q(PASSWORD_POST_URL), body="<html>an unexpected page</html>")
+            with pytest.raises(FarmadAuthenticationError, match="unexpected page"):
                 await async_login(session, USERNAME, PASSWORD, timeout=5.0)
+
+
+async def test_mfa_login_walks_every_hop() -> None:
+    calls: list[str] = []
+
+    async def provider() -> str:
+        calls.append("called")
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True)
+            tokens = await async_login(
+                session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider
+            )
+            requests = m.requests
+            otp_posts = requests.get(("POST", URL(OTP_CHALLENGE_URL)))
+    assert tokens["access_token"] == "new-access-token"
+    assert tokens["refresh_token"] == "new-refresh-token"
+    assert calls == ["called"]
+    assert otp_posts is not None
+    form = dict(otp_posts[0].kwargs["data"])
+    assert form["code"] == OTP
+    assert form["state"] == OTP_STATE
+
+
+async def test_mfa_login_without_provider_raises() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True)
+            with pytest.raises(FarmadMfaRequiredError, match="one-time code"):
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0)
+
+
+async def test_mfa_login_with_rejected_code_raises() -> None:
+    async def provider() -> str:
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True, otp_rejected=True)
+            with pytest.raises(FarmadAuthenticationError, match="Wrong one-time code"):
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider)
+
+
+async def test_mfa_login_with_repeated_challenge_raises() -> None:
+    async def provider() -> str:
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                _q(AUTHORIZE_URL),
+                status=302,
+                headers={"Location": f"/login?state={LOGIN_STATE}"},
+                body="",
+            )
+            m.get(_q(LOGIN_URL), body=_lock_page())
+            m.post(_q(PASSWORD_POST_URL), body=_ws_fed_page())
+            m.post(
+                _q(WS_FED_CALLBACK_URL),
+                status=302,
+                headers={"Location": "/authorize/resume?state=resume-state"},
+                body="",
+            )
+            m.get(_q(RESUME_URL), status=302, headers={"Location": OTP_CHALLENGE_LOCATION}, body="")
+            m.get(_q(OTP_CHALLENGE_URL), body=otp_challenge_page())
+            m.post(
+                _q(OTP_CHALLENGE_URL),
+                status=302,
+                headers={"Location": "/authorize/resume?state=resume-after-otp"},
+                body="",
+            )
+            m.get(_q(RESUME_URL), status=302, headers={"Location": OTP_CHALLENGE_LOCATION}, body="")
+            m.get(_q(OTP_CHALLENGE_URL), body=otp_challenge_page())
+            with pytest.raises(FarmadAuthenticationError, match="Wrong one-time code"):
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider)
+
+
+async def test_mfa_challenge_without_state_raises() -> None:
+    async def provider() -> str:
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                _q(AUTHORIZE_URL),
+                status=302,
+                headers={"Location": f"/login?state={LOGIN_STATE}"},
+                body="",
+            )
+            m.get(_q(LOGIN_URL), body=_lock_page())
+            m.post(_q(PASSWORD_POST_URL), body=_ws_fed_page())
+            m.post(
+                _q(WS_FED_CALLBACK_URL),
+                status=302,
+                headers={"Location": "/authorize/resume?state=resume-state"},
+                body="",
+            )
+            m.get(_q(RESUME_URL), status=302, headers={"Location": OTP_CHALLENGE_LOCATION}, body="")
+            m.get(
+                _q(OTP_CHALLENGE_URL), body='<html><form><input name="code" value=""></form></html>'
+            )
+            with pytest.raises(FarmadAuthenticationError, match="did not carry its state"):
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider)
+
+
+async def test_mfa_provider_wait_is_not_limited_by_the_timeout() -> None:
+    async def slow_provider() -> str:
+        await asyncio.sleep(0.2)
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True)
+            tokens = await async_login(
+                session, USERNAME, PASSWORD, timeout=0.05, otp_provider=slow_provider
+            )
+    assert tokens["access_token"] == "new-access-token"
+
+
+async def test_login_without_mfa_never_awaits_the_otp_provider() -> None:
+    calls: list[str] = []
+
+    async def provider() -> str:
+        calls.append("called")
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m)
+            tokens = await async_login(
+                session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider
+            )
+    assert tokens["access_token"] == "new-access-token"
+    assert calls == []
 
 
 async def test_login_without_lock_config_raises() -> None:

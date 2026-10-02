@@ -36,7 +36,22 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-The login scripts the same authorization-code flow the web app uses: PKCE against the hosted login form on `signin.procura.farmad.be`, then a token exchange for an access token and a rotating refresh token. Accounts with multi-factor authentication are not supported and raise `FarmadMfaRequiredError`.
+The login scripts the same authorization-code flow the web app uses: PKCE against the hosted login form on `signin.procura.farmad.be`, then a token exchange for an access token and a rotating refresh token. Accounts with multi-factor authentication pass an otp provider, which the login awaits only when the hosted form demands a one-time code.
+
+```python
+async def read_code() -> str:
+    return input("code: ")
+
+
+async with FarmadClient(
+    email="you@example.com",
+    password="your-password",
+    otp_provider=read_code,
+) as client:
+    await client.async_login()
+```
+
+The wait for the code does not count against the request timeout. A rejected code raises `FarmadAuthenticationError`, and a login that needs a code but has no provider raises `FarmadMfaRequiredError`.
 
 ## Token persistence
 
@@ -125,7 +140,7 @@ Until Farmad changes the platform, prescriptions work in the web app only.
 | Exception | Meaning |
 | --- | --- |
 | `FarmadAuthenticationError` | Credentials or tokens were rejected |
-| `FarmadMfaRequiredError` | The account needs multi-factor authentication |
+| `FarmadMfaRequiredError` | The login needed a one-time code and no otp provider was passed |
 | `FarmadAuthorizationError` | The account has no role at this pharmacy |
 | `FarmadEhealthAuthorizationRequiredError` | The eHealth consent is missing |
 | `FarmadCommunicationError` | The API is unreachable or answered with a failure |
