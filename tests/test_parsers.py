@@ -13,6 +13,7 @@ from aiofarmad.parsers import (
     parse_catalog_product,
     parse_catalog_product_price,
     parse_catalog_product_stock,
+    parse_catalog_products,
     parse_conversation,
     parse_conversations,
     parse_day_scheme,
@@ -285,6 +286,41 @@ def test_parse_catalog_product_price_from_int() -> None:
     price = parse_catalog_product_price({"salesPrice": 4})
     assert price is not None
     assert price.sales_price == 4.0
+
+
+def test_parse_catalog_products_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
+    products = parse_catalog_products(load_fixture("products_search.json"))
+    assert len(products) == 3
+    first = products[0]
+    assert first.cnk == "2810901"
+    assert first.apb == "346369"
+    assert first.descriptions["nl"] == "PARACETAMOL TEVA 1 G TABL 120 X 1 G BLISTER"
+    assert first.brand == "Teva"
+    assert first.is_medicine is True
+    assert first.price is not None
+    assert first.price.sales_price == 11.63
+    assert first.stock is not None
+    assert first.stock.total_in_stock == 107
+    assert products[1].cnk == "2881076"
+    assert products[2].cnk == "2881100"
+    assert products[0].raw is not None
+    assert products[0].raw["cnk"] == "2810901"
+
+
+def test_parse_catalog_products_skips_non_object_hits() -> None:
+    products = parse_catalog_products(
+        {"hits": ["junk", None, {"cnk": "1234567"}, 3], "aggregates": []}
+    )
+    assert len(products) == 1
+    assert products[0].cnk == "1234567"
+
+
+def test_parse_catalog_products_rejects_unusable_payloads() -> None:
+    assert parse_catalog_products(None) == ()
+    assert parse_catalog_products(["hits"]) == ()
+    assert parse_catalog_products({"hits": "junk"}) == ()
+    assert parse_catalog_products({}) == ()
+    assert parse_catalog_products({"hits": []}) == ()
 
 
 def test_parse_baskets_from_real_payload(load_fixture: Callable[[str], Any]) -> None:

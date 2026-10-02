@@ -1,0 +1,43 @@
+info:
+  name: search-products
+  type: http
+  seq: 3
+http:
+  method: GET
+  url: '{{catalogBaseUrl}}/api/catalog/products'
+  params:
+  - name: SearchTerm
+    value: paracetamol
+    type: query
+  - name: Apb
+    value: '{{APB}}'
+    type: query
+  - name: Page
+    value: '1'
+    type: query
+  - name: Limit
+    value: '25'
+    type: query
+  - name: Language
+    value: nl
+    type: query
+  - name: api-version
+    value: '5.3'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The catalog search of one pharmacy. The search term matches product names
+  and a full CNK matches its own product. Pages count from 1 and a page past
+  the last result is empty, so keep requesting the next page while it stays
+  full. The answer wraps the products in hits and adds an aggregates tree of
+  matching categories. A search without the Apb parameter answers 500.
+
+  Mirrors FarmadClient::async_search_products_in_apb.

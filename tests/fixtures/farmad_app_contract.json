@@ -136,6 +136,14 @@
       "gateway": false
     },
     {
+      "name": "search_products",
+      "method": "GET",
+      "service": "catalog",
+      "version": "5.3",
+      "path": "/api/catalog/products",
+      "gateway": false
+    },
+    {
       "name": "prescriptions",
       "method": "GET",
       "service": "ehealth",

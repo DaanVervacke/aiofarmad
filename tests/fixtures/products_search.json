@@ -1,0 +1,254 @@
+{
+  "hits": [
+    {
+      "cnk": "2810901",
+      "versionNumber": 0,
+      "apb": "346369",
+      "description": {
+        "nl": "PARACETAMOL TEVA 1 G TABL 120 X 1 G BLISTER",
+        "fr": "PARACETAMOL TEVA 1 G COMP 120 X 1 G BLISTER"
+      },
+      "category": [
+        {
+          "categoryType": "PharmaPhoto",
+          "pathText": "1.7.25.663",
+          "displayName": "Lichte pijnstillers & Koorts"
+        }
+      ],
+      "isOnPrescription": false,
+      "productGroupCode": "ST",
+      "productGroupDescription": {},
+      "productType": "Product",
+      "productLegalCode": "M  ",
+      "isOwnProduct": false,
+      "packageCode": "TABL",
+      "packageQuantity": 120.0,
+      "currentPriceInfo": {
+        "salesPrice": 11.63,
+        "promoPriceOnline": null,
+        "discountPercentageOnline": null,
+        "salesTvaPercentage": 6,
+        "basePrice": 11.63,
+        "purchasePrice": 5.28,
+        "profitMarginPurchase": 107.8,
+        "profitMarginSales": 51.88,
+        "discountPercentageExternal": null,
+        "promoPriceExternal": null,
+        "ownPurchasePrice": null,
+        "manualPriceType": "ONE_TIME_SALES_PRICE"
+      },
+      "currentStockInfo": {
+        "hasRobotLocation": true,
+        "totalQuantityInStock": 107,
+        "quantityInRobot": 2,
+        "preservationCode": "   ",
+        "availabilityCode": "Pharmacy"
+      },
+      "productCodes": [
+        {
+          "codeType": "Gtin",
+          "codeValue": "05407003824216"
+        },
+        {
+          "codeType": "BasisProductNr",
+          "codeValue": "23867"
+        },
+        {
+          "codeType": "Gip",
+          "codeValue": "24780"
+        },
+        {
+          "codeType": "Gtin",
+          "codeValue": "05407003827316"
+        }
+      ],
+      "brand": "Teva",
+      "labo": "TEVA PHARMA BELGIUM",
+      "popularity": 996851,
+      "isMedicine": true,
+      "isForVeterinaryUse": false
+    },
+    {
+      "cnk": "2881076",
+      "versionNumber": 0,
+      "apb": "346369",
+      "description": {
+        "nl": "PARACETAMOL EG FORTE 1G FILMOMH TABL 120",
+        "fr": "PARACETAMOL EG FORTE 1G COMP PELL 120"
+      },
+      "category": [
+        {
+          "categoryType": "PharmaPhoto",
+          "pathText": "1.7.25.663",
+          "displayName": "Lichte pijnstillers & Koorts"
+        }
+      ],
+      "isOnPrescription": false,
+      "productGroupCode": "ST",
+      "productGroupDescription": {},
+      "productType": "Product",
+      "productLegalCode": "M  ",
+      "isOwnProduct": false,
+      "packageCode": "TABL",
+      "packageQuantity": 120.0,
+      "currentPriceInfo": {
+        "salesPrice": 11.85,
+        "promoPriceOnline": null,
+        "discountPercentageOnline": null,
+        "salesTvaPercentage": 6,
+        "basePrice": 11.85,
+        "purchasePrice": 5.48,
+        "profitMarginPurchase": 104.0,
+        "profitMarginSales": 50.98,
+        "discountPercentageExternal": null,
+        "promoPriceExternal": null,
+        "ownPurchasePrice": null,
+        "manualPriceType": "ONE_TIME_SALES_PRICE"
+      },
+      "currentStockInfo": {
+        "hasRobotLocation": true,
+        "totalQuantityInStock": 4,
+        "quantityInRobot": 4,
+        "preservationCode": "   ",
+        "availabilityCode": "Pharmacy"
+      },
+      "productCodes": [
+        {
+          "codeType": "Gtin",
+          "codeValue": "05400581004919"
+        },
+        {
+          "codeType": "Gip",
+          "codeValue": "25993"
+        },
+        {
+          "codeType": "BasisProductNr",
+          "codeValue": "23867"
+        }
+      ],
+      "brand": "EG",
+      "labo": "EG NV/SA",
+      "popularity": 564404,
+      "isMedicine": true,
+      "isForVeterinaryUse": false
+    },
+    {
+      "cnk": "2881100",
+      "versionNumber": 0,
+      "apb": "346369",
+      "description": {
+        "nl": "PARACETAMOL EG FORTE 1G FILMOMH TABL 30",
+        "fr": "PARACETAMOL EG FORTE 1G COMP PELL 30"
+      },
+      "category": [
+        {
+          "categoryType": "PharmaPhoto",
+          "pathText": "1.7.25.663",
+          "displayName": "Lichte pijnstillers & Koorts"
+        }
+      ],
+      "isOnPrescription": false,
+      "productGroupCode": "SP",
+      "productGroupDescription": {},
+      "productType": "Product",
+      "productLegalCode": "M  ",
+      "isOwnProduct": false,
+      "packageCode": "TABL",
+      "packageQuantity": 30.0,
+      "currentPriceInfo": {
+        "salesPrice": 8.54,
+        "promoPriceOnline": null,
+        "discountPercentageOnline": null,
+        "salesTvaPercentage": 6,
+        "basePrice": 8.54,
+        "purchasePrice": 5.56,
+        "profitMarginPurchase": 44.9,
+        "profitMarginSales": 30.99,
+        "discountPercentageExternal": null,
+        "promoPriceExternal": null,
+        "ownPurchasePrice": null,
+        "manualPriceType": "ONE_TIME_SALES_PRICE"
+      },
+      "currentStockInfo": {
+        "hasRobotLocation": true,
+        "totalQuantityInStock": 0,
+        "quantityInRobot": 0,
+        "preservationCode": "   ",
+        "availabilityCode": "NotInStock"
+      },
+      "productCodes": [
+        {
+          "codeType": "Gip",
+          "codeValue": "25993"
+        },
+        {
+          "codeType": "Gtin",
+          "codeValue": "05400581004926"
+        },
+        {
+          "codeType": "BasisProductNr",
+          "codeValue": "23867"
+        }
+      ],
+      "brand": "EG",
+      "labo": "EG NV/SA",
+      "popularity": 511760,
+      "isMedicine": true,
+      "isForVeterinaryUse": false
+    }
+  ],
+  "aggregates": [
+    {
+      "description": "Alle categorieën",
+      "productCount": 46,
+      "path": "1",
+      "childCategories": [
+        {
+          "description": "Geneesmiddelen",
+          "productCount": 46,
+          "path": "1.7",
+          "childCategories": [
+            {
+              "description": "Pijn & Koorts",
+              "productCount": 46,
+              "path": "1.7.25",
+              "childCategories": [
+                {
+                  "description": "Lichte pijnstillers & Koorts",
+                  "productCount": 35,
+                  "path": "1.7.25.663",
+                  "childCategories": []
+                },
+                {
+                  "description": "Sterke pijnstillers",
+                  "productCount": 11,
+                  "path": "1.7.25.664",
+                  "childCategories": []
+                }
+              ]
+            },
+            {
+              "description": "Beenderen en gewrichten",
+              "productCount": 1,
+              "path": "1.7.629",
+              "childCategories": [
+                {
+                  "description": "Ontsteking",
+                  "productCount": 1,
+                  "path": "1.7.629.651",
+                  "childCategories": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "description": "Geen categorie",
+      "productCount": 6,
+      "path": "",
+      "childCategories": []
+    }
+  ]
+}

@@ -99,6 +99,7 @@ Calls against a pharmacy the account has no role at raise `FarmadAuthorizationEr
 | `async_get_medication_nondaily_products(apb, day=...)` | Medications taken outside the daily scheme |
 | `async_get_conversations(apb)` | Conversations with the pharmacy |
 | `async_get_conversation_messages(apb, customer_account_id)` | Messages in one conversation |
+| `async_search_products_in_apb(apb, query)` | The products at one pharmacy matching a search term |
 | `async_get_baskets(apb)` | Submitted orders |
 | `async_get_draft_basket(apb)` | The current draft basket, or `None` |
 

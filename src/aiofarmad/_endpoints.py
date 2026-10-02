@@ -25,6 +25,7 @@ from .parsers import (
     parse_account,
     parse_baskets,
     parse_catalog_product,
+    parse_catalog_products,
     parse_conversations,
     parse_day_scheme_range,
     parse_draft_basket,
@@ -531,6 +532,28 @@ class ProductInApbByGtinArgs:
             raise ValueError(msg)
 
 
+@dataclass(frozen=True, slots=True)
+class SearchProductsArgs:
+    """One page of search results in the catalog of one pharmacy."""
+
+    apb: str
+    query: str
+    language: str = DEFAULT_LANGUAGE
+    limit: int = DEFAULT_PAGE_LIMIT
+    page: int = 1
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.query:
+            msg = "query must not be empty"
+            raise ValueError(msg)
+        if self.limit < 1 or self.page < 1:
+            msg = "limit and page must be positive"
+            raise ValueError(msg)
+
+
 PRODUCT_IN_APB: Endpoint[ProductInApbArgs, CatalogProduct | None] = Endpoint(
     name="product_in_apb",
     method="GET",
@@ -555,6 +578,22 @@ PRODUCT_IN_APB_BY_GTIN: Endpoint[ProductInApbByGtinArgs, CatalogProduct | None] 
         parse_catalog_product(payload) if isinstance(payload, dict) else None
     ),
     not_found_is_none=True,
+)
+
+SEARCH_PRODUCTS: Endpoint[SearchProductsArgs, tuple[CatalogProduct, ...]] = Endpoint(
+    name="search_products",
+    method="GET",
+    url=lambda _args: "/api/catalog/products",
+    version="5.3",
+    base_url=CATALOG_BASE_URL,
+    params=lambda args: {
+        "SearchTerm": args.query,
+        "Apb": args.apb,
+        "Page": str(args.page),
+        "Limit": str(args.limit),
+        "Language": args.language,
+    },
+    parse=lambda payload, _args: parse_catalog_products(payload),
 )
 
 

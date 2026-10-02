@@ -357,6 +357,13 @@ def parse_catalog_product(data: Mapping[str, Any]) -> CatalogProduct:
     )
 
 
+def parse_catalog_products(data: Any) -> tuple[CatalogProduct, ...]:
+    """Build every product from the catalog search payload."""
+    if not isinstance(data, Mapping):
+        return ()
+    return tuple(parse_catalog_product(hit) for hit in _mapping_items(data.get("hits")))
+
+
 def parse_baskets(data: Mapping[str, Any]) -> tuple[CustomerBasket, ...]:
     """Build orders from the basket list payload, resolving patient names."""
     embedded: dict[str, str] = {}

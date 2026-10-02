@@ -14,6 +14,7 @@ REDACTIONS: tuple[tuple[str, str], ...] = (
     ("captures/baskets_raw.json", "tests/fixtures/baskets.json"),
     ("captures/patient_raw.json", "tests/fixtures/patient.json"),
     ("captures/product_in_apb_raw.json", "tests/fixtures/product_in_apb.json"),
+    ("captures/products_search_raw.json", "tests/fixtures/products_search.json"),
     (
         "captures/product_in_apb_by_gtin_raw.json",
         "tests/fixtures/product_in_apb_by_gtin.json",

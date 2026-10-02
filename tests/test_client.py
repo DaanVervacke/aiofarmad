@@ -469,6 +469,75 @@ async def test_get_product_in_apb_requires_a_role() -> None:
                 await make_client(session).async_get_product_in_apb(APB, "3093242")
 
 
+async def test_search_products_in_apb(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url("/api/catalog/products"),
+                payload=load_fixture("products_search.json"),
+            )
+            products = await make_client(session).async_search_products_in_apb(APB, "paracetamol")
+    assert len(products) == 3
+    assert products[0].cnk == "2810901"
+    assert products[0].brand == "Teva"
+    assert products[2].cnk == "2881100"
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        "https://api.catalog.procura.farmad.be/api/catalog/products",
+    )
+    params = request_log[key][0].kwargs["params"]
+    assert params["api-version"] == "5.3"
+    assert params["SearchTerm"] == "paracetamol"
+    assert params["Apb"] == APB
+    assert params["Page"] == "1"
+    assert params["Limit"] == "25"
+    assert params["Language"] == "nl"
+
+
+async def test_search_products_in_apb_passes_the_page() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(catalog_url("/api/catalog/products"), payload={"hits": []})
+            await make_client(session).async_search_products_in_apb(
+                APB, "paracetamol", limit=3, page=2, language="fr"
+            )
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        "https://api.catalog.procura.farmad.be/api/catalog/products",
+    )
+    params = request_log[key][0].kwargs["params"]
+    assert params["Page"] == "2"
+    assert params["Limit"] == "3"
+    assert params["Language"] == "fr"
+
+
+async def test_search_products_in_apb_without_matches_is_empty() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url("/api/catalog/products"),
+                payload={"hits": [], "aggregates": []},
+            )
+            products = await make_client(session).async_search_products_in_apb(APB, "zzzzqqq")
+    assert products == ()
+
+
+async def test_search_products_in_apb_requires_a_role() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url("/api/catalog/products"),
+                status=403,
+                payload={},
+            )
+            with pytest.raises(FarmadAuthorizationError):
+                await make_client(session).async_search_products_in_apb(APB, "paracetamol")
+
+
 async def test_link_pharmacy_posts_apb() -> None:
     async with aiohttp.ClientSession() as session:
         with aioresponses() as m:

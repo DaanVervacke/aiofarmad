@@ -150,6 +150,13 @@ async def main() -> None:
                 "conversations",
                 f"{ALB}/messaging/api/message/{APB}?Limit=25&Page=0&api-version=4.0",
             ),
+            (
+                "products_search",
+                (
+                    f"{CATALOG}/api/catalog/products?SearchTerm=paracetamol&Apb={APB}"
+                    "&Page=1&Limit=3&Language=nl&api-version=5.3"
+                ),
+            ),
         ]
         baskets_payload: Any = None
         for name, url in calls:

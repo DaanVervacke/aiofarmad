@@ -36,3 +36,16 @@ Resolving a CNK before you order works through the catalog service:
 The lookup by ``async_get_product_in_apb_by_gtin`` takes the GTIN barcode on
 the product box instead of the CNK. Both answer ``None`` when the pharmacy
 does not carry the product.
+
+When only a name is known, the catalog search returns the products of one
+pharmacy that match it:
+
+.. code-block:: python
+
+    products = await client.async_search_products_in_apb("343602", "paracetamol")
+    for product in products:
+        print(product.cnk, product.descriptions.get("nl", ""))
+
+Pages count from 1 and hold at most ``limit`` products, 25 by default. A full
+CNK also matches, so the search resolves a product code to its product. A
+query without matches answers an empty tuple.

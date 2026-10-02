@@ -26,6 +26,7 @@ from aiofarmad._endpoints import (
     PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
+    SEARCH_PRODUCTS,
     SELF_ONBOARDING,
     SUBMIT_BASKET,
     AccountArgs,
@@ -45,6 +46,7 @@ from aiofarmad._endpoints import (
     ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
+    SearchProductsArgs,
     SelfOnboardingArgs,
     SubmitBasketArgs,
 )
@@ -60,6 +62,7 @@ ENDPOINTS: tuple[Endpoint[Any, Any], ...] = (
     PRESCRIPTIONS,
     PRODUCT_IN_APB,
     PRODUCT_IN_APB_BY_GTIN,
+    SEARCH_PRODUCTS,
     SCHEME_DAY,
     SCHEME_NONDAILY,
     CONVERSATIONS,
@@ -107,6 +110,7 @@ def dummy_args(endpoint: Endpoint[Any, Any]) -> object:
         "self_onboarding": SelfOnboardingArgs(account_id="id", apb="apb"),
         "product_in_apb": ProductInApbArgs(cnk="cnk", apb="apb"),
         "product_in_apb_by_gtin": ProductInApbByGtinArgs(gtin="gtin", apb="apb"),
+        "search_products": SearchProductsArgs(apb="apb", query="query"),
         "prescriptions": PrescriptionsArgs(page=0),
         "prescription": PrescriptionArgs(prescription_id="prescriptionId"),
     }[endpoint.name]

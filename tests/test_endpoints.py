@@ -21,6 +21,7 @@ from aiofarmad._endpoints import (
     PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
+    SEARCH_PRODUCTS,
     SELF_ONBOARDING,
     SUBMIT_BASKET,
     BasketIdArgs,
@@ -38,6 +39,7 @@ from aiofarmad._endpoints import (
     ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
+    SearchProductsArgs,
     SelfOnboardingArgs,
     SubmitBasketArgs,
     _optional_id,
@@ -183,6 +185,17 @@ def test_product_in_apb_by_gtin_args_validation() -> None:
         ProductInApbByGtinArgs(gtin="03585552783337", apb="")
 
 
+def test_search_products_args_validation() -> None:
+    with pytest.raises(ValueError, match="apb must not be empty"):
+        SearchProductsArgs(apb="", query="paracetamol")
+    with pytest.raises(ValueError, match="query must not be empty"):
+        SearchProductsArgs(apb="a", query="")
+    with pytest.raises(ValueError, match="limit and page must be positive"):
+        SearchProductsArgs(apb="a", query="paracetamol", limit=0)
+    with pytest.raises(ValueError, match="limit and page must be positive"):
+        SearchProductsArgs(apb="a", query="paracetamol", page=0)
+
+
 def test_lookups_mark_not_found_as_none() -> None:
     for endpoint in (DRAFT_BASKET, PRODUCT_IN_APB, PRODUCT_IN_APB_BY_GTIN):
         assert endpoint.not_found_is_none is True
@@ -193,6 +206,7 @@ def test_lookups_mark_not_found_as_none() -> None:
         PHARMACY_PREFERENCES,
         SCHEME_DAY,
         SCHEME_NONDAILY,
+        SEARCH_PRODUCTS,
         CONVERSATIONS,
         CONVERSATION_MESSAGES,
         BASKETS,
@@ -213,6 +227,24 @@ def test_product_lookups_target_the_catalog_host() -> None:
     assert PRODUCT_IN_APB.url(args) == "/api/catalog/products/1234567/a"
     assert PRODUCT_IN_APB_BY_GTIN.base_url == "https://api.catalog.procura.farmad.be"
     assert PRODUCT_IN_APB_BY_GTIN.url(gtin_args) == "/api/catalog/products/gtin/03585552783337/a"
+
+
+def test_search_products_targets_the_catalog_host() -> None:
+    assert SEARCH_PRODUCTS.base_url == "https://api.catalog.procura.farmad.be"
+    assert SEARCH_PRODUCTS.url(SearchProductsArgs(apb="a", query="paracetamol")) == (
+        "/api/catalog/products"
+    )
+
+
+def test_search_products_params_render_the_query() -> None:
+    args = SearchProductsArgs(apb="a", query="paracetamol", limit=3, page=2)
+    assert SEARCH_PRODUCTS.params(args) == {
+        "SearchTerm": "paracetamol",
+        "Apb": "a",
+        "Page": "2",
+        "Limit": "3",
+        "Language": "nl",
+    }
 
 
 def test_scheme_day_params_render_the_window() -> None:

@@ -76,6 +76,9 @@ async def main() -> None:
         draft = await client.async_get_draft_basket(APB)
         print("draft:", "none" if draft is None else draft.id)
 
+        search = await client.async_search_products_in_apb(APB, "paracetamol")
+        print("search results:", len(search))
+
         try:
             conversations = await client.async_get_conversations(APB)
             print("conversations:", len(conversations))

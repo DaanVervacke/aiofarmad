@@ -27,6 +27,7 @@ from ._endpoints import (
     PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
+    SEARCH_PRODUCTS,
     SELF_ONBOARDING,
     SUBMIT_BASKET,
     AccountArgs,
@@ -46,6 +47,7 @@ from ._endpoints import (
     ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
+    SearchProductsArgs,
     SelfOnboardingArgs,
     SubmitBasketArgs,
 )
@@ -380,6 +382,26 @@ class FarmadClient:
         return await self._call(
             PRODUCT_IN_APB_BY_GTIN,
             ProductInApbByGtinArgs(gtin=gtin, apb=apb),
+        )
+
+    async def async_search_products_in_apb(
+        self,
+        apb: str,
+        query: str,
+        *,
+        limit: int = 25,
+        page: int = 1,
+        language: str = "nl",
+    ) -> tuple[CatalogProduct, ...]:
+        """Search the catalog of one pharmacy and return one page of products.
+
+        The query matches product names and a full CNK matches its own
+        product. Pages count from 1 and a page past the last result is
+        empty. A query without matches answers an empty tuple.
+        """
+        return await self._call(
+            SEARCH_PRODUCTS,
+            SearchProductsArgs(apb=apb, query=query, language=language, limit=limit, page=page),
         )
 
     async def async_get_prescriptions(
