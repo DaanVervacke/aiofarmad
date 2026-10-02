@@ -33,7 +33,11 @@ Add all of the following:
 - A row in `tests/fixtures/farmad_app_contract.json` matching the wire path the app bundle uses.
 - A fixture under `tests/fixtures/` with a real or redacted payload. Do not guess fixture shapes: capture one from the live API with `scripts/probe_farmad.py` and redact personal data before committing.
 - A Bruno mirror in `.bruno/` whose docs name the client method it mirrors, satisfying `scripts/check_bruno_drift`.
-- An entry under `[Unreleased]` in `CHANGELOG.md`.
+- A conventional commit subject, which git-cliff renders into `CHANGELOG.md`.
+
+## Changelog
+
+`CHANGELOG.md` is generated with git-cliff from conventional commit subjects. Never edit it by hand. Features, bug fixes, documentation, and maintenance chores reach the changelog through their `feat:`, `fix:`, `docs:`, and `chore:` subjects. Regenerate the unreleased section with `git-cliff --unreleased --prepend CHANGELOG.md` and commit the result. At release, cut the dated section with `git-cliff --tag vX.Y.Z --prepend CHANGELOG.md`.
 
 ## Captures and personal data
 
@@ -46,5 +50,5 @@ Captured payloads contain health data. Raw captures stay in `captures/`, which i
 - Ruff uses `select = ["ALL"]` with the documented ignore list in `pyproject.toml`. mypy runs in strict mode.
 - Do not add narrative code comments. Docstrings document the public API.
 - Never log tokens, credentials, or OAuth state.
-- Run the text-quality skills over all user-facing text before committing: README, CHANGELOG entries, docstrings, and error messages. No em dashes, no semicolon-joined clauses, no filler transitions.
+- Run the text-quality skills over all user-facing text before committing: README, commit subjects, docstrings, and error messages. No em dashes, no semicolon-joined clauses, no filler transitions.
 - Do not mention AI, agents, or tooling in commit messages.
