@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.11.32,<0.13"]
+requires = ["uv_build>=0.12.21,<0.13"]
 build-backend = "uv_build"
 
 [project]
@@ -39,7 +39,6 @@ dev = [
     "mypy>=1.13",
     "ruff>=0.16",
     "coverage[toml]>=7.15.2",
-    "pip-audit>=2.7",
     "pyyaml>=6.0.2",
     "types-pyyaml>=6.0.12",
 ]
@@ -55,7 +54,7 @@ Issues = "https://github.com/DaanVervacke/aiofarmad/issues"
 Changelog = "https://github.com/DaanVervacke/aiofarmad/blob/main/CHANGELOG.md"
 
 [tool.uv]
-required-version = ">=0.11.32,<0.13"
+required-version = ">=0.12.21,<0.13"
 
 [tool.uv.build-backend]
 source-include = ["LICENSE"]

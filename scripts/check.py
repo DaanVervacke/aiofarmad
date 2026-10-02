@@ -11,7 +11,8 @@ COMMANDS: tuple[tuple[str, ...], ...] = (
     ("uv", "run", "python", "-m", "scripts.check_bruno_drift"),
     ("uv", "run", "coverage", "run", "-m", "pytest"),
     ("uv", "run", "coverage", "report"),
-    ("uv", "run", "pip-audit"),
+    ("uv", "build"),
+    ("uv", "audit", "--locked", "--preview-features", "audit-command"),
 )
 
 
