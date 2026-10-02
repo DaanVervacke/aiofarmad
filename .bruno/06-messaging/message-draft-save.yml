@@ -1,0 +1,28 @@
+info:
+  name: message-draft-save
+  type: http
+  seq: 4
+http:
+  method: POST
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Content-Type
+    value: application/json-patch+json
+  - name: Accept
+    value: application/json
+  body: {"body":"","reference":""}
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Creates a message draft with a body and a reference. The 201 answer is
+  the created draft, which the app then updates and sends.
+
+  Mirrors FarmadClient::async_save_message_draft.

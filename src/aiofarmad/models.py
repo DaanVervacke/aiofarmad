@@ -1,7 +1,7 @@
 """Immutable input and result models for the Farmad Procura customer API."""
 
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
 from enum import StrEnum
 from typing import Any
@@ -146,6 +146,17 @@ class MedicationNondailyProduct:
 
 
 @dataclass(frozen=True, slots=True)
+class MedicationSchemeProductEntry:
+    """One scheme entry of one product, kept raw until a live capture shows its shape.
+
+    The test account takes no medication in its scheme, so the product
+    scheme answers an empty list and the payload shape stays unknown.
+    """
+
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class FarmadMessage:
     """One message in a conversation with a pharmacy."""
 
@@ -156,6 +167,50 @@ class FarmadMessage:
     sender_id: str
     sender_name: str
     read_by_receiver: bool
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftAttachmentVariant:
+    """One downloadable form of a message attachment."""
+
+    type: str
+    media_type: str
+    uri: str
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftAttachment:
+    """One file attached to a message draft."""
+
+    id: str
+    name: str
+    variants: tuple[MessageDraftAttachmentVariant, ...] = ()
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraft:
+    """The message being composed to one pharmacy, before it is sent."""
+
+    id: str
+    reference: str
+    body: str
+    attachments: tuple[MessageDraftAttachment, ...] = ()
+    created_on: datetime | None = None
+    modified_on: datetime | None = None
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class ServiceMessage:
+    """One platform banner the app shows outside the pharmacy data."""
+
+    message_nl: str
+    message_fr: str
+    priority: int
+    scope: str
+    level: str
     raw: dict[str, Any] | None = None
 
 
@@ -216,6 +271,23 @@ class CatalogProduct:
     price: CatalogProductPrice | None = None
     stock: CatalogProductStock | None = None
     product_codes: tuple[CatalogProductCode, ...] = ()
+    raw: dict[str, Any] | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class KavaProduct:
+    """The reimbursement data and official patient information of one product."""
+
+    cnk: str
+    apb_product_category_code: str
+    is_medication: bool
+    is_veterinary_use: bool
+    is_subject_to_repayment: bool
+    is_written_application: bool
+    is_on_prescription: bool
+    is_fmd_product: bool
+    patient_information_urls: Mapping[str, str] = field(default_factory=dict)
+    summary_of_products_characteristics_urls: Mapping[str, str] = field(default_factory=dict)
     raw: dict[str, Any] | None = None
 
 
@@ -302,6 +374,17 @@ class DraftBasket:
     def item_count(self) -> int:
         """Total quantity across all draft lines."""
         return sum(item.quantity for item in self.items)
+
+
+@dataclass(frozen=True, slots=True)
+class BasketPayment:
+    """One online payment session, kept raw until a payable pharmacy confirms its shape.
+
+    The test pharmacy disallows online payments, so the pay call answers
+    400 and the success body stays unknown.
+    """
+
+    raw: dict[str, Any] | None = None
 
 
 @dataclass(frozen=True, slots=True)

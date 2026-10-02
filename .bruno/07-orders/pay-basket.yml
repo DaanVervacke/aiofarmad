@@ -1,0 +1,30 @@
+info:
+  name: pay-basket
+  type: http
+  seq: 9
+http:
+  method: POST
+  url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/customerbaskets/basket-id/pay'
+  params:
+  - name: api-version
+    value: '1.0'
+    type: query
+  headers:
+  - name: Content-Type
+    value: application/json
+  - name: Accept
+    value: application/json
+  body: {"redirectUrl":"https://procura.farmad.be/auth-callback.html"}
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Starts the online payment of one submitted order. The answer is the
+  payment session the app hands to a browser, because the checkout runs
+  at the payment provider. Pharmacies that disallow online payments
+  answer 400.
+
+  Mirrors FarmadClient::async_pay_basket.

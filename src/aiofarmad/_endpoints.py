@@ -5,8 +5,11 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
+import aiohttp
+
 from .const import ALB_BASE_URL, CATALOG_BASE_URL, EHEALTH_BASE_URL
 from .models import (
+    BasketPayment,
     CatalogProduct,
     ConversationSummary,
     CustomerBasket,
@@ -15,27 +18,36 @@ from .models import (
     FarmadAccount,
     FarmadMessage,
     FarmadPatient,
+    KavaProduct,
     MedicationDayScheme,
     MedicationNondailyProduct,
+    MedicationSchemeProductEntry,
+    MessageDraft,
     Pharmacy,
     PharmacyPreferences,
     Prescription,
+    ServiceMessage,
 )
 from .parsers import (
     parse_account,
+    parse_basket_payment,
     parse_baskets,
     parse_catalog_product,
     parse_catalog_products,
     parse_conversations,
     parse_day_scheme_range,
     parse_draft_basket,
+    parse_kava_product,
     parse_message,
+    parse_message_draft,
     parse_nondaily_products,
     parse_organization,
     parse_patient,
     parse_pharmacy_preferences,
     parse_prescription,
     parse_prescriptions,
+    parse_scheme_product_entries,
+    parse_service_messages,
 )
 
 DEFAULT_LANGUAGE = "nl"
@@ -112,6 +124,26 @@ class SchemeNondailyArgs(PatientArgs):
             raise ValueError(msg)
         if not self.apb:
             msg = "apb must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class SchemeProductArgs(PatientArgs):
+    """The scheme entries of one product for one patient at one pharmacy."""
+
+    apb: str
+    cnk: str
+    language: str = DEFAULT_LANGUAGE
+
+    def __post_init__(self) -> None:
+        if not self.patient_id:
+            msg = "patient_id must not be empty"
+            raise ValueError(msg)
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.cnk:
+            msg = "cnk must not be empty"
             raise ValueError(msg)
 
 
@@ -265,6 +297,25 @@ class BasketIdArgs(PharmacyArgs):
 
 
 @dataclass(frozen=True, slots=True)
+class PayBasketArgs(PharmacyArgs):
+    """The body for starting an online payment of one submitted order."""
+
+    basket_id: str
+    redirect_url: str
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.basket_id:
+            msg = "basket_id must not be empty"
+            raise ValueError(msg)
+        if not self.redirect_url:
+            msg = "redirect_url must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
 class SelfOnboardingArgs(AccountArgs):
     """The pharmacy to link to the account through self-onboarding."""
 
@@ -317,6 +368,7 @@ class Endpoint[ArgsT, ModelT]:
     params: Callable[[ArgsT], dict[str, str]]
     base_url: str = ALB_BASE_URL
     json_body: Callable[[ArgsT], dict[str, Any]] | None = None
+    form_body: Callable[[ArgsT], aiohttp.FormData] | None = None
     not_found_is_none: bool = False
     ehealth: bool = False
 
@@ -395,6 +447,18 @@ SCHEME_NONDAILY: Endpoint[SchemeNondailyArgs, tuple[MedicationNondailyProduct, .
         "language": args.language,
     },
     parse=lambda payload, _args: parse_nondaily_products(payload),
+)
+
+SCHEME_PRODUCT: Endpoint[SchemeProductArgs, tuple[MedicationSchemeProductEntry, ...]] = Endpoint(
+    name="scheme_product",
+    method="GET",
+    url=lambda args: (
+        f"/medicationscheme/api/medicationscheme/{args.patient_id}"
+        f"/scheme/{args.apb}/product/{args.cnk}"
+    ),
+    version="2.5",
+    params=lambda args: {"language": args.language},
+    parse=lambda payload, _args: parse_scheme_product_entries(payload),
 )
 
 CONVERSATIONS: Endpoint[ConversationsArgs, tuple[ConversationSummary, ...]] = Endpoint(
@@ -499,6 +563,16 @@ CANCEL_BASKET: Endpoint[BasketIdArgs, None] = Endpoint(
     parse=lambda _payload, _args: None,
 )
 
+PAY_BASKET: Endpoint[PayBasketArgs, BasketPayment | None] = Endpoint(
+    name="pay_basket",
+    method="POST",
+    url=lambda args: f"/customerbasket/api/{args.apb}/customerbaskets/{args.basket_id}/pay",
+    version="1.0",
+    params=lambda _args: {},
+    json_body=lambda args: {"redirectUrl": args.redirect_url},
+    parse=lambda payload, _args: parse_basket_payment(payload),
+)
+
 
 @dataclass(frozen=True, slots=True)
 class ProductInApbArgs:
@@ -597,6 +671,241 @@ SEARCH_PRODUCTS: Endpoint[SearchProductsArgs, tuple[CatalogProduct, ...]] = Endp
 )
 
 
+@dataclass(frozen=True, slots=True)
+class KavaProductArgs:
+    """The reimbursement data of one product, addressed by its CNK."""
+
+    cnk: str
+
+    def __post_init__(self) -> None:
+        if not self.cnk:
+            msg = "cnk must not be empty"
+            raise ValueError(msg)
+
+
+KAVA_PRODUCT: Endpoint[KavaProductArgs, KavaProduct] = Endpoint(
+    name="kava_product",
+    method="GET",
+    url=lambda args: f"/api/catalog/products/kava/{args.cnk}",
+    version="5.3",
+    base_url=CATALOG_BASE_URL,
+    params=lambda _args: {},
+    parse=lambda payload, _args: parse_kava_product(payload),
+)
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftArgs(PharmacyArgs):
+    """The message draft of one account at one pharmacy."""
+
+    account_id: str
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.account_id:
+            msg = "account_id must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftSaveArgs(MessageDraftArgs):
+    """The body for creating a message draft."""
+
+    body: str
+    reference: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftIdArgs(MessageDraftArgs):
+    """One message draft of one account, addressed by its id."""
+
+    draft_id: str
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.account_id:
+            msg = "account_id must not be empty"
+            raise ValueError(msg)
+        if not self.draft_id:
+            msg = "draft_id must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class MessageDraftUpdateArgs(MessageDraftIdArgs):
+    """The body for replacing the text of an existing message draft."""
+
+    body: str
+    reference: str = ""
+
+
+@dataclass(frozen=True, slots=True)
+class MessageAttachmentUploadArgs(MessageDraftIdArgs):
+    """One file to attach to a message draft."""
+
+    filename: str
+    content: bytes
+    content_type: str = "application/pdf"
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.account_id:
+            msg = "account_id must not be empty"
+            raise ValueError(msg)
+        if not self.draft_id:
+            msg = "draft_id must not be empty"
+            raise ValueError(msg)
+        if not self.filename:
+            msg = "filename must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class MessageAttachmentDeleteArgs(MessageDraftArgs):
+    """One attachment of a message draft, addressed by its id."""
+
+    attachment_id: str
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.account_id:
+            msg = "account_id must not be empty"
+            raise ValueError(msg)
+        if not self.attachment_id:
+            msg = "attachment_id must not be empty"
+            raise ValueError(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class MessageMarkReadArgs(MessageDraftArgs):
+    """One message of one account, addressed by its id."""
+
+    message_id: str
+
+    def __post_init__(self) -> None:
+        if not self.apb:
+            msg = "apb must not be empty"
+            raise ValueError(msg)
+        if not self.account_id:
+            msg = "account_id must not be empty"
+            raise ValueError(msg)
+        if not self.message_id:
+            msg = "message_id must not be empty"
+            raise ValueError(msg)
+
+
+def _attachment_form(args: MessageAttachmentUploadArgs) -> aiohttp.FormData:
+    form = aiohttp.FormData()
+    form.add_field(
+        "uploadedFile", args.content, filename=args.filename, content_type=args.content_type
+    )
+    return form
+
+
+MESSAGE_DRAFT: Endpoint[MessageDraftArgs, MessageDraft | None] = Endpoint(
+    name="message_draft",
+    method="GET",
+    url=lambda args: f"/messaging/api/draft/{args.apb}/{args.account_id}",
+    version="4.0",
+    params=lambda _args: {},
+    parse=lambda payload, _args: parse_message_draft(payload),
+    not_found_is_none=True,
+)
+
+MESSAGE_DRAFT_SAVE: Endpoint[MessageDraftSaveArgs, MessageDraft | None] = Endpoint(
+    name="message_draft_save",
+    method="POST",
+    url=lambda args: f"/messaging/api/draft/{args.apb}/{args.account_id}",
+    version="4.0",
+    params=lambda _args: {},
+    json_body=lambda args: {"body": args.body, "reference": args.reference},
+    parse=lambda payload, _args: parse_message_draft(payload),
+)
+
+MESSAGE_DRAFT_UPDATE: Endpoint[MessageDraftUpdateArgs, None] = Endpoint(
+    name="message_draft_update",
+    method="PUT",
+    url=lambda args: f"/messaging/api/draft/{args.apb}/{args.account_id}/{args.draft_id}",
+    version="4.0",
+    params=lambda _args: {},
+    json_body=lambda args: {"body": args.body, "reference": args.reference},
+    parse=lambda _payload, _args: None,
+)
+
+MESSAGE_DRAFT_SEND: Endpoint[MessageDraftIdArgs, None] = Endpoint(
+    name="message_draft_send",
+    method="POST",
+    url=lambda args: f"/messaging/api/draft/{args.apb}/{args.account_id}/send/{args.draft_id}",
+    version="4.0",
+    params=lambda _args: {},
+    parse=lambda _payload, _args: None,
+)
+
+MESSAGE_ATTACHMENT_UPLOAD: Endpoint[MessageAttachmentUploadArgs, str | None] = Endpoint(
+    name="message_attachment_upload",
+    method="POST",
+    url=lambda args: (
+        f"/messaging/api/draft/{args.apb}/{args.account_id}/{args.draft_id}/attachment"
+    ),
+    version="4.0",
+    params=lambda _args: {},
+    form_body=_attachment_form,
+    parse=lambda payload, _args: _optional_attachment_id(payload),
+)
+
+MESSAGE_ATTACHMENT_DELETE: Endpoint[MessageAttachmentDeleteArgs, None] = Endpoint(
+    name="message_attachment_delete",
+    method="DELETE",
+    url=lambda args: (
+        f"/messaging/api/draft/{args.apb}/{args.account_id}/attachment/{args.attachment_id}"
+    ),
+    version="4.0",
+    params=lambda _args: {},
+    parse=lambda _payload, _args: None,
+)
+
+MESSAGE_MARK_READ: Endpoint[MessageMarkReadArgs, None] = Endpoint(
+    name="message_mark_read",
+    method="PUT",
+    url=lambda args: f"/messaging/api/message/{args.apb}/{args.account_id}/{args.message_id}",
+    version="4.0",
+    params=lambda _args: {},
+    parse=lambda _payload, _args: None,
+)
+
+
+@dataclass(frozen=True, slots=True)
+class PlatformArgs:
+    """No request parameters: the platform status reads take none."""
+
+
+SERVICE_MESSAGES: Endpoint[PlatformArgs, tuple[ServiceMessage, ...]] = Endpoint(
+    name="service_messages",
+    method="GET",
+    url=lambda _args: "/notifications/api/servicemessages",
+    version="2.1",
+    params=lambda _args: {},
+    parse=lambda payload, _args: parse_service_messages(payload),
+)
+
+TECHNICAL_INTERRUPTIONS: Endpoint[PlatformArgs, bool] = Endpoint(
+    name="technical_interruptions",
+    method="GET",
+    url=lambda _args: "/notifications/api/technicalinterruptions",
+    version="2.1",
+    params=lambda _args: {},
+    parse=lambda payload, _args: payload is True,
+)
+
+
 _EHEALTH_HOST = EHEALTH_BASE_URL.removesuffix("/ehealth")
 
 PRESCRIPTIONS: Endpoint[PrescriptionsArgs, tuple[Prescription, ...]] = Endpoint(
@@ -634,6 +943,14 @@ def _optional_id(payload: Any) -> str | None:
         return payload
     if isinstance(payload, dict):
         value = payload.get("id")
+        if isinstance(value, str):
+            return value
+    return None
+
+
+def _optional_attachment_id(payload: Any) -> str | None:
+    if isinstance(payload, dict):
+        value = payload.get("attachmentId")
         if isinstance(value, str):
             return value
     return None

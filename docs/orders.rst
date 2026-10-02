@@ -49,3 +49,14 @@ pharmacy that match it:
 Pages count from 1 and hold at most ``limit`` products, 25 by default. A full
 CNK also matches, so the search resolves a product code to its product. A
 query without matches answers an empty tuple.
+
+The reimbursement block of the product detail page is a separate read, which
+the wire serves without an apb:
+
+.. code-block:: python
+
+    kava = await client.async_get_kava_product("2810901")
+    print(kava.is_subject_to_repayment, kava.patient_information_urls.get("nl"))
+
+It carries the repayment and prescription flags and the official patient
+information and SPC links per language.

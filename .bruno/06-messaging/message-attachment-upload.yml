@@ -1,0 +1,32 @@
+info:
+  name: message-attachment-upload
+  type: http
+  seq: 7
+http:
+  method: POST
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}/draft-id/attachment'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  body:
+    multipart:
+    - name: uploadedFile
+      value: note.pdf
+      type: file
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Attaches one file to a message draft as multipart form data under the
+  uploadedFile field. The service accepts pdf parts only and answers 500
+  for any other content type. The 202 answer carries the new attachment
+  id.
+
+  Mirrors FarmadClient::async_upload_message_attachment.

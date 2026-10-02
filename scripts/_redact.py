@@ -1,6 +1,7 @@
 """Redact raw captures into tracked fixtures with synthetic personal data."""
 
 import json
+import re
 import uuid
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,14 @@ REDACTIONS: tuple[tuple[str, str], ...] = (
     ("captures/patient_raw.json", "tests/fixtures/patient.json"),
     ("captures/product_in_apb_raw.json", "tests/fixtures/product_in_apb.json"),
     ("captures/products_search_raw.json", "tests/fixtures/products_search.json"),
+    ("captures/kava_product_raw.json", "tests/fixtures/kava_product.json"),
+    ("captures/message_draft_raw.json", "tests/fixtures/message_draft.json"),
+    ("captures/scheme_product_raw.json", "tests/fixtures/scheme_product.json"),
+    ("captures/service_messages_raw.json", "tests/fixtures/service_messages.json"),
+    (
+        "captures/technical_interruptions_raw.json",
+        "tests/fixtures/technical_interruptions.json",
+    ),
     (
         "captures/product_in_apb_by_gtin_raw.json",
         "tests/fixtures/product_in_apb_by_gtin.json",
@@ -30,11 +39,22 @@ NAME_FIELDS = {
 EMAIL_FIELDS = {"email": "user@example.com"}
 DATE_FIELDS = {"dateOfBirth": "1990-01-01T00:00:00+00:00", "lastVisit": "2000-01-01T00:00:00+00:00"}
 APB_FIELDS = {"apb", "apbNumber"}
+URI_FIELDS = {"uri", "url"}
+UUID_IN_URI_RE = re.compile(
+    r"[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+)
+APB_IN_URI_RE = re.compile(r"\b\d{6}\b")
 
 
 def synthetic_uuid(value: str) -> str:
     """Map one identifier to a stable synthetic identifier."""
     return str(uuid.uuid5(SYNTHETIC_NAMESPACE, value))
+
+
+def redact_uri(value: str) -> str:
+    """Map every identifier inside one uri to its synthetic form."""
+    value = UUID_IN_URI_RE.sub(lambda match: synthetic_uuid(match.group(0)), value)
+    return APB_IN_URI_RE.sub(lambda match: synthetic_apb(match.group(0)), value)
 
 
 def synthetic_apb(value: str) -> str:
@@ -58,15 +78,26 @@ def redact_scalar(value: Any, key: str) -> Any:
     """Replace one scalar in place when its key marks personal data."""
     if key in KEY_REPLACEMENTS:
         return KEY_REPLACEMENTS[key]
-    if key in DATE_FIELDS and isinstance(value, str):
-        return DATE_FIELDS[key]
-    if key in APB_FIELDS and isinstance(value, str):
-        return synthetic_apb(value)
+    if isinstance(value, str):
+        mapped = _redact_string(value, key)
+        if mapped is not None:
+            return mapped
+        if is_uuid(value):
+            return synthetic_uuid(value)
     if key == "customerNumber" and isinstance(value, int):
         return 10000 + (uuid.uuid5(SYNTHETIC_NAMESPACE, str(value)).int % 90000)
-    if isinstance(value, str) and is_uuid(value):
-        return synthetic_uuid(value)
     return value
+
+
+def _redact_string(value: str, key: str) -> str | None:
+    """Map one string field that marks personal data, or return None."""
+    if key in DATE_FIELDS:
+        return DATE_FIELDS[key]
+    if key in URI_FIELDS:
+        return redact_uri(value)
+    if key in APB_FIELDS:
+        return synthetic_apb(value)
+    return None
 
 
 def redact(value: Any, key: str = "") -> Any:

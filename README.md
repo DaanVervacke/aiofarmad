@@ -100,8 +100,30 @@ Calls against a pharmacy the account has no role at raise `FarmadAuthorizationEr
 | `async_get_conversations(apb)` | Conversations with the pharmacy |
 | `async_get_conversation_messages(apb, customer_account_id)` | Messages in one conversation |
 | `async_search_products_in_apb(apb, query)` | The products at one pharmacy matching a search term |
+| `async_get_kava_product(cnk)` | The reimbursement data and official patient links of one product |
+| `async_get_medication_scheme_for_product(apb, cnk)` | The scheme entries of one product for the patient |
+| `async_get_service_messages()` | Platform banners outside the pharmacy data |
+| `async_has_technical_interruptions()` | Whether the Farmad platform reports an interruption |
 | `async_get_baskets(apb)` | Submitted orders |
 | `async_get_draft_basket(apb)` | The current draft basket, or `None` |
+
+## Messaging
+
+Reading conversations and messages is one half of the messaging service. The other half is the compose flow: one draft per account and pharmacy, with text, attachments, and a send that publishes it as a message the pharmacy sees.
+
+```python
+async with FarmadClient(access_token=..., refresh_token=...) as client:
+    draft = await client.async_get_message_draft("343602")
+    if draft is None:
+        draft = await client.async_save_message_draft("343602", "hello")
+    await client.async_update_message_draft("343602", draft.id, "hello pharmacy")
+    await client.async_upload_message_attachment(
+        "343602", draft.id, "note.pdf", Path("note.pdf").read_bytes()
+    )
+    await client.async_send_message_draft("343602", draft.id)
+```
+
+Sending consumes the draft: the next `async_get_message_draft` answers `None` until a new one is saved. `async_upload_message_attachment` returns the attachment id. The service accepts pdf attachments only and answers 500 for any other content type, so the content type parameter defaults to `application/pdf`. `async_delete_message_attachment` removes one attachment by its id, and `async_mark_message_as_read` marks one message in a conversation as read.
 
 ## Ordering
 
@@ -122,7 +144,7 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
     )
 ```
 
-Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there answers 400. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
+Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there answers 400. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
 
 ## Prescriptions
 

@@ -50,6 +50,13 @@
       "path": "/api/medicationscheme/{patientId}/scheme/{apb}/nondaily"
     },
     {
+      "name": "scheme_product",
+      "method": "GET",
+      "service": "medicationscheme",
+      "version": "2.5",
+      "path": "/api/medicationscheme/{patientId}/scheme/{apb}/product/{cnk}"
+    },
+    {
       "name": "conversations",
       "method": "GET",
       "service": "messaging",
@@ -113,6 +120,13 @@
       "path": "/api/{apb}/customerbaskets/{basketId}/cancel"
     },
     {
+      "name": "pay_basket",
+      "method": "POST",
+      "service": "customerbasket",
+      "version": "1.0",
+      "path": "/api/{apb}/customerbaskets/{basketId}/pay"
+    },
+    {
       "name": "self_onboarding",
       "method": "POST",
       "service": "usermanagement",
@@ -144,6 +158,77 @@
       "gateway": false
     },
     {
+      "name": "kava_product",
+      "method": "GET",
+      "service": "catalog",
+      "version": "5.3",
+      "path": "/api/catalog/products/kava/{cnk}",
+      "gateway": false
+    },
+    {
+      "name": "message_draft",
+      "method": "GET",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}"
+    },
+    {
+      "name": "message_draft_save",
+      "method": "POST",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}"
+    },
+    {
+      "name": "message_draft_update",
+      "method": "PUT",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}/{draftId}"
+    },
+    {
+      "name": "message_draft_send",
+      "method": "POST",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}/send/{draftId}"
+    },
+    {
+      "name": "message_attachment_upload",
+      "method": "POST",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}/{draftId}/attachment"
+    },
+    {
+      "name": "message_attachment_delete",
+      "method": "DELETE",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/draft/{apb}/{customerAccountId}/attachment/{attachmentId}"
+    },
+    {
+      "name": "message_mark_read",
+      "method": "PUT",
+      "service": "messaging",
+      "version": "4.0",
+      "path": "/api/message/{apb}/{customerAccountId}/{messageId}"
+    },
+    {
+      "name": "service_messages",
+      "method": "GET",
+      "service": "notifications",
+      "version": "2.1",
+      "path": "/api/servicemessages"
+    },
+    {
+      "name": "technical_interruptions",
+      "method": "GET",
+      "service": "notifications",
+      "version": "2.1",
+      "path": "/api/technicalinterruptions"
+    },
+    {
       "name": "prescriptions",
       "method": "GET",
       "service": "ehealth",
@@ -155,7 +240,1706 @@
       "method": "GET",
       "service": "ehealth",
       "version": "1.1",
-      "path": "/api/prescriptions/{prescriptionId}"
+      "path": "/api/prescriptions/{id}"
     }
-  ]
+  ],
+  "ledger": {
+    "bundle": "main.2ba421e258d1f7c6.js",
+    "pathCount": 326,
+    "rows": [
+      {
+        "path": "/api/account",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/duplicate",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}",
+        "status": "implemented",
+        "names": [
+          "account"
+        ]
+      },
+      {
+        "path": "/api/account/{id}/assignableroles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/link-to-trustbuilder-account-by-email-address/{emailAddress}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/link-to/{emailAddress}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/mandates",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/mandates/{apb}/{patientId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/merge/{secondaryId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/notarization",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/notarization/insz/{insz}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/onboardingrequest",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/onboardingrequest/photo",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/partnerships",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/pharmacies/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/refresh-authorization",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/reset",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/self-onboarding",
+        "status": "implemented",
+        "names": [
+          "self_onboarding"
+        ]
+      },
+      {
+        "path": "/api/account/{id}/userroles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/userroles/{userRoleId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{id}/verificationemail",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/account/{userId}/role-bundle",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/by-state",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/by-state/pending",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/{agentId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/{agentId}/approve",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/{agentId}/reactivate",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/agents/{agentId}/revoke",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/articles/{apb}/info",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/articles/{apb}/prices",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/auth",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/auth/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authentication/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/me",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/primary-idp",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/register",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/{oAuthSubject}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/{oAuthSubject}/disable-mfa",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/{oAuthSubject}/mfa-activation",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/authorization/{oAuthSubject}/mfa-parameters",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/automation-tasks/{apb}/automation-task/{correlationId}/event",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/automation-tasks/{apb}/automation-task/{correlationId}/lock",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/automation/{apb}/config",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/automation/{apb}/settings",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/automation/{apb}/settings/public",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/catalog/brands",
+        "status": "waived",
+        "reason": "search filter lists"
+      },
+      {
+        "path": "/api/catalog/categories",
+        "status": "waived",
+        "reason": "search filter lists"
+      },
+      {
+        "path": "/api/catalog/labos",
+        "status": "waived",
+        "reason": "search filter lists"
+      },
+      {
+        "path": "/api/catalog/products",
+        "status": "implemented",
+        "names": [
+          "search_products"
+        ]
+      },
+      {
+        "path": "/api/catalog/products/gtin/{gtin}/{apb}",
+        "status": "implemented",
+        "names": [
+          "product_in_apb_by_gtin"
+        ]
+      },
+      {
+        "path": "/api/catalog/products/kava/{cnk}",
+        "status": "implemented",
+        "names": [
+          "kava_product"
+        ]
+      },
+      {
+        "path": "/api/catalog/products/public",
+        "status": "waived",
+        "reason": "the authenticated search covers it"
+      },
+      {
+        "path": "/api/catalog/products/{cnk}/{apb}",
+        "status": "implemented",
+        "names": [
+          "product_in_apb"
+        ]
+      },
+      {
+        "path": "/api/categories/atcs",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/categories/pharmaphoto",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/categories/{categoryRefId}/substitutions/atc",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/categories/{categoryRefId}/substitutions/vmp-group",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/commercial-states",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/companies",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/companies/summarized",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/companies/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/cpuload",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/deliveryhatches/{apb}/shoppingcarts",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/deliveryhatches/{apb}/shoppingcarts/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/discounts/products",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/discounts/products/{cnk}/promotions",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/discounts/promotions",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/discounts/promotions/{id}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}",
+        "status": "implemented",
+        "names": [
+          "message_draft",
+          "message_draft_save"
+        ]
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}/attachment/{attachmentId}",
+        "status": "implemented",
+        "names": [
+          "message_attachment_delete"
+        ]
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}/attachment/{attachmentId}/{type}",
+        "status": "waived",
+        "reason": "binary download"
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}/send/{draftId}",
+        "status": "implemented",
+        "names": [
+          "message_draft_send"
+        ]
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}/{draftId}",
+        "status": "implemented",
+        "names": [
+          "message_draft_update"
+        ]
+      },
+      {
+        "path": "/api/draft/{apb}/{customerAccountId}/{draftId}/attachment",
+        "status": "implemented",
+        "names": [
+          "message_attachment_upload"
+        ]
+      },
+      {
+        "path": "/api/export/{apb}",
+        "status": "waived",
+        "reason": "datapump back office"
+      },
+      {
+        "path": "/api/export/{apb}/status",
+        "status": "waived",
+        "reason": "datapump back office"
+      },
+      {
+        "path": "/api/export/{apb}/{exportItemId}",
+        "status": "waived",
+        "reason": "datapump back office"
+      },
+      {
+        "path": "/api/feedback",
+        "status": "waived",
+        "reason": "customer support back office"
+      },
+      {
+        "path": "/api/gip/{apb}/{cnk}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/gip/{apb}/{cnk}/{patientId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/import/failures/{apb}",
+        "status": "waived",
+        "reason": "datapump back office"
+      },
+      {
+        "path": "/api/inventory/{productId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/knowledgebase/{kbNumber}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/locks",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/locks/{resourceId}/releases",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/manualprices/manualprice",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/marketdata/referenceprices/{productId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/media-content-types",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/advanced-search",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/as-patient",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/event",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/export-published",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/product-links",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/search",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/upload-url",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/vector-repopulations",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{apb}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{apb}/favorites/{mediaId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{apb}/media/{mediaId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{apb}/{mediaId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/all-product-refs",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/as-patient",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/drafts",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/is-patient-targeted",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/manage-content",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/mark-as-verified",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/pharmacy-content",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/reviews",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/url",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medias/{mediaId}/with-latest-published",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/medicationscheme/{patientId}/scheme/{apb}/day",
+        "status": "implemented",
+        "names": [
+          "scheme_day"
+        ]
+      },
+      {
+        "path": "/api/medicationscheme/{patientId}/scheme/{apb}/nondaily",
+        "status": "implemented",
+        "names": [
+          "scheme_nondaily"
+        ]
+      },
+      {
+        "path": "/api/medicationscheme/{patientId}/scheme/{apb}/product/{cnk}",
+        "status": "implemented",
+        "names": [
+          "scheme_product"
+        ]
+      },
+      {
+        "path": "/api/medipim/leaflets",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/medipim/photos/{cnk}",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/medipim/{apb}/{rest}",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/message/{apb}",
+        "status": "implemented",
+        "names": [
+          "conversations"
+        ]
+      },
+      {
+        "path": "/api/message/{apb}/{customerAccountId}",
+        "status": "implemented",
+        "names": [
+          "conversation_messages"
+        ]
+      },
+      {
+        "path": "/api/message/{apb}/{customerAccountId}/attachment/{attachmentId}/{type}",
+        "status": "waived",
+        "reason": "binary download"
+      },
+      {
+        "path": "/api/message/{apb}/{customerAccountId}/mark-conversation-as-read-by-pharmacist",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/message/{apb}/{customerAccountId}/mark-conversation-as-unread-by-pharmacist",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/message/{apb}/{customerAccountId}/{messageId}",
+        "status": "implemented",
+        "names": [
+          "message_mark_read"
+        ]
+      },
+      {
+        "path": "/api/messages/media-email",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/organization",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/authenticate/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/checkdefaultrolesconfigurationfororganizations",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/cleanupremoteonboarding",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/invisible/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/premium-farmacontent-apbs",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/problems/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/problems/{apb}/retry",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/progress",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/progress/alarm",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/progress/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/progress/{apb}/restart",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/search",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/settings/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/verification/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}",
+        "status": "implemented",
+        "names": [
+          "organization"
+        ]
+      },
+      {
+        "path": "/api/organization/{apb}/account/{accountId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/accounts",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/accounts/{id}/mandates",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/admin",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/admin/{accountId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/fixdefaultroles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{groupId}/role-bundle",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}/grouproles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}/grouproles/{groupRoleId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}/grouproles/{roleId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}/membership",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/groups/{id}/membership/{accountId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/logo",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{apb}/logo/{size}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{groupName}/grouprole",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/organization/{groupName}/grouprole/{roleId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/patientcontents/{apb}/{patientId}",
+        "status": "waived",
+        "reason": "empty live payload"
+      },
+      {
+        "path": "/api/patients",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/patients/{apb}/{customerNumber}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/patients/{patientId}",
+        "status": "implemented",
+        "names": [
+          "patient"
+        ]
+      },
+      {
+        "path": "/api/payment-providers/mollie/onboarding/authorization/{apb}",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/payment-providers/mollie/onboarding/callback",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/payment-providers/mollie/payment-links/callback/{apb}",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/payment-providers/mollie/payments/callback/{apb}",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/payment-providers/mollie/profiles/{apb}",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/payment-providers/status/{apb}",
+        "status": "waived",
+        "reason": "payment provider back office"
+      },
+      {
+        "path": "/api/pharmacy-listing",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups/eligible-for-scope",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups/eligible-pharmacies-for-inventory",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups/{pharmacyGroupId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups/{pharmacyGroupId}/memberships/{membershipId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacygroups/{pharmacyGroupId}/memberships/{membershipId}/status",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacypreferences/{apb}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pharmacypreferences/{apb}/for-customer",
+        "status": "waived",
+        "reason": "duplicate surface of the customerbasket read"
+      },
+      {
+        "path": "/api/pharmacypreferences/{apb}/public",
+        "status": "waived",
+        "reason": "secondary surface"
+      },
+      {
+        "path": "/api/pharmacysoftware/status",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/pharmacysoftware/twin-online-topology",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/pharmacysoftware/twin-online-topology/{apb}",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/pharmi/patient/{patientId}/{rest}",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/pharmi/send-notifications",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/phil/secret-key-seeding",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/phil/{apb}/{rest}",
+        "status": "waived",
+        "reason": "document passthrough"
+      },
+      {
+        "path": "/api/preferences/account/{userId}",
+        "status": "waived",
+        "reason": "unverifiable route"
+      },
+      {
+        "path": "/api/preferences/apb/{apb}",
+        "status": "waived",
+        "reason": "unverifiable route"
+      },
+      {
+        "path": "/api/preferences/apb/{apb}/sms/credits",
+        "status": "waived",
+        "reason": "unverifiable route"
+      },
+      {
+        "path": "/api/preferences/{apb}",
+        "status": "waived",
+        "reason": "unverifiable route"
+      },
+      {
+        "path": "/api/prescriptions",
+        "status": "implemented",
+        "names": [
+          "prescriptions"
+        ]
+      },
+      {
+        "path": "/api/prescriptions/{id}",
+        "status": "implemented",
+        "names": [
+          "prescription"
+        ]
+      },
+      {
+        "path": "/api/prescriptions/{id}/pdf",
+        "status": "waived",
+        "reason": "binary response"
+      },
+      {
+        "path": "/api/prescriptions/{id}/reservation",
+        "status": "waived",
+        "reason": "eHealth consent session"
+      },
+      {
+        "path": "/api/prescriptions/{id}/reservation/{pharmacyNihii}",
+        "status": "waived",
+        "reason": "eHealth consent session"
+      },
+      {
+        "path": "/api/prescriptions/{id}/visibility",
+        "status": "waived",
+        "reason": "eHealth consent session"
+      },
+      {
+        "path": "/api/priceinfo/{apb}/price",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/priceinfo/{apb}/price/deliveryhatch",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/priceinfo/{apb}/price/{cnk}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/pricing/discounts",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/pricing/discounts/party-discount",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/pricing/discounts/party-discount/{discountId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/pricing/discounts/product-discount",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/pricing/discounts/product-discount/{discountId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/product-attribute-categories",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/product-attribute-categories/detailed",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/product-attribute-type-specs",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/product-attribute-type-specs/{id}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/product-attribute-type-specs/{productAttributeTypeSpecId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/productfruits/pharmacy-shop",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/productmdmimport/startsync",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/advanced-search",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/by-cnk/{cnk}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/event",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/search",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/with-media-levels",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/with-media-levels-paged",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{apb}/folo/{productRef}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{cnk}/medipim",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{cnk}/phil",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{id}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{id}/reviews",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{productId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{productId}/campaigns/{apb}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{productId}/with-latest-published",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/products/{productRefId}/url",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/product-history/{pharmacyGroupId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/product-info-pharmacy",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/product-info-pharmacy-group/{pharmacyGroupId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/confirm",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/feedback",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/line/{proposalLineId}/confirmed-quantity",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/line/{proposalLineId}/feedback-quantity",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/line/{proposalLineId}/proposed-quantity",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/proposals/{proposalId}/status",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/publicaccount",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/publicaccount/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/role-bundles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/roles",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/roles/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/roles/{id}/groups",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/roles/{id}/users",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/scheduling",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/scheduling/reset-promotions",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/scopes",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/scopes/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/servicemessages",
+        "status": "implemented",
+        "names": [
+          "service_messages"
+        ]
+      },
+      {
+        "path": "/api/stockinfo/{apb}/stock",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockinfo/{apb}/stock/bulk",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockinfo/{apb}/stock/{cnk}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/inputreservations/validations",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/message/input",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/message/output/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/output/message",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/output/request",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/stockrobot/{apb}/output/response",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/subscriptions",
+        "status": "waived",
+        "reason": "back office"
+      },
+      {
+        "path": "/api/suppliers",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/target-audiences",
+        "status": "waived",
+        "reason": "farmacontent admin"
+      },
+      {
+        "path": "/api/technicalinterruptions",
+        "status": "implemented",
+        "names": [
+          "technical_interruptions"
+        ]
+      },
+      {
+        "path": "/api/trustbuilder",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/trustbuilder/provision",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/trustbuilder/{id}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/trustbuilder/{id}/switch-account",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/twin-apbs",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/twin-apbs/{apb}/is-twin-apb",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/twinbridge/request/id/{requestId}",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/twinbridge/request/to/{toApb}",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/twinbridge/response/for-request/{requestId}",
+        "status": "waived",
+        "reason": "pharmacy software back office"
+      },
+      {
+        "path": "/api/user",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/user/self-onboarding",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/usersettings/{userId}",
+        "status": "waived",
+        "reason": "unverifiable route"
+      },
+      {
+        "path": "/api/{apb}/automation/deliveries",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/automation/reservations/{robotArticleId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/campaigns",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/automatic/{productRefId}",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/farmacontent/{productRef}",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/folo/{productRef}",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/media/{mediaId}",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/{id}",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/{id}/activation",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/{id}/deactivation",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/campaigns/{id}/users",
+        "status": "waived",
+        "reason": "campaign management"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets",
+        "status": "implemented",
+        "names": [
+          "baskets"
+        ]
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/create-as-pharmacist",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/register",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/register-direct-sale",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/cancel",
+        "status": "implemented",
+        "names": [
+          "cancel_basket"
+        ]
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/delivery-location",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/eject",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/is-paying-allowed",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/mark-as-assigned",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/mark-as-delivered",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/mark-as-paid",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/mark-as-ready-for-delivery",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/mark-as-registered-in-twin",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/pay",
+        "status": "implemented",
+        "names": [
+          "pay_basket"
+        ]
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/payment-transactions",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/send-payment-link",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/split",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/submit",
+        "status": "implemented",
+        "names": [
+          "submit_basket"
+        ]
+      },
+      {
+        "path": "/api/{apb}/customerbaskets/{basketId}/unique-packages",
+        "status": "waived",
+        "reason": "pharmacist action"
+      },
+      {
+        "path": "/api/{apb}/deliveries",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/deliveries/{deliveryId}",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/deliveries/{deliveryId}/robot-state",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/drafts/{accountId}",
+        "status": "implemented",
+        "names": [
+          "draft_basket",
+          "draft_save",
+          "draft_clear"
+        ]
+      },
+      {
+        "path": "/api/{apb}/drafts/{accountId}/{basketId}",
+        "status": "implemented",
+        "names": [
+          "draft_update"
+        ]
+      },
+      {
+        "path": "/api/{apb}/invoice-versions",
+        "status": "waived",
+        "reason": "invoicing back office"
+      },
+      {
+        "path": "/api/{apb}/invoice-versions/search",
+        "status": "waived",
+        "reason": "invoicing back office"
+      },
+      {
+        "path": "/api/{apb}/invoice-versions/{invoiceVersionId}/mark-as-manual-sent",
+        "status": "waived",
+        "reason": "invoicing back office"
+      },
+      {
+        "path": "/api/{apb}/invoice-versions/{invoiceVersionId}/process",
+        "status": "waived",
+        "reason": "invoicing back office"
+      },
+      {
+        "path": "/api/{apb}/invoice-versions/{invoiceVersionId}/send",
+        "status": "waived",
+        "reason": "invoicing back office"
+      },
+      {
+        "path": "/api/{apb}/parties/search",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/pharmacy-preferences",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/pharmacypreferences",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/pharmacypreferences/for-customer",
+        "status": "implemented",
+        "names": [
+          "pharmacy_preferences"
+        ]
+      },
+      {
+        "path": "/api/{apb}/pharmacypreferences/public",
+        "status": "waived",
+        "reason": "secondary surface"
+      },
+      {
+        "path": "/api/{apb}/products/stockrequest",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/provider/account-information",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      },
+      {
+        "path": "/api/{apb}/recipient",
+        "status": "waived",
+        "reason": "pharmacist portal"
+      }
+    ]
+  }
 }

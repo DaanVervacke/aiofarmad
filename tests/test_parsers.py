@@ -4,11 +4,12 @@ from collections.abc import Callable
 from datetime import date
 from typing import Any
 
-from aiofarmad.models import CatalogProductCode, MedicationTemporality
+from aiofarmad.models import CatalogProductCode, MedicationSchemeProductEntry, MedicationTemporality
 from aiofarmad.parsers import (
     _TEMPORALITY_ORDER,
     parse_account,
     parse_basket_items,
+    parse_basket_payment,
     parse_baskets,
     parse_catalog_product,
     parse_catalog_product_price,
@@ -19,13 +20,18 @@ from aiofarmad.parsers import (
     parse_day_scheme,
     parse_day_scheme_range,
     parse_draft_basket,
+    parse_kava_product,
     parse_message,
+    parse_message_draft,
+    parse_message_draft_attachments,
     parse_nondaily_products,
     parse_organization,
     parse_patient,
     parse_pharmacy_preferences,
     parse_prescription,
     parse_prescriptions,
+    parse_scheme_product_entries,
+    parse_service_messages,
 )
 
 from .conftest import ACCOUNT_ID, PATIENT_ID
@@ -321,6 +327,154 @@ def test_parse_catalog_products_rejects_unusable_payloads() -> None:
     assert parse_catalog_products({"hits": "junk"}) == ()
     assert parse_catalog_products({}) == ()
     assert parse_catalog_products({"hits": []}) == ()
+
+
+def test_parse_kava_product_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
+    kava = parse_kava_product(load_fixture("kava_product.json"))
+    assert kava.cnk == "2810901"
+    assert kava.apb_product_category_code == "S"
+    assert kava.is_medication is True
+    assert kava.is_veterinary_use is False
+    assert kava.is_subject_to_repayment is True
+    assert kava.is_written_application is True
+    assert kava.is_on_prescription is False
+    assert kava.is_fmd_product is True
+    assert kava.patient_information_urls["nl"].startswith("https://app.fagg-afmps.be/")
+    assert kava.summary_of_products_characteristics_urls["fr"].startswith(
+        "https://app.fagg-afmps.be/"
+    )
+    assert kava.raw is not None
+    assert kava.raw["cnk"] == "2810901"
+
+
+def test_parse_kava_product_lenient_blocks() -> None:
+    kava = parse_kava_product({"cnk": "1234567", "patientInformationUrl": "junk"})
+    assert kava.patient_information_urls == {}
+    assert kava.summary_of_products_characteristics_urls == {}
+    assert kava.is_medication is False
+
+
+def test_parse_service_messages_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
+    assert parse_service_messages(load_fixture("service_messages.json")) == ()
+
+
+def test_parse_service_message_items() -> None:
+    messages = parse_service_messages(
+        {
+            "serviceMessages": [
+                {
+                    "messageNl": "Storing eHealth",
+                    "messageFr": "Interruption eHealth",
+                    "priority": 1,
+                    "scope": "EHEALTH",
+                    "level": "ERROR",
+                },
+                "junk",
+            ]
+        }
+    )
+    assert len(messages) == 1
+    assert messages[0].message_nl == "Storing eHealth"
+    assert messages[0].message_fr == "Interruption eHealth"
+    assert messages[0].priority == 1
+    assert messages[0].scope == "EHEALTH"
+    assert messages[0].level == "ERROR"
+
+
+def test_parse_service_messages_rejects_unusable_payloads() -> None:
+    assert parse_service_messages(None) == ()
+    assert parse_service_messages([]) == ()
+    assert parse_service_messages({"serviceMessages": "junk"}) == ()
+    assert parse_service_messages({}) == ()
+
+
+def test_parse_message_draft_from_real_payload(load_fixture: Callable[[str], Any]) -> None:
+    draft = parse_message_draft(load_fixture("message_draft.json"))
+    assert draft is not None
+    assert draft.id
+    assert draft.reference == ""
+    assert draft.body == ""
+    assert draft.created_on is not None
+    assert draft.modified_on is not None
+    assert draft.raw is not None
+    assert draft.raw["reference"] == ""
+    assert len(draft.attachments) == 5
+    first = draft.attachments[0]
+    assert first.id == "f95f2858-9a9c-5585-8563-76f273b9df88"
+    assert first.name == "USER"
+    assert first.variants[0].type == "Original"
+    assert first.variants[0].media_type == "application/pdf"
+    assert first.variants[0].uri.startswith("api/draft/346369/")
+    assert first.raw is not None
+    assert first.raw["id"] == "f95f2858-9a9c-5585-8563-76f273b9df88"
+
+
+def test_parse_message_draft_with_attachments_and_lenient_blocks() -> None:
+    draft = parse_message_draft(
+        {
+            "id": "draft-1",
+            "reference": "ref",
+            "body": "text",
+            "attachments": [
+                {
+                    "id": "a",
+                    "name": "note.pdf",
+                    "variants": [{"type": "Original", "mediaType": "application/pdf", "uri": "x"}],
+                },
+                {"id": "b", "variants": "junk"},
+                "junk",
+                None,
+            ],
+            "createdOn": "garbage",
+        }
+    )
+    assert draft is not None
+    assert draft.id == "draft-1"
+    assert draft.body == "text"
+    assert draft.created_on is None
+    assert len(draft.attachments) == 2
+    first = draft.attachments[0]
+    assert first.id == "a"
+    assert first.name == "note.pdf"
+    assert first.variants[0].uri == "x"
+    assert draft.attachments[1].variants == ()
+
+
+def test_parse_message_draft_rejects_unusable_payloads() -> None:
+    assert parse_message_draft(None) is None
+    assert parse_message_draft([]) is None
+    assert parse_message_draft("") is None
+
+
+def test_parse_message_draft_attachments_reject_non_lists() -> None:
+    assert parse_message_draft_attachments("junk") == ()
+    assert parse_message_draft_attachments(None) == ()
+    assert parse_message_draft_attachments({}) == ()
+
+
+def test_parse_scheme_product_entries_keeps_everything_raw(
+    load_fixture: Callable[[str], Any],
+) -> None:
+    assert parse_scheme_product_entries(load_fixture("scheme_product.json")) == ()
+
+
+def test_parse_scheme_product_entries_shapes() -> None:
+    assert parse_scheme_product_entries([{"day": "2026-10-01"}, "junk"]) == (
+        MedicationSchemeProductEntry(raw={"day": "2026-10-01"}),
+    )
+    assert parse_scheme_product_entries({"moment": "ONTBIJT"}) == (
+        MedicationSchemeProductEntry(raw={"moment": "ONTBIJT"}),
+    )
+    assert parse_scheme_product_entries(None) == ()
+    assert parse_scheme_product_entries("junk") == ()
+
+
+def test_parse_basket_payment_keeps_the_body_raw() -> None:
+    payment = parse_basket_payment({"checkoutUrl": "https://pay.example/x"})
+    assert payment is not None
+    assert payment.raw == {"checkoutUrl": "https://pay.example/x"}
+    assert parse_basket_payment(None) is None
+    assert parse_basket_payment("junk") is None
 
 
 def test_parse_baskets_from_real_payload(load_fixture: Callable[[str], Any]) -> None:

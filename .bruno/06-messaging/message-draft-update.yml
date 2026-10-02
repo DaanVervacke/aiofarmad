@@ -1,0 +1,26 @@
+info:
+  name: message-draft-update
+  type: http
+  seq: 5
+http:
+  method: PUT
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}/draft-id'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Content-Type
+    value: application/json-patch+json
+  body: {"body":"new text","reference":""}
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Replaces the text of an existing message draft. The answer body is
+  empty.
+
+  Mirrors FarmadClient::async_update_message_draft.

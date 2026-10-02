@@ -1,0 +1,26 @@
+info:
+  name: service-messages
+  type: http
+  seq: 1
+http:
+  method: GET
+  url: '{{albBaseUrl}}/notifications/api/servicemessages'
+  params:
+  - name: api-version
+    value: '2.1'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: none
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The platform banners the app shows outside the pharmacy data. Every
+  message carries a Dutch and a French text, a priority, a scope, and a
+  level. The list is regularly empty.
+
+  Mirrors FarmadClient::async_get_service_messages.

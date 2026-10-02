@@ -1,0 +1,26 @@
+info:
+  name: message-draft-send
+  type: http
+  seq: 6
+http:
+  method: POST
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}/send/draft-id'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Sends one message draft to the pharmacy as a new message. The draft is
+  consumed and the next draft read answers 204. The pharmacist sees the
+  message in the pharmacy portal.
+
+  Mirrors FarmadClient::async_send_message_draft.

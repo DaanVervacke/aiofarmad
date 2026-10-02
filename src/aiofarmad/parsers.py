@@ -9,6 +9,7 @@ from .models import (
     AccountMembership,
     BasketItem,
     BasketLine,
+    BasketPayment,
     CatalogProduct,
     CatalogProductCode,
     CatalogProductPrice,
@@ -19,15 +20,21 @@ from .models import (
     FarmadAccount,
     FarmadMessage,
     FarmadPatient,
+    KavaProduct,
     MedicationDayScheme,
     MedicationIntakeMoment,
     MedicationNondailyProduct,
     MedicationSchemeProduct,
+    MedicationSchemeProductEntry,
     MedicationTemporality,
+    MessageDraft,
+    MessageDraftAttachment,
+    MessageDraftAttachmentVariant,
     PatientInPharmacy,
     Pharmacy,
     PharmacyPreferences,
     Prescription,
+    ServiceMessage,
 )
 
 _TEMPORALITY_ORDER: dict[MedicationTemporality, int] = {
@@ -362,6 +369,111 @@ def parse_catalog_products(data: Any) -> tuple[CatalogProduct, ...]:
     if not isinstance(data, Mapping):
         return ()
     return tuple(parse_catalog_product(hit) for hit in _mapping_items(data.get("hits")))
+
+
+def parse_kava_product(data: Mapping[str, Any]) -> KavaProduct:
+    """Build the reimbursement model from the kava product payload."""
+    return KavaProduct(
+        cnk=_str_field(data, "cnk"),
+        apb_product_category_code=_str_field(data, "apbProductCategoryCode"),
+        is_medication=_bool_field(data, "isMedication"),
+        is_veterinary_use=_bool_field(data, "isVeterinaryUse"),
+        is_subject_to_repayment=_bool_field(data, "isSubjectToRepayment"),
+        is_written_application=_bool_field(data, "isWrittenApplication"),
+        is_on_prescription=_bool_field(data, "isOnPrescription"),
+        is_fmd_product=_bool_field(data, "isFmdProduct"),
+        patient_information_urls=_descriptions_field(data.get("patientInformationUrl")),
+        summary_of_products_characteristics_urls=_descriptions_field(
+            data.get("summaryOfProductsCharacteristicsUrl")
+        ),
+        raw=dict(data),
+    )
+
+
+def parse_service_message(data: Mapping[str, Any]) -> ServiceMessage:
+    """Build one service message from its payload."""
+    return ServiceMessage(
+        message_nl=_str_field(data, "messageNl"),
+        message_fr=_str_field(data, "messageFr"),
+        priority=_int_field(data, "priority") or 0,
+        scope=_str_field(data, "scope"),
+        level=_str_field(data, "level"),
+        raw=dict(data),
+    )
+
+
+def parse_service_messages(data: Any) -> tuple[ServiceMessage, ...]:
+    """Build every service message from the service messages payload."""
+    if not isinstance(data, Mapping):
+        return ()
+    return tuple(
+        parse_service_message(item) for item in _mapping_items(data.get("serviceMessages"))
+    )
+
+
+def parse_message_draft_attachments(data: Any) -> tuple[MessageDraftAttachment, ...]:
+    """Build the attachments of a draft from their payload."""
+    if not isinstance(data, list):
+        return ()
+    return tuple(
+        _parse_message_draft_attachment(item) for item in data if isinstance(item, Mapping)
+    )
+
+
+def _parse_message_draft_attachment(data: Mapping[str, Any]) -> MessageDraftAttachment:
+    variants = data.get("variants")
+    parsed: tuple[MessageDraftAttachmentVariant, ...] = ()
+    if isinstance(variants, list):
+        parsed = tuple(
+            MessageDraftAttachmentVariant(
+                type=_str_field(variant, "type"),
+                media_type=_str_field(variant, "mediaType"),
+                uri=_str_field(variant, "uri"),
+            )
+            for variant in variants
+            if isinstance(variant, Mapping)
+        )
+    return MessageDraftAttachment(
+        id=_str_field(data, "id"),
+        name=_str_field(data, "name"),
+        variants=parsed,
+        raw=dict(data),
+    )
+
+
+def parse_message_draft(data: Any) -> MessageDraft | None:
+    """Build the draft model from the message draft payload."""
+    if not isinstance(data, Mapping):
+        return None
+    return MessageDraft(
+        id=_str_field(data, "id"),
+        reference=_str_field(data, "reference"),
+        body=_str_field(data, "body"),
+        attachments=parse_message_draft_attachments(data.get("attachments")),
+        created_on=_datetime_field(data, "createdOn"),
+        modified_on=_datetime_field(data, "modifiedOn"),
+        raw=dict(data),
+    )
+
+
+def parse_scheme_product_entries(payload: Any) -> tuple[MedicationSchemeProductEntry, ...]:
+    """Build the scheme entries of one product, keeping every entry raw."""
+    if isinstance(payload, list):
+        return tuple(
+            MedicationSchemeProductEntry(raw=dict(item))
+            for item in payload
+            if isinstance(item, dict)
+        )
+    if isinstance(payload, dict):
+        return (MedicationSchemeProductEntry(raw=dict(payload)),)
+    return ()
+
+
+def parse_basket_payment(payload: Any) -> BasketPayment | None:
+    """Build the payment session from the pay answer, keeping the body raw."""
+    if isinstance(payload, dict):
+        return BasketPayment(raw=payload)
+    return None
 
 
 def parse_baskets(data: Mapping[str, Any]) -> tuple[CustomerBasket, ...]:

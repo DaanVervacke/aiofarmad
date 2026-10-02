@@ -79,6 +79,19 @@ async def main() -> None:
         search = await client.async_search_products_in_apb(APB, "paracetamol")
         print("search results:", len(search))
 
+        kava = await client.async_get_kava_product("2810901")
+        print("kava:", kava.cnk, "subject to repayment:", kava.is_subject_to_repayment)
+
+        scheme_product = await client.async_get_medication_scheme_for_product(APB, "2810901")
+        print("scheme product entries:", len(scheme_product))
+
+        service_messages = await client.async_get_service_messages()
+        interrupted = await client.async_has_technical_interruptions()
+        print("service messages:", len(service_messages), "interruption:", interrupted)
+
+        message_draft = await client.async_get_message_draft(APB)
+        print("message draft:", "none" if message_draft is None else message_draft.id)
+
         try:
             conversations = await client.async_get_conversations(APB)
             print("conversations:", len(conversations))

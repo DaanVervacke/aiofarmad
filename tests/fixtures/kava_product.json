@@ -1,0 +1,19 @@
+{
+  "cnk": "2810901",
+  "apbProductCategoryCode": "S",
+  "isMedication": true,
+  "isVeterinaryUse": false,
+  "isSubjectToRepayment": true,
+  "isWrittenApplication": true,
+  "isOnPrescription": false,
+  "isFmdProduct": true,
+  "patientInformationUrl": {
+    "fr": "https://app.fagg-afmps.be/pharma-status/api/files/62bc52861e5c015ab3b14562",
+    "de": "https://app.fagg-afmps.be/pharma-status/api/files/62bc52861e5c015ab3b144c2",
+    "nl": "https://app.fagg-afmps.be/pharma-status/api/files/62bc52871e5c015ab3b145da"
+  },
+  "summaryOfProductsCharacteristicsUrl": {
+    "fr": "https://app.fagg-afmps.be/pharma-status/api/files/62bc52871e5c015ab3b1464c",
+    "nl": "https://app.fagg-afmps.be/pharma-status/api/files/62bc52891e5c015ab3b1495f"
+  }
+}

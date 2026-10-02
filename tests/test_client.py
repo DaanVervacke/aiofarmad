@@ -538,6 +538,262 @@ async def test_search_products_in_apb_requires_a_role() -> None:
                 await make_client(session).async_search_products_in_apb(APB, "paracetamol")
 
 
+async def test_get_kava_product(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url("/api/catalog/products/kava/2810901"),
+                payload=load_fixture("kava_product.json"),
+            )
+            kava = await make_client(session).async_get_kava_product("2810901")
+    assert kava.cnk == "2810901"
+    assert kava.is_subject_to_repayment is True
+    assert kava.is_fmd_product is True
+    assert kava.patient_information_urls["nl"].startswith("https://app.fagg-afmps.be/")
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        "https://api.catalog.procura.farmad.be/api/catalog/products/kava/2810901",
+    )
+    assert request_log[key][0].kwargs["params"]["api-version"] == "5.3"
+
+
+async def test_get_medication_scheme_for_product(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                alb_url(
+                    f"/medicationscheme/api/medicationscheme/{PATIENT_ID}/scheme/{APB}"
+                    "/product/2810901"
+                ),
+                payload=load_fixture("scheme_product.json"),
+            )
+            entries = await make_client(session).async_get_medication_scheme_for_product(
+                APB, "2810901"
+            )
+    assert entries == ()
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        f"https://alb-prod.procura.farmad.be/medicationscheme/api/medicationscheme/{PATIENT_ID}"
+        f"/scheme/{APB}/product/2810901",
+    )
+    params = request_log[key][0].kwargs["params"]
+    assert params["api-version"] == "2.5"
+    assert params["language"] == "nl"
+
+
+async def test_get_message_draft(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}"),
+                payload=load_fixture("message_draft.json"),
+            )
+            draft = await make_client(session).async_get_message_draft(APB)
+    assert draft is not None
+    assert draft.id
+    assert len(draft.attachments) == 5
+
+
+async def test_get_message_draft_without_one_is_none() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}"), status=204, body="")
+            draft = await make_client(session).async_get_message_draft(APB)
+    assert draft is None
+
+
+async def test_save_message_draft(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}"),
+                payload=load_fixture("message_draft.json"),
+            )
+            draft = await make_client(session).async_save_message_draft(APB, "hello")
+    assert draft is not None
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "POST",
+        f"https://alb-prod.procura.farmad.be/messaging/api/draft/{APB}/{ACCOUNT_ID}",
+    )
+    assert request_log[key][0].kwargs["json"] == {"body": "hello", "reference": ""}
+    assert request_log[key][0].kwargs["params"]["api-version"] == "4.0"
+
+
+async def test_update_message_draft() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.put(alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}/draft-1"), status=200, body="")
+            await make_client(session).async_update_message_draft(APB, "draft-1", "new text")
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "PUT",
+        f"https://alb-prod.procura.farmad.be/messaging/api/draft/{APB}/{ACCOUNT_ID}/draft-1",
+    )
+    assert request_log[key][0].kwargs["json"] == {"body": "new text", "reference": ""}
+
+
+async def test_send_message_draft() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}/send/draft-1"),
+                status=201,
+                body="",
+            )
+            await make_client(session).async_send_message_draft(APB, "draft-1")
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "POST",
+        f"https://alb-prod.procura.farmad.be/messaging/api/draft/{APB}/{ACCOUNT_ID}/send/draft-1",
+    )
+    assert request_log[key][0].kwargs["params"]["api-version"] == "4.0"
+
+
+async def test_upload_message_attachment() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}/draft-1/attachment"),
+                payload={
+                    "attachmentId": "att-9",
+                    "progressId": "00000000-0000-0000-0000-000000000000",
+                },
+            )
+            attachment_id = await make_client(session).async_upload_message_attachment(
+                APB, "draft-1", "note.pdf", b"hello"
+            )
+    assert attachment_id == "att-9"
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "POST",
+        f"https://alb-prod.procura.farmad.be/messaging/api/draft/{APB}/{ACCOUNT_ID}"
+        "/draft-1/attachment",
+    )
+    form = request_log[key][0].kwargs["data"]
+    assert isinstance(form, aiohttp.FormData)
+    assert len(form._fields) == 1
+    assert form._fields[0][0]["name"] == "uploadedFile"
+    assert form._fields[0][0]["filename"] == "note.pdf"
+    assert form._fields[0][1]["Content-Type"] == "application/pdf"
+    assert form._fields[0][2] == b"hello"
+
+
+async def test_delete_message_attachment() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.delete(
+                alb_url(f"/messaging/api/draft/{APB}/{ACCOUNT_ID}/attachment/att-1"),
+                status=200,
+                body="",
+            )
+            await make_client(session).async_delete_message_attachment(APB, "att-1")
+    request_log = m.requests
+    first_request_key(
+        request_log,
+        "DELETE",
+        f"https://alb-prod.procura.farmad.be/messaging/api/draft/{APB}/{ACCOUNT_ID}"
+        "/attachment/att-1",
+    )
+
+
+async def test_mark_message_as_read() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.put(
+                alb_url(f"/messaging/api/message/{APB}/{ACCOUNT_ID}/msg-1"),
+                status=200,
+                body="",
+            )
+            await make_client(session).async_mark_message_as_read(APB, "msg-1")
+    request_log = m.requests
+    first_request_key(
+        request_log,
+        "PUT",
+        f"https://alb-prod.procura.farmad.be/messaging/api/message/{APB}/{ACCOUNT_ID}/msg-1",
+    )
+
+
+async def test_get_service_messages(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                alb_url("/notifications/api/servicemessages"),
+                payload=load_fixture("service_messages.json"),
+            )
+            messages = await make_client(session).async_get_service_messages()
+    assert messages == ()
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "GET",
+        "https://alb-prod.procura.farmad.be/notifications/api/servicemessages",
+    )
+    assert request_log[key][0].kwargs["params"]["api-version"] == "2.1"
+
+
+async def test_has_technical_interruptions() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(alb_url("/notifications/api/technicalinterruptions"), payload=True)
+            interrupted = await make_client(session).async_has_technical_interruptions()
+    assert interrupted is True
+
+
+async def test_has_no_technical_interruptions(load_fixture: Callable[[str], Any]) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                alb_url("/notifications/api/technicalinterruptions"),
+                payload=load_fixture("technical_interruptions.json"),
+            )
+            interrupted = await make_client(session).async_has_technical_interruptions()
+    assert interrupted is False
+
+
+async def test_pay_basket() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/basket-9/pay"),
+                payload={"checkoutUrl": "https://pay.example/x"},
+            )
+            payment = await make_client(session).async_pay_basket(
+                APB, "basket-9", "https://procura.farmad.be/auth-callback.html"
+            )
+    assert payment is not None
+    assert payment.raw == {"checkoutUrl": "https://pay.example/x"}
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "POST",
+        f"https://alb-prod.procura.farmad.be/customerbasket/api/{APB}/customerbaskets/basket-9/pay",
+    )
+    assert request_log[key][0].kwargs["json"] == {
+        "redirectUrl": "https://procura.farmad.be/auth-callback.html"
+    }
+
+
+async def test_pay_basket_denied_answers_400() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/basket-9/pay"),
+                status=400,
+                payload={},
+            )
+            with pytest.raises(FarmadCommunicationError):
+                await make_client(session).async_pay_basket(APB, "basket-9", "https://x/")
+
+
 async def test_link_pharmacy_posts_apb() -> None:
     async with aiohttp.ClientSession() as session:
         with aioresponses() as m:

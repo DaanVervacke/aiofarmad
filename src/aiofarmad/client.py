@@ -18,8 +18,17 @@ from ._endpoints import (
     DRAFT_CLEAR,
     DRAFT_SAVE,
     DRAFT_UPDATE,
+    KAVA_PRODUCT,
+    MESSAGE_ATTACHMENT_DELETE,
+    MESSAGE_ATTACHMENT_UPLOAD,
+    MESSAGE_DRAFT,
+    MESSAGE_DRAFT_SAVE,
+    MESSAGE_DRAFT_SEND,
+    MESSAGE_DRAFT_UPDATE,
+    MESSAGE_MARK_READ,
     ORGANIZATION,
     PATIENT,
+    PAY_BASKET,
     PHARMACY_PREFERENCES,
     PRESCRIPTION,
     PRESCRIPTIONS,
@@ -27,9 +36,12 @@ from ._endpoints import (
     PRODUCT_IN_APB_BY_GTIN,
     SCHEME_DAY,
     SCHEME_NONDAILY,
+    SCHEME_PRODUCT,
     SEARCH_PRODUCTS,
     SELF_ONBOARDING,
+    SERVICE_MESSAGES,
     SUBMIT_BASKET,
+    TECHNICAL_INTERRUPTIONS,
     AccountArgs,
     BasketIdArgs,
     BasketsArgs,
@@ -39,14 +51,25 @@ from ._endpoints import (
     DraftUpdateArgs,
     DraftWriteArgs,
     Endpoint,
+    KavaProductArgs,
+    MessageAttachmentDeleteArgs,
+    MessageAttachmentUploadArgs,
+    MessageDraftArgs,
+    MessageDraftIdArgs,
+    MessageDraftSaveArgs,
+    MessageDraftUpdateArgs,
+    MessageMarkReadArgs,
     PatientArgs,
+    PayBasketArgs,
     PharmacyArgs,
+    PlatformArgs,
     PrescriptionArgs,
     PrescriptionsArgs,
     ProductInApbArgs,
     ProductInApbByGtinArgs,
     SchemeDayArgs,
     SchemeNondailyArgs,
+    SchemeProductArgs,
     SearchProductsArgs,
     SelfOnboardingArgs,
     SubmitBasketArgs,
@@ -61,6 +84,7 @@ from .exceptions import (
     FarmadNotFoundError,
 )
 from .models import (
+    BasketPayment,
     CatalogProduct,
     ConversationSummary,
     CustomerBasket,
@@ -70,11 +94,15 @@ from .models import (
     FarmadMessage,
     FarmadPatient,
     FarmadTokens,
+    KavaProduct,
     MedicationDayScheme,
     MedicationNondailyProduct,
+    MedicationSchemeProductEntry,
+    MessageDraft,
     Pharmacy,
     PharmacyPreferences,
     Prescription,
+    ServiceMessage,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -217,6 +245,26 @@ class FarmadClient:
         return await self._call(
             SCHEME_NONDAILY,
             SchemeNondailyArgs(apb=apb, patient_id=resolved, day=day, language=language),
+        )
+
+    async def async_get_medication_scheme_for_product(
+        self,
+        apb: str,
+        cnk: str,
+        *,
+        patient_id: str | None = None,
+        language: str = "nl",
+    ) -> tuple[MedicationSchemeProductEntry, ...]:
+        """Fetch the scheme entries of one product for one patient at one pharmacy.
+
+        The entries stay raw because the test account takes no medication
+        in its scheme, so the live answer is empty and the payload shape
+        is unknown.
+        """
+        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        return await self._call(
+            SCHEME_PRODUCT,
+            SchemeProductArgs(apb=apb, cnk=cnk, patient_id=resolved, language=language),
         )
 
     async def async_get_conversations(
@@ -367,6 +415,22 @@ class FarmadClient:
         """
         await self._call(CANCEL_BASKET, BasketIdArgs(apb=apb, basket_id=basket_id))
 
+    async def async_pay_basket(
+        self, apb: str, basket_id: str, redirect_url: str
+    ) -> BasketPayment | None:
+        """Start the online payment of one submitted order and return the session.
+
+        The answer is the raw payment session, which the app hands to a
+        browser because the checkout itself runs at the payment provider.
+        Most pharmacies disallow online payments, which answers 400. The
+        success shape stays unconfirmed because the test pharmacy allows
+        none.
+        """
+        return await self._call(
+            PAY_BASKET,
+            PayBasketArgs(apb=apb, basket_id=basket_id, redirect_url=redirect_url),
+        )
+
     async def async_get_product_in_apb(self, apb: str, cnk: str) -> CatalogProduct | None:
         """Fetch one product by its CNK as one pharmacy sells it.
 
@@ -403,6 +467,136 @@ class FarmadClient:
             SEARCH_PRODUCTS,
             SearchProductsArgs(apb=apb, query=query, language=language, limit=limit, page=page),
         )
+
+    async def async_get_kava_product(self, cnk: str) -> KavaProduct:
+        """Fetch the reimbursement data of one product by its CNK.
+
+        The answer carries the repayment and prescription flags and the
+        official patient information links per language.
+        """
+        return await self._call(KAVA_PRODUCT, KavaProductArgs(cnk=cnk))
+
+    async def async_get_message_draft(
+        self,
+        apb: str,
+        *,
+        account_id: str | None = None,
+    ) -> MessageDraft | None:
+        """Fetch the message draft, or None when no draft is open."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        return await self._call(MESSAGE_DRAFT, MessageDraftArgs(apb=apb, account_id=resolved))
+
+    async def async_save_message_draft(
+        self,
+        apb: str,
+        body: str,
+        *,
+        reference: str = "",
+        account_id: str | None = None,
+    ) -> MessageDraft | None:
+        """Create a message draft and return it, or None on an empty answer."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        return await self._call(
+            MESSAGE_DRAFT_SAVE,
+            MessageDraftSaveArgs(apb=apb, account_id=resolved, body=body, reference=reference),
+        )
+
+    async def async_update_message_draft(
+        self,
+        apb: str,
+        draft_id: str,
+        body: str,
+        *,
+        reference: str = "",
+        account_id: str | None = None,
+    ) -> None:
+        """Replace the text of an existing message draft."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        await self._call(
+            MESSAGE_DRAFT_UPDATE,
+            MessageDraftUpdateArgs(
+                apb=apb, account_id=resolved, draft_id=draft_id, body=body, reference=reference
+            ),
+        )
+
+    async def async_send_message_draft(
+        self,
+        apb: str,
+        draft_id: str,
+        *,
+        account_id: str | None = None,
+    ) -> None:
+        """Send one message draft to the pharmacy as a new message."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        await self._call(
+            MESSAGE_DRAFT_SEND,
+            MessageDraftIdArgs(apb=apb, account_id=resolved, draft_id=draft_id),
+        )
+
+    async def async_upload_message_attachment(
+        self,
+        apb: str,
+        draft_id: str,
+        filename: str,
+        content: bytes,
+        *,
+        content_type: str = "application/pdf",
+        account_id: str | None = None,
+    ) -> str | None:
+        """Attach one file to a message draft and return the attachment id.
+
+        The service accepts pdf attachments only: any other content type
+        answers 500 instead of a clean refusal, so the content type
+        defaults to application/pdf.
+        """
+        resolved = self._require(account_id or self.account_id, "account_id")
+        return await self._call(
+            MESSAGE_ATTACHMENT_UPLOAD,
+            MessageAttachmentUploadArgs(
+                apb=apb,
+                account_id=resolved,
+                draft_id=draft_id,
+                filename=filename,
+                content=content,
+                content_type=content_type,
+            ),
+        )
+
+    async def async_delete_message_attachment(
+        self,
+        apb: str,
+        attachment_id: str,
+        *,
+        account_id: str | None = None,
+    ) -> None:
+        """Remove one attachment from the message draft."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        await self._call(
+            MESSAGE_ATTACHMENT_DELETE,
+            MessageAttachmentDeleteArgs(apb=apb, account_id=resolved, attachment_id=attachment_id),
+        )
+
+    async def async_mark_message_as_read(
+        self,
+        apb: str,
+        message_id: str,
+        *,
+        account_id: str | None = None,
+    ) -> None:
+        """Mark one message in a conversation as read."""
+        resolved = self._require(account_id or self.account_id, "account_id")
+        await self._call(
+            MESSAGE_MARK_READ,
+            MessageMarkReadArgs(apb=apb, account_id=resolved, message_id=message_id),
+        )
+
+    async def async_get_service_messages(self) -> tuple[ServiceMessage, ...]:
+        """Fetch the platform banners the app shows outside the pharmacy data."""
+        return await self._call(SERVICE_MESSAGES, PlatformArgs())
+
+    async def async_has_technical_interruptions(self) -> bool:
+        """Answer whether the Farmad platform reports a technical interruption."""
+        return await self._call(TECHNICAL_INTERRUPTIONS, PlatformArgs())
 
     async def async_get_prescriptions(
         self,
@@ -483,6 +677,7 @@ class FarmadClient:
             headers=headers,
             params=params,
             json_body=endpoint.json_body(args) if endpoint.json_body is not None else None,
+            form_body=endpoint.form_body(args) if endpoint.form_body is not None else None,
             timeout=self._request_timeout,
         )
 

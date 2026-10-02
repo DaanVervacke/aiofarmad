@@ -1,0 +1,64 @@
+{
+  "id": "e3066ce5-5851-5d58-99ae-da69c5efaaa7",
+  "reference": "",
+  "body": "",
+  "attachments": [
+    {
+      "id": "f95f2858-9a9c-5585-8563-76f273b9df88",
+      "name": "USER",
+      "variants": [
+        {
+          "type": "Original",
+          "mediaType": "application/pdf",
+          "uri": "api/draft/346369/98d9e829-86de-5924-b6c9-f39470943eb8/attachment/f95f2858-9a9c-5585-8563-76f273b9df88/Original?api-version=4.0"
+        }
+      ]
+    },
+    {
+      "id": "064b5505-93c9-51c1-a54c-cd8d95d683da",
+      "name": "USER",
+      "variants": [
+        {
+          "type": "Original",
+          "mediaType": "application/pdf",
+          "uri": "api/draft/346369/98d9e829-86de-5924-b6c9-f39470943eb8/attachment/064b5505-93c9-51c1-a54c-cd8d95d683da/Original?api-version=4.0"
+        }
+      ]
+    },
+    {
+      "id": "cd458347-8073-5b06-9310-1acf9a58fdd3",
+      "name": "USER",
+      "variants": [
+        {
+          "type": "Original",
+          "mediaType": "application/pdf",
+          "uri": "api/draft/346369/98d9e829-86de-5924-b6c9-f39470943eb8/attachment/cd458347-8073-5b06-9310-1acf9a58fdd3/Original?api-version=4.0"
+        }
+      ]
+    },
+    {
+      "id": "5a1177df-a25b-59df-b2e0-cf6293ab2571",
+      "name": "USER",
+      "variants": [
+        {
+          "type": "Original",
+          "mediaType": "application/pdf",
+          "uri": "api/draft/346369/98d9e829-86de-5924-b6c9-f39470943eb8/attachment/5a1177df-a25b-59df-b2e0-cf6293ab2571/Original?api-version=4.0"
+        }
+      ]
+    },
+    {
+      "id": "97ba55fa-457a-552f-b7ec-22497086efa7",
+      "name": "USER",
+      "variants": [
+        {
+          "type": "Original",
+          "mediaType": "application/pdf",
+          "uri": "api/draft/346369/98d9e829-86de-5924-b6c9-f39470943eb8/attachment/97ba55fa-457a-552f-b7ec-22497086efa7/Original?api-version=4.0"
+        }
+      ]
+    }
+  ],
+  "createdOn": "2026-10-02T11:06:11.551096+00:00",
+  "modifiedOn": "2026-10-02T11:06:11.551096+00:00"
+}

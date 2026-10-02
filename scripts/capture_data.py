@@ -140,6 +140,13 @@ async def main() -> None:
                 ),
             ),
             (
+                "scheme_product",
+                (
+                    f"{ALB}/medicationscheme/api/medicationscheme/{patient_id}"
+                    f"/scheme/{APB}/product/2810901?language=nl&api-version=2.5"
+                ),
+            ),
+            (
                 "baskets",
                 (
                     f"{ALB}/customerbasket/api/{APB}/customerbaskets"
@@ -151,11 +158,27 @@ async def main() -> None:
                 f"{ALB}/messaging/api/message/{APB}?Limit=25&Page=0&api-version=4.0",
             ),
             (
+                "message_draft",
+                f"{ALB}/messaging/api/draft/{APB}/{account_id}?api-version=4.0",
+            ),
+            (
+                "service_messages",
+                f"{ALB}/notifications/api/servicemessages?api-version=2.1",
+            ),
+            (
+                "technical_interruptions",
+                f"{ALB}/notifications/api/technicalinterruptions?api-version=2.1",
+            ),
+            (
                 "products_search",
                 (
                     f"{CATALOG}/api/catalog/products?SearchTerm=paracetamol&Apb={APB}"
                     "&Page=1&Limit=3&Language=nl&api-version=5.3"
                 ),
+            ),
+            (
+                "kava_product",
+                f"{CATALOG}/api/catalog/products/kava/2810901?api-version=5.3",
             ),
         ]
         baskets_payload: Any = None

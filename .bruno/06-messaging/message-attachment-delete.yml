@@ -1,0 +1,25 @@
+info:
+  name: message-attachment-delete
+  type: http
+  seq: 8
+http:
+  method: DELETE
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}/attachment/attachment-id'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Removes one attachment from the message draft. The draft id is not part
+  of the path: the attachment id identifies the file on its own.
+
+  Mirrors FarmadClient::async_delete_message_attachment.

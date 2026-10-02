@@ -1,0 +1,26 @@
+info:
+  name: message-draft
+  type: http
+  seq: 3
+http:
+  method: GET
+  url: '{{albBaseUrl}}/messaging/api/draft/{{APB}}/{{ACCOUNT_ID}}'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The message draft the account is composing at one pharmacy. The answer
+  carries the draft id, the text, the attachments, and the timestamps. A
+  204 answers when no draft is open, which the client returns as None.
+
+  Mirrors FarmadClient::async_get_message_draft.

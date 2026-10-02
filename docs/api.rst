@@ -31,11 +31,19 @@ Models
    :members:
 .. autoclass:: aiofarmad.MedicationNondailyProduct
    :members:
+.. autoclass:: aiofarmad.MedicationSchemeProductEntry
+   :members:
 .. autoclass:: aiofarmad.MedicationTemporality
    :members:
 .. autoclass:: aiofarmad.ConversationSummary
    :members:
 .. autoclass:: aiofarmad.FarmadMessage
+   :members:
+.. autoclass:: aiofarmad.MessageDraft
+   :members:
+.. autoclass:: aiofarmad.MessageDraftAttachment
+   :members:
+.. autoclass:: aiofarmad.ServiceMessage
    :members:
 .. autoclass:: aiofarmad.CatalogProduct
    :members:
@@ -45,11 +53,15 @@ Models
    :members:
 .. autoclass:: aiofarmad.CatalogProductStock
    :members:
+.. autoclass:: aiofarmad.KavaProduct
+   :members:
 .. autoclass:: aiofarmad.CustomerBasket
    :members:
 .. autoclass:: aiofarmad.BasketLine
    :members:
 .. autoclass:: aiofarmad.BasketItem
+   :members:
+.. autoclass:: aiofarmad.BasketPayment
    :members:
 .. autoclass:: aiofarmad.DraftBasket
    :members:

@@ -1,0 +1,27 @@
+info:
+  name: kava-product
+  type: http
+  seq: 4
+http:
+  method: GET
+  url: '{{catalogBaseUrl}}/api/catalog/products/kava/2810901'
+  params:
+  - name: api-version
+    value: '5.3'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  The reimbursement data of one product by its CNK, the same block the
+  app shows on the product detail page: repayment flags, prescription
+  state, and the official patient information and SPC links per
+  language. The wire accepts the call without a bearer token.
+
+  Mirrors FarmadClient::async_get_kava_product.

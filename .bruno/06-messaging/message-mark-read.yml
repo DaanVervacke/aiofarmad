@@ -1,0 +1,25 @@
+info:
+  name: message-mark-read
+  type: http
+  seq: 9
+http:
+  method: PUT
+  url: '{{albBaseUrl}}/messaging/api/message/{{APB}}/{{ACCOUNT_ID}}/message-id'
+  params:
+  - name: api-version
+    value: '4.0'
+    type: query
+  headers:
+  - name: Accept
+    value: application/json
+  auth: bearer
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: false
+  maxRedirects: 0
+docs: |-
+  Marks one message in a conversation as read by the receiver. The answer
+  body is empty.
+
+  Mirrors FarmadClient::async_mark_message_as_read.
