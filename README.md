@@ -12,7 +12,7 @@ This is a reverse-engineered client and the Farmad API may change or withdraw ac
 ## Install
 
 ```bash
-pip install aiofarmad
+uv add aiofarmad
 ```
 
 ## Login

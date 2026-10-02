@@ -18,10 +18,11 @@ mypy src tests scripts
 python -m scripts.check_bruno_drift
 coverage run -m pytest
 coverage report
-pip-audit
+uv build
+uv audit
 ```
 
-Coverage measures branches in `src/` and requires `fail_under = 98`. `pip-audit` needs network access.
+Coverage measures branches in `src/` and requires `fail_under = 98`. `uv audit` needs network access.
 
 ## Adding an endpoint
 
