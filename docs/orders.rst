@@ -24,6 +24,21 @@ before the pharmacy processes it.
 Submitting an order is a real transaction with the pharmacy. The pharmacy
 sees it, and someone pays or cancels it.
 
+``async_save_draft_basket`` returns the draft id. ``async_update_draft_basket``
+replaces the lines of an existing draft, ``async_clear_draft_basket`` deletes
+it, and ``async_get_draft_basket`` reads it back or answers ``None``.
+
+Orders are paid at pickup by default. Most pharmacies do not allow online
+payments, and passing ``pay_online=True`` there raises
+:class:`aiofarmad.FarmadCommunicationError` with ``status`` 400.
+``async_pay_basket`` starts an online payment for a pharmacy that allows it
+and returns the raw session the app hands to a browser, because the checkout
+runs at the payment provider.
+
+Cancelling a submitted order is the pharmacy's decision. Customer accounts
+regularly get :class:`aiofarmad.FarmadAuthorizationError` from
+``async_cancel_basket``.
+
 Resolving a CNK before you order works through the catalog service:
 
 .. code-block:: python
@@ -59,4 +74,5 @@ the wire serves without an apb:
     print(kava.is_subject_to_repayment, kava.patient_information_urls.get("nl"))
 
 It carries the repayment and prescription flags and the official patient
-information and SPC links per language.
+information and SPC links per language, in ``patient_information_urls`` and
+``summary_of_products_characteristics_urls``.

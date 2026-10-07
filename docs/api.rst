@@ -8,6 +8,8 @@ Client
    :members:
    :undoc-members:
 
+.. autodata:: aiofarmad.TokenRefreshCallback
+
 Models
 ------
 
@@ -43,6 +45,8 @@ Models
    :members:
 .. autoclass:: aiofarmad.MessageDraftAttachment
    :members:
+.. autoclass:: aiofarmad.MessageDraftAttachmentVariant
+   :members:
 .. autoclass:: aiofarmad.ServiceMessage
    :members:
 .. autoclass:: aiofarmad.CatalogProduct
@@ -64,6 +68,8 @@ Models
 .. autoclass:: aiofarmad.BasketPayment
    :members:
 .. autoclass:: aiofarmad.DraftBasket
+   :members:
+.. autoclass:: aiofarmad.DraftProduct
    :members:
 .. autoclass:: aiofarmad.FarmadTokens
    :members:

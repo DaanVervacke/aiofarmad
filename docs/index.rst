@@ -13,7 +13,9 @@ Async Python client for the Mijn Farmad Apotheek customer API. Requires Python >
 
    quickstart
    authentication
+   reading
    orders
    messaging
    prescriptions
+   errors
    api
