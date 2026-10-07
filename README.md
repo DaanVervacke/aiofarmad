@@ -55,13 +55,18 @@ The wait for the code does not count against the request timeout. A rejected cod
 
 ## Token persistence
 
-Log in once, store the pair that `async_login` returns, and pass it back on the next start. The client refreshes before the access token expires and calls `on_token_refresh` whenever Farmad rotates the pair.
+Log in once, store the `access_token` and `refresh_token` of the `FarmadTokens` that `async_login` returns, and pass them back on the next start. The client refreshes 30 seconds before the access token expires, retries a request once after a 401, and calls `on_token_refresh` after a login and after every rotation.
 
 ```python
+from datetime import UTC, datetime, timedelta
+
 from aiofarmad import FarmadClient
 
 
 async def run(stored_access: str, stored_refresh: str) -> None:
+    start_of_today = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
+    end_of_today = start_of_today + timedelta(days=1)
+
     async def save_tokens(access_token: str, refresh_token: str | None) -> None:
         await write_tokens_somewhere(access_token, refresh_token)
 
@@ -77,13 +82,21 @@ async def run(stored_access: str, stored_refresh: str) -> None:
         )
 ```
 
-## Pharmacists and permissions
+## Client options
+
+`FarmadClient` takes an optional `aiohttp.ClientSession` as its first argument. An injected session stays owned by the caller, and the client closes only a session it created. `request_timeout` sets the per-request timeout in seconds and defaults to 30. Use the client as an async context manager or call `async_close` when done.
+
+The `account_id` and `patient_id` properties come from the current access token. Methods that take an optional `account_id` or `patient_id` fall back to them and raise `FarmadAuthenticationError` when neither is available.
+
+## Pharmacies and permissions
 
 Every pharmacy-scoped call takes an apb number, the identifier of one pharmacy. An account only has roles at pharmacies it has been linked to through the app's self-onboarding, which the library exposes as well:
 
 ```python
 linked = await client.async_link_pharmacy("343602")
 ```
+
+The call returns `True` on success. A refused link raises instead of returning `False`.
 
 Calls against a pharmacy the account has no role at raise `FarmadAuthorizationError`.
 
@@ -99,6 +112,8 @@ Calls against a pharmacy the account has no role at raise `FarmadAuthorizationEr
 | `async_get_medication_nondaily_products(apb, day=...)` | Medications taken outside the daily scheme |
 | `async_get_conversations(apb)` | Conversations with the pharmacy |
 | `async_get_conversation_messages(apb, customer_account_id)` | Messages in one conversation |
+| `async_get_product_in_apb(apb, cnk)` | One product by its CNK at one pharmacy, or `None` |
+| `async_get_product_in_apb_by_gtin(apb, gtin)` | One product by its GTIN barcode at one pharmacy, or `None` |
 | `async_search_products_in_apb(apb, query)` | The products at one pharmacy matching a search term |
 | `async_get_kava_product(cnk)` | The reimbursement data and official patient links of one product |
 | `async_get_medication_scheme_for_product(apb, cnk)` | The scheme entries of one product for the patient |
@@ -112,6 +127,8 @@ Calls against a pharmacy the account has no role at raise `FarmadAuthorizationEr
 Reading conversations and messages is one half of the messaging service. The other half is the compose flow: one draft per account and pharmacy, with text, attachments, and a send that publishes it as a message the pharmacy sees.
 
 ```python
+from pathlib import Path
+
 async with FarmadClient(access_token=..., refresh_token=...) as client:
     draft = await client.async_get_message_draft("343602")
     if draft is None:
@@ -123,7 +140,7 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
     await client.async_send_message_draft("343602", draft.id)
 ```
 
-Sending consumes the draft: the next `async_get_message_draft` answers `None` until a new one is saved. `async_upload_message_attachment` returns the attachment id. The service accepts pdf attachments only and answers 500 for any other content type, so the content type parameter defaults to `application/pdf`. `async_delete_message_attachment` removes one attachment by its id, and `async_mark_message_as_read` marks one message in a conversation as read.
+Sending consumes the draft: the next `async_get_message_draft` answers `None` until a new one is saved. `async_upload_message_attachment` returns the attachment id. The service accepts pdf attachments only and answers any other content type with a 500, raised as `FarmadCommunicationError`, so the content type parameter defaults to `application/pdf`. `async_delete_message_attachment` removes one attachment by its id, and `async_mark_message_as_read` marks one message in a conversation as read.
 
 ## Ordering
 
@@ -144,7 +161,9 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
     )
 ```
 
-Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there answers 400. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
+`async_save_draft_basket` returns the draft id. `async_update_draft_basket` replaces the lines of an existing draft and `async_clear_draft_basket` deletes it.
+
+Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadCommunicationError` with `status` 400. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
 
 ## Prescriptions
 
@@ -160,17 +179,19 @@ Until Farmad changes the platform, prescriptions work in the web app only.
 
 ## Errors
 
-| Exception | Meaning |
-| --- | --- |
-| `FarmadAuthenticationError` | Credentials or tokens were rejected |
-| `FarmadMfaRequiredError` | The login needed a one-time code and no otp provider was passed |
-| `FarmadAuthorizationError` | The account has no role at this pharmacy |
-| `FarmadEhealthAuthorizationRequiredError` | The eHealth consent is missing |
-| `FarmadCommunicationError` | The API is unreachable or answered with a failure |
-| `FarmadTimeoutError` | A request exceeded the configured timeout |
-| `FarmadInvalidResponseError` | A response payload was unusable |
-| `FarmadNotFoundError` | The requested object does not exist |
-| `FarmadClientClosedError` | The client was closed |
+Every exception derives from `FarmadError`, which carries the HTTP `status` when one applies.
+
+| Exception | Parent | Meaning |
+| --- | --- | --- |
+| `FarmadAuthenticationError` | `FarmadError` | Credentials or tokens were rejected, or no account or patient id is known |
+| `FarmadMfaRequiredError` | `FarmadAuthenticationError` | The login needed a one-time code and no otp provider was passed |
+| `FarmadAuthorizationError` | `FarmadError` | The account has no role at this pharmacy (403) |
+| `FarmadEhealthAuthorizationRequiredError` | `FarmadError` | The eHealth consent is missing |
+| `FarmadCommunicationError` | `FarmadError` | The API is unreachable or answered with a failure |
+| `FarmadTimeoutError` | `FarmadCommunicationError` | A request exceeded the configured timeout |
+| `FarmadInvalidResponseError` | `FarmadCommunicationError` | A response payload was unusable |
+| `FarmadNotFoundError` | `FarmadCommunicationError` | The requested object does not exist (404) |
+| `FarmadClientClosedError` | `FarmadError` | The client was closed |
 
 ## Development
 
