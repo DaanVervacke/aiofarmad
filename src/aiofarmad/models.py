@@ -417,11 +417,3 @@ class Prescription:
 
     prescription_id: str = ""
     raw: dict[str, Any] | None = None
-
-
-@dataclass(frozen=True, slots=True)
-class PharmacyLinkResult:
-    """The outcome of a pharmacy self-onboarding request."""
-
-    apb: str
-    accepted: bool
