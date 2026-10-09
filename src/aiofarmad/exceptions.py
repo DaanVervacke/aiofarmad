@@ -21,6 +21,10 @@ class FarmadAuthenticationError(FarmadError):
     """Login failed because the credentials or tokens were rejected."""
 
 
+class FarmadMissingIdentifierError(FarmadAuthenticationError):
+    """No account or patient id was passed and the current token carries none."""
+
+
 class FarmadMfaRequiredError(FarmadAuthenticationError):
     """The account requires a one-time code and no otp provider was passed to supply it."""
 

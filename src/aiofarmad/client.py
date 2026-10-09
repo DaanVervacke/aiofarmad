@@ -82,6 +82,7 @@ from .exceptions import (
     FarmadAuthenticationError,
     FarmadClientClosedError,
     FarmadEhealthAuthorizationRequiredError,
+    FarmadMissingIdentifierError,
     FarmadNotFoundError,
 )
 from .models import (
@@ -707,7 +708,7 @@ class FarmadClient:
         """Return the value or raise when it cannot be resolved."""
         if not value:
             msg = f"{name} is required: pass it explicitly or log in first"
-            raise FarmadAuthenticationError(msg)
+            raise FarmadMissingIdentifierError(msg)
         return value
 
     def _assert_open(self) -> None:

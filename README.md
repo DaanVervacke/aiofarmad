@@ -86,7 +86,7 @@ async def run(stored_access: str, stored_refresh: str) -> None:
 
 `FarmadClient` takes an optional `aiohttp.ClientSession` as its first argument. An injected session stays owned by the caller, and the client closes only a session it created. `request_timeout` sets the per-request timeout in seconds and defaults to 30. Use the client as an async context manager or call `async_close` when done.
 
-The `account_id` and `patient_id` properties come from the current access token. Methods that take an optional `account_id` or `patient_id` fall back to them and raise `FarmadAuthenticationError` when neither is available.
+The `account_id` and `patient_id` properties come from the current access token. Methods that take an optional `account_id` or `patient_id` fall back to them and raise `FarmadMissingIdentifierError`, a subclass of `FarmadAuthenticationError`, when neither is available.
 
 ## Pharmacies and permissions
 
@@ -186,8 +186,9 @@ Every exception derives from `FarmadError`, which carries the HTTP `status` when
 
 | Exception | Parent | Meaning |
 | --- | --- | --- |
-| `FarmadAuthenticationError` | `FarmadError` | Credentials or tokens were rejected, or no account or patient id is known |
+| `FarmadAuthenticationError` | `FarmadError` | Credentials or tokens were rejected |
 | `FarmadMfaRequiredError` | `FarmadAuthenticationError` | The login needed a one-time code and no otp provider was passed |
+| `FarmadMissingIdentifierError` | `FarmadAuthenticationError` | No account or patient id was passed and the token carries none |
 | `FarmadAuthorizationError` | `FarmadError` | The account has no role at this pharmacy (403) |
 | `FarmadEhealthAuthorizationRequiredError` | `FarmadError` | The eHealth consent is missing |
 | `FarmadCommunicationError` | `FarmadError` | The API is unreachable or answered with a failure |

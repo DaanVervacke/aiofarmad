@@ -37,6 +37,7 @@ when the pharmacy still has to accept it. A refused link raises.
 Reads that need a patient id or an account id default to the
 ``patient_id`` and ``account_id`` properties, which come from the access
 token. When neither is available the call raises
+:class:`aiofarmad.FarmadMissingIdentifierError`, a subclass of
 :class:`aiofarmad.FarmadAuthenticationError`.
 
 ``FarmadClient`` takes an optional ``aiohttp.ClientSession`` as its first

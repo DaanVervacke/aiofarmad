@@ -22,6 +22,7 @@ from aiofarmad import (
     FarmadCommunicationError,
     FarmadEhealthAuthorizationRequiredError,
     FarmadInvalidResponseError,
+    FarmadMissingIdentifierError,
     FarmadNotFoundError,
 )
 
@@ -164,8 +165,16 @@ async def test_get_account_without_any_id_raises() -> None:
                 access_token=make_jwt(account_id=""),
                 refresh_token=REFRESH,
             )
-            with pytest.raises(FarmadAuthenticationError, match="account_id is required"):
+            with pytest.raises(FarmadMissingIdentifierError, match="account_id is required") as err:
                 await client.async_get_account()
+    assert isinstance(err.value, FarmadAuthenticationError)
+
+
+async def test_get_patient_without_any_id_raises() -> None:
+    client = FarmadClient(access_token=make_jwt(patient_id=None), refresh_token=REFRESH)
+    with pytest.raises(FarmadMissingIdentifierError, match="patient_id is required"):
+        await client.async_get_patient()
+    await client.async_close()
 
 
 async def test_claims_default_account_and_patient() -> None:
