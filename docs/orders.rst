@@ -12,19 +12,24 @@ before the pharmacy processes it.
 
    async with FarmadClient(access_token=..., refresh_token=...) as client:
        draft_id = await client.async_save_draft_basket("343602", products=products)
-       await client.async_submit_basket(
+       if draft_id is None:
+           msg = "the pharmacy returned no draft id"
+           raise RuntimeError(msg)
+       order_id = await client.async_submit_basket(
            "343602",
            draft_id,
            products=products,
            unit_prices=(("1234567", 4.95),),
        )
-       baskets = await client.async_get_baskets("343602")
-       await client.async_cancel_basket("343602", baskets[-1].id)
+       if order_id is not None:
+           await client.async_cancel_basket("343602", order_id)
 
 Submitting an order is a real transaction with the pharmacy. The pharmacy
 sees it, and someone pays or cancels it.
 
-``async_save_draft_basket`` returns the draft id. ``async_update_draft_basket``
+``async_save_draft_basket`` returns the draft id and ``async_submit_basket``
+returns the order id. Both answer ``None`` when the response carries no id.
+``async_update_draft_basket``
 replaces the lines of an existing draft, ``async_clear_draft_basket`` deletes
 it, and ``async_get_draft_basket`` reads it back or answers ``None``.
 

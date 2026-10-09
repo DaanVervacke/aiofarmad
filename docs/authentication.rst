@@ -9,8 +9,8 @@ refresh token rotates on every use.
 ``async_login`` returns a :class:`aiofarmad.FarmadTokens`. Store its
 ``access_token`` and ``refresh_token`` and pass them back on the next start.
 The client refreshes 30 seconds before the access token expires, retries a
-request once after a 401, and calls ``on_token_refresh`` after a login and
-after every rotation. A stored pair logs in without the one-time-code step,
+request once after a 401 when it holds a refresh token, and calls
+``on_token_refresh`` after a login and after every rotation. A stored pair logs in without the one-time-code step,
 because the refresh token keeps the session alive.
 
 .. code-block:: python
