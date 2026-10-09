@@ -1032,3 +1032,15 @@ async def test_get_baskets_with_a_non_object_answer_is_empty(body: str) -> None:
             baskets = await make_client(session).async_get_baskets(APB)
     assert baskets == ()
 
+
+async def test_not_found_after_a_refresh_is_none() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(catalog_url(f"/api/catalog/products/0000000/{APB}"), status=401, payload={})
+            m.get(catalog_url(f"/api/catalog/products/0000000/{APB}"), status=404, payload={})
+            m.post(
+                "https://signin.procura.farmad.be/oauth/token",
+                payload={"access_token": "fresh-access", "refresh_token": "fresh-refresh"},
+            )
+            product = await make_client(session).async_get_product_in_apb(APB, "0000000")
+    assert product is None

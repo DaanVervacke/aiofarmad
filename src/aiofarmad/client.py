@@ -636,7 +636,21 @@ class FarmadClient:
         self._assert_open()
         await self._lifecycle.ensure_fresh()
         try:
-            payload = await self._request_json_authenticated(endpoint, args)
+            payload = await self._request_json_with_refresh(endpoint, args)
+        except FarmadNotFoundError:
+            if not endpoint.not_found_is_none:
+                raise
+            payload = None
+        return endpoint.parse(payload, args)
+
+    async def _request_json_with_refresh[ArgsT, ModelT](
+        self,
+        endpoint: Endpoint[ArgsT, ModelT],
+        args: ArgsT,
+    ) -> object:
+        """Request one endpoint and retry once with refreshed tokens after a 401."""
+        try:
+            return await self._request_json_authenticated(endpoint, args)
         except FarmadAuthenticationError as err:
             if endpoint.ehealth:
                 msg = (
@@ -648,12 +662,7 @@ class FarmadClient:
                 raise
             _LOGGER.debug("401 with a live token: refreshing once and retrying")
             await self._lifecycle.refresh()
-            payload = await self._request_json_authenticated(endpoint, args)
-        except FarmadNotFoundError:
-            if not endpoint.not_found_is_none:
-                raise
-            payload = None
-        return endpoint.parse(payload, args)
+            return await self._request_json_authenticated(endpoint, args)
 
     async def _request_json_authenticated[ArgsT, ModelT](
         self,
