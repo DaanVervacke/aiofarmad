@@ -75,10 +75,12 @@ def _lock_config(body: str) -> dict[str, Any]:
     if match is None:
         msg = "The hosted login page did not carry its configuration"
         raise FarmadAuthenticationError(msg)
-    decoded = base64.b64decode(match.group(1))
-    config = json.loads(decoded)
+    msg = "The hosted login page carried an unusable configuration"
+    try:
+        config = json.loads(base64.b64decode(match.group(1)))
+    except ValueError as err:
+        raise FarmadAuthenticationError(msg) from err
     if not isinstance(config, dict):
-        msg = "The hosted login page carried an unusable configuration"
         raise FarmadAuthenticationError(msg)
     return config
 
@@ -150,7 +152,11 @@ async def _post_credentials(
         headers={"User-Agent": USER_AGENT},
         allow_redirects=True,
     ) as response:
+        page_status = response.status
         login_page = await response.text()
+    if page_status != HTTPStatus.OK:
+        msg = f"The hosted login page answered {page_status}"
+        raise FarmadCommunicationError(msg, status=page_status)
 
     config = _lock_config(login_page)
     extra_params = config.get("extraParams", {})

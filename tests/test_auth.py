@@ -463,3 +463,41 @@ def _ws_fed_page() -> str:
 def _config_page(config: object) -> str:
     blob = base64.b64encode(json.dumps(config).encode()).decode()
     return f"<html><script>window.atob('{blob}');</script></html>"
+
+
+@pytest.mark.parametrize(
+    "page",
+    [
+        "<html><script>window.atob('not base64!');</script></html>",
+        f"<html><script>window.atob('{base64.b64encode(b'{not json').decode()}');</script></html>",
+        f"<html><script>window.atob('{base64.b64encode(b'\xff\xfe').decode()}');</script></html>",
+    ],
+    ids=["not_base64", "not_json", "not_utf8"],
+)
+async def test_login_rejects_an_undecodable_lock_config(page: str) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                _q(AUTHORIZE_URL),
+                status=302,
+                headers={"Location": f"/login?state={LOGIN_STATE}"},
+                body="",
+            )
+            m.get(_q(LOGIN_URL), body=page)
+            with pytest.raises(FarmadAuthenticationError, match="unusable configuration"):
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0)
+
+
+async def test_login_rejects_a_failing_login_page() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                _q(AUTHORIZE_URL),
+                status=302,
+                headers={"Location": f"/login?state={LOGIN_STATE}"},
+                body="",
+            )
+            m.get(_q(LOGIN_URL), status=503, body="")
+            with pytest.raises(FarmadCommunicationError, match="login page answered 503") as err:
+                await async_login(session, USERNAME, PASSWORD, timeout=5.0)
+    assert err.value.status == 503
