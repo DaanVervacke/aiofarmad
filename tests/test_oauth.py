@@ -5,6 +5,7 @@ import pytest
 from aioresponses import aioresponses
 
 from aiofarmad._oauth import async_request_tokens
+from aiofarmad.const import USER_AGENT
 from aiofarmad.exceptions import (
     FarmadAuthenticationError,
     FarmadCommunicationError,
@@ -94,3 +95,12 @@ async def test_request_tokens_transport_error() -> None:
             m.post(TOKEN_URL, exception=aiohttp.ClientError("boom"))
             with pytest.raises(FarmadCommunicationError):
                 await async_request_tokens(session, BODY, timeout=5.0)
+
+
+async def test_request_tokens_sends_the_app_user_agent() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(TOKEN_URL, payload={"access_token": "a", "refresh_token": "r"})
+            await async_request_tokens(session, BODY, timeout=5.0)
+            calls = next(iter(m.requests.values()))
+    assert calls[0].kwargs["headers"]["User-Agent"] == USER_AGENT

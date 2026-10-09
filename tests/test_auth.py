@@ -517,8 +517,7 @@ async def test_login_sends_browser_headers_on_every_hop() -> None:
                 for (method, url), calls in m.requests.items()
             }
     origin = "https://signin.procura.farmad.be"
-    login_hops = [headers for (_method, url), headers in sent.items() if url != TOKEN_URL]
-    assert all(headers["User-Agent"] == USER_AGENT for headers in login_hops)
+    assert all(headers["User-Agent"] == USER_AGENT for headers in sent.values())
     for url in (PASSWORD_POST_URL, WS_FED_CALLBACK_URL, OTP_CHALLENGE_URL):
         headers = sent["POST", url]
         assert headers["Content-Type"] == "application/x-www-form-urlencoded"

@@ -5,7 +5,7 @@ from typing import Any
 
 import aiohttp
 
-from .const import AUTH0_DOMAIN
+from .const import AUTH0_DOMAIN, USER_AGENT
 from .exceptions import (
     FarmadAuthenticationError,
     FarmadCommunicationError,
@@ -27,7 +27,7 @@ async def async_request_tokens(
             async with session.post(
                 TOKEN_URL,
                 json=body,
-                headers={"Accept": "application/json"},
+                headers={"Accept": "application/json", "User-Agent": USER_AGENT},
             ) as response:
                 payload = await response.json(content_type=None)
         except TimeoutError as err:
