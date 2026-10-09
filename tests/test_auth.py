@@ -11,6 +11,7 @@ from aioresponses import aioresponses
 from yarl import URL
 
 from aiofarmad._auth import async_login
+from aiofarmad.const import USER_AGENT
 from aiofarmad.exceptions import (
     FarmadAuthenticationError,
     FarmadCommunicationError,
@@ -501,3 +502,29 @@ async def test_login_rejects_a_failing_login_page() -> None:
             with pytest.raises(FarmadCommunicationError, match="login page answered 503") as err:
                 await async_login(session, USERNAME, PASSWORD, timeout=5.0)
     assert err.value.status == 503
+
+
+async def test_login_sends_browser_headers_on_every_hop() -> None:
+    async def provider() -> str:
+        return OTP
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            register_login_flow(m, mfa=True)
+            await async_login(session, USERNAME, PASSWORD, timeout=5.0, otp_provider=provider)
+            sent = {
+                (method, str(url).split("?", 1)[0]): calls[0].kwargs["headers"]
+                for (method, url), calls in m.requests.items()
+            }
+    origin = "https://signin.procura.farmad.be"
+    login_hops = [headers for (_method, url), headers in sent.items() if url != TOKEN_URL]
+    assert all(headers["User-Agent"] == USER_AGENT for headers in login_hops)
+    for url in (PASSWORD_POST_URL, WS_FED_CALLBACK_URL, OTP_CHALLENGE_URL):
+        headers = sent["POST", url]
+        assert headers["Content-Type"] == "application/x-www-form-urlencoded"
+        assert headers["Origin"] == origin
+    assert sent["POST", PASSWORD_POST_URL]["Referer"].startswith(LOGIN_URL)
+    assert sent["POST", WS_FED_CALLBACK_URL]["Referer"] == LOGIN_URL
+    assert sent["POST", OTP_CHALLENGE_URL]["Referer"] == OTP_CHALLENGE_URL
+    assert sent["GET", OTP_CHALLENGE_URL]["Referer"] == LOGIN_URL
+    assert sent["GET", RESUME_URL]["Referer"] == LOGIN_URL

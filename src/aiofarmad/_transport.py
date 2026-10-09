@@ -48,7 +48,7 @@ async def request(
     url: str,
     headers: dict[str, str] | None = None,
     json_body: dict[str, Any] | None = None,
-    form_body: aiohttp.FormData | None = None,
+    form_body: aiohttp.FormData | dict[str, str] | None = None,
     params: dict[str, str] | None = None,
     allow_redirects: bool = False,
     raise_on_error: bool = True,
