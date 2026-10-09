@@ -191,7 +191,7 @@ class FarmadClient:
 
     async def async_get_account(self, account_id: str | None = None) -> FarmadAccount:
         """Fetch the account, defaulting to the account of the current token."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         return await self._call(
             ACCOUNT,
             AccountArgs(account_id=resolved),
@@ -203,7 +203,7 @@ class FarmadClient:
 
     async def async_get_patient(self, patient_id: str | None = None) -> FarmadPatient:
         """Fetch the patient record, defaulting to the patient of the current token."""
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(PATIENT, PatientArgs(patient_id=resolved))
 
     async def async_get_pharmacy_preferences(self, apb: str) -> PharmacyPreferences:
@@ -220,7 +220,7 @@ class FarmadClient:
         language: str = "nl",
     ) -> tuple[MedicationDayScheme, ...]:
         """Fetch every day scheme in a window for one patient at one pharmacy."""
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(
             SCHEME_DAY,
             SchemeDayArgs(
@@ -241,7 +241,7 @@ class FarmadClient:
         language: str = "nl",
     ) -> tuple[MedicationNondailyProduct, ...]:
         """Fetch the nondaily medications for one patient at one pharmacy."""
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(
             SCHEME_NONDAILY,
             SchemeNondailyArgs(apb=apb, patient_id=resolved, day=day, language=language),
@@ -261,7 +261,7 @@ class FarmadClient:
         in its scheme, so the live answer is empty and the payload shape
         is unknown.
         """
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(
             SCHEME_PRODUCT,
             SchemeProductArgs(apb=apb, cnk=cnk, patient_id=resolved, language=language),
@@ -305,7 +305,7 @@ class FarmadClient:
         take: int = 50,
     ) -> tuple[CustomerBasket, ...]:
         """Fetch one page of baskets for one patient at one pharmacy."""
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(
             BASKETS,
             BasketsArgs(apb=apb, patient_id=resolved, skip=skip, take=take),
@@ -318,7 +318,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> DraftBasket | None:
         """Fetch the draft basket, or None when the account has no draft."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         return await self._call(DRAFT_BASKET, DraftArgs(apb=apb, account_id=resolved))
 
     async def async_save_draft_basket(
@@ -330,8 +330,8 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> str | None:
         """Create the draft basket with the given product lines."""
-        resolved_account = self._require(account_id or self.account_id, "account_id")
-        resolved_patient = self._require(patient_id or self.patient_id, "patient_id")
+        resolved_account = self._resolve_account_id(account_id)
+        resolved_patient = self._resolve_patient_id(patient_id)
         return await self._call(
             DRAFT_SAVE,
             DraftWriteArgs(
@@ -352,8 +352,8 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> str | None:
         """Replace the product lines of an existing draft basket."""
-        resolved_account = self._require(account_id or self.account_id, "account_id")
-        resolved_patient = self._require(patient_id or self.patient_id, "patient_id")
+        resolved_account = self._resolve_account_id(account_id)
+        resolved_patient = self._resolve_patient_id(patient_id)
         return await self._call(
             DRAFT_UPDATE,
             DraftUpdateArgs(
@@ -372,7 +372,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> None:
         """Delete the draft basket."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         await self._call(DRAFT_CLEAR, DraftArgs(apb=apb, account_id=resolved))
 
     async def async_submit_basket(
@@ -392,7 +392,7 @@ class FarmadClient:
         allow online payments. Passing pay_online True against such a
         pharmacy answers 400.
         """
-        resolved = self._require(patient_id or self.patient_id, "patient_id")
+        resolved = self._resolve_patient_id(patient_id)
         return await self._call(
             SUBMIT_BASKET,
             SubmitBasketArgs(
@@ -483,7 +483,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> MessageDraft | None:
         """Fetch the message draft, or None when no draft is open."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         return await self._call(MESSAGE_DRAFT, MessageDraftArgs(apb=apb, account_id=resolved))
 
     async def async_save_message_draft(
@@ -495,7 +495,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> MessageDraft | None:
         """Create a message draft and return it, or None on an empty answer."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         return await self._call(
             MESSAGE_DRAFT_SAVE,
             MessageDraftSaveArgs(apb=apb, account_id=resolved, body=body, reference=reference),
@@ -511,7 +511,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> None:
         """Replace the text of an existing message draft."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         await self._call(
             MESSAGE_DRAFT_UPDATE,
             MessageDraftUpdateArgs(
@@ -527,7 +527,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> None:
         """Send one message draft to the pharmacy as a new message."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         await self._call(
             MESSAGE_DRAFT_SEND,
             MessageDraftIdArgs(apb=apb, account_id=resolved, draft_id=draft_id),
@@ -549,7 +549,7 @@ class FarmadClient:
         answers 500 instead of a clean refusal, so the content type
         defaults to application/pdf.
         """
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         return await self._call(
             MESSAGE_ATTACHMENT_UPLOAD,
             MessageAttachmentUploadArgs(
@@ -570,7 +570,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> None:
         """Remove one attachment from the message draft."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         await self._call(
             MESSAGE_ATTACHMENT_DELETE,
             MessageAttachmentDeleteArgs(apb=apb, account_id=resolved, attachment_id=attachment_id),
@@ -584,7 +584,7 @@ class FarmadClient:
         account_id: str | None = None,
     ) -> None:
         """Mark one message in a conversation as read."""
-        resolved = self._require(account_id or self.account_id, "account_id")
+        resolved = self._resolve_account_id(account_id)
         await self._call(
             MESSAGE_MARK_READ,
             MessageMarkReadArgs(apb=apb, account_id=resolved, message_id=message_id),
@@ -621,7 +621,7 @@ class FarmadClient:
 
     async def async_link_pharmacy(self, apb: str) -> bool:
         """Link the account to one pharmacy through the app's self-onboarding."""
-        resolved = self._require(self.account_id, "account_id")
+        resolved = self._resolve_account_id(None)
         return await self._call(
             SELF_ONBOARDING,
             SelfOnboardingArgs(account_id=resolved, apb=apb),
@@ -689,6 +689,14 @@ class FarmadClient:
             form_body=endpoint.form_body(args) if endpoint.form_body is not None else None,
             timeout=self._request_timeout,
         )
+
+    def _resolve_account_id(self, account_id: str | None) -> str:
+        """Return the given account id or the one carried by the current token."""
+        return self._require(account_id or self.account_id, "account_id")
+
+    def _resolve_patient_id(self, patient_id: str | None) -> str:
+        """Return the given patient id or the one carried by the current token."""
+        return self._require(patient_id or self.patient_id, "patient_id")
 
     def _require(self, value: str | None, name: str) -> str:
         """Return the value or raise when it cannot be resolved."""
