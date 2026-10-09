@@ -21,6 +21,7 @@ from aiofarmad import (
     FarmadClientClosedError,
     FarmadCommunicationError,
     FarmadEhealthAuthorizationRequiredError,
+    FarmadInvalidResponseError,
     FarmadNotFoundError,
 )
 
@@ -984,3 +985,50 @@ async def test_get_prescription_not_found_is_none() -> None:
             client = FarmadClient(session, access_token=ACCESS, refresh_token=REFRESH)
             prescription = await client.async_get_prescription("BEP10S18PLM4")
     assert prescription is None
+
+
+@pytest.mark.parametrize("body", ["", "[]", '"text"'], ids=["empty", "list", "string"])
+@pytest.mark.parametrize(
+    ("url", "call"),
+    [
+        (
+            alb_url(f"/usermanagement/api/account/{ACCOUNT_ID}"),
+            lambda client: client.async_get_account(),
+        ),
+        (
+            alb_url(f"/usermanagement/api/organization/{APB}"),
+            lambda client: client.async_get_organization(APB),
+        ),
+        (
+            alb_url(f"/patientmanagement/api/patients/{PATIENT_ID}"),
+            lambda client: client.async_get_patient(),
+        ),
+        (
+            alb_url(f"/customerbasket/api/{APB}/pharmacypreferences/for-customer"),
+            lambda client: client.async_get_pharmacy_preferences(APB),
+        ),
+        (
+            catalog_url("/api/catalog/products/kava/3093242"),
+            lambda client: client.async_get_kava_product("3093242"),
+        ),
+    ],
+    ids=["account", "organization", "patient", "pharmacy_preferences", "kava_product"],
+)
+async def test_single_object_endpoint_rejects_a_non_object_answer(
+    url: Any, call: Callable[[FarmadClient], Any], body: str
+) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(url, body=body)
+            with pytest.raises(FarmadInvalidResponseError, match="not a JSON object"):
+                await call(make_client(session))
+
+
+@pytest.mark.parametrize("body", ["", "[]"], ids=["empty", "list"])
+async def test_get_baskets_with_a_non_object_answer_is_empty(body: str) -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(alb_url(f"/customerbasket/api/{APB}/customerbaskets"), body=body)
+            baskets = await make_client(session).async_get_baskets(APB)
+    assert baskets == ()
+

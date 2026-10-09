@@ -8,6 +8,7 @@ from typing import Any
 import aiohttp
 
 from .const import ALB_BASE_URL, CATALOG_BASE_URL, EHEALTH_BASE_URL
+from .exceptions import FarmadInvalidResponseError
 from .models import (
     BasketPayment,
     CatalogProduct,
@@ -390,7 +391,7 @@ ACCOUNT: Endpoint[AccountArgs, FarmadAccount] = Endpoint(
     url=lambda args: f"/usermanagement/api/account/{args.account_id}",
     version="8.12",
     params=lambda _args: {},
-    parse=lambda payload, _args: parse_account(payload),
+    parse=lambda payload, _args: parse_account(_object(payload)),
 )
 
 ORGANIZATION: Endpoint[PharmacyArgs, Pharmacy] = Endpoint(
@@ -399,7 +400,7 @@ ORGANIZATION: Endpoint[PharmacyArgs, Pharmacy] = Endpoint(
     url=lambda args: f"/usermanagement/api/organization/{args.apb}",
     version="8.12",
     params=lambda _args: {},
-    parse=lambda payload, _args: parse_organization(payload),
+    parse=lambda payload, _args: parse_organization(_object(payload)),
 )
 
 PATIENT: Endpoint[PatientArgs, FarmadPatient] = Endpoint(
@@ -408,7 +409,7 @@ PATIENT: Endpoint[PatientArgs, FarmadPatient] = Endpoint(
     url=lambda args: f"/patientmanagement/api/patients/{args.patient_id}",
     version="2.0",
     params=lambda _args: {},
-    parse=lambda payload, _args: parse_patient(payload),
+    parse=lambda payload, _args: parse_patient(_object(payload)),
 )
 
 PHARMACY_PREFERENCES: Endpoint[PharmacyArgs, PharmacyPreferences] = Endpoint(
@@ -417,7 +418,7 @@ PHARMACY_PREFERENCES: Endpoint[PharmacyArgs, PharmacyPreferences] = Endpoint(
     url=lambda args: f"/customerbasket/api/{args.apb}/pharmacypreferences/for-customer",
     version="1.0",
     params=lambda _args: {},
-    parse=lambda payload, _args: parse_pharmacy_preferences(payload),
+    parse=lambda payload, _args: parse_pharmacy_preferences(_object(payload)),
 )
 
 SCHEME_DAY: Endpoint[SchemeDayArgs, tuple[MedicationDayScheme, ...]] = Endpoint(
@@ -489,7 +490,7 @@ BASKETS: Endpoint[BasketsArgs, tuple[CustomerBasket, ...]] = Endpoint(
         "Skip": str(args.skip),
         "Take": str(args.take),
     },
-    parse=lambda payload, _args: parse_baskets(payload),
+    parse=lambda payload, _args: parse_baskets(payload) if isinstance(payload, dict) else (),
 )
 
 DRAFT_BASKET: Endpoint[DraftArgs, DraftBasket | None] = Endpoint(
@@ -690,7 +691,7 @@ KAVA_PRODUCT: Endpoint[KavaProductArgs, KavaProduct] = Endpoint(
     version="5.3",
     base_url=CATALOG_BASE_URL,
     params=lambda _args: {},
-    parse=lambda payload, _args: parse_kava_product(payload),
+    parse=lambda payload, _args: parse_kava_product(_object(payload)),
 )
 
 
@@ -930,6 +931,13 @@ PRESCRIPTION: Endpoint[PrescriptionArgs, Prescription | None] = Endpoint(
     not_found_is_none=True,
     ehealth=True,
 )
+
+
+def _object(payload: Any) -> dict[str, Any]:
+    if not isinstance(payload, dict):
+        msg = "The Farmad API answer is not a JSON object"
+        raise FarmadInvalidResponseError(msg)
+    return payload
 
 
 def _parse_messages(payload: Any) -> tuple[FarmadMessage, ...]:
