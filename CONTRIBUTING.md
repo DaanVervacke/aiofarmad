@@ -47,7 +47,7 @@ Captured payloads contain health data. Raw captures stay in `captures/`, which i
 ## Test and repository rules
 
 - Reuse `register_login_flow` from `tests/conftest.py` for login-flow tests.
-- Pytest uses `asyncio_mode = auto`. Warnings are errors except the configured resource warnings.
+- Pytest uses `asyncio_mode = auto`. Every warning is an error, including an unclosed session.
 - Ruff uses `select = ["ALL"]` with the documented ignore list in `pyproject.toml`. mypy runs in strict mode.
 - Do not add narrative code comments. Docstrings document the public API.
 - Never log tokens, credentials, or OAuth state.

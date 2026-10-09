@@ -106,11 +106,7 @@ ignore = [
 minversion = "9.0"
 testpaths = ["tests"]
 addopts = ["-ra", "--strict-markers", "--strict-config"]
-filterwarnings = [
-    "error",
-    "ignore:Unclosed client session:ResourceWarning",
-    "ignore:Unclosed connector:ResourceWarning",
-]
+filterwarnings = ["error"]
 asyncio_mode = "auto"
 
 [tool.coverage.run]
