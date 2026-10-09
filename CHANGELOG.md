@@ -6,7 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Before 1.0, breaking changes ship as minor bumps.
 
-## [Unreleased]
+## [0.6.0] - 2026-10-09
 
 ### Breaking Changes
 
@@ -30,6 +30,10 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Raise a dedicated error for a missing account or patient id
 - Pass a redirect url when submitting an online-paid order
+
+### Maintenance
+
+- Bump release-drafter/release-drafter (#2)
 
 ## [0.5.0] - 2026-10-02
 
@@ -79,7 +83,7 @@ Before 1.0, breaking changes ship as minor bumps.
 - Migrate the release drafter config and label workflows
 - Manage the changelog with git-cliff
 
-[Unreleased]: https://github.com/DaanVervacke/aiofarmad/compare/v0.5.0...HEAD
+[0.6.0]: https://github.com/DaanVervacke/aiofarmad/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/DaanVervacke/aiofarmad/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/DaanVervacke/aiofarmad/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/DaanVervacke/aiofarmad/compare/v0.2.0...v0.3.0
