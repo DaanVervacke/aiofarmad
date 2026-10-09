@@ -3,6 +3,7 @@
 import logging
 from collections.abc import Awaitable, Callable
 from datetime import date, datetime
+from http import HTTPStatus
 from typing import Self
 
 import aiohttp
@@ -75,7 +76,7 @@ from ._endpoints import (
     SubmitBasketArgs,
 )
 from ._tokens import TokenLifecycle
-from ._transport import OwnedSession, request_json
+from ._transport import OwnedSession, request_json_with_status
 from .const import USER_AGENT
 from .exceptions import (
     FarmadAuthenticationError,
@@ -619,9 +620,13 @@ class FarmadClient:
             PrescriptionArgs(prescription_id=prescription_id, language=language),
         )
 
-    async def async_link_pharmacy(self, apb: str) -> bool:
-        """Link the account to one pharmacy through the app's self-onboarding."""
-        resolved = self._resolve_account_id(None)
+    async def async_link_pharmacy(self, apb: str, *, account_id: str | None = None) -> bool:
+        """Link the account to one pharmacy through the app's self-onboarding.
+
+        The answer is True when the link is active right away and False
+        when the pharmacy still has to accept it. A refused link raises.
+        """
+        resolved = self._resolve_account_id(account_id)
         return await self._call(
             SELF_ONBOARDING,
             SelfOnboardingArgs(account_id=resolved, apb=apb),
@@ -636,18 +641,18 @@ class FarmadClient:
         self._assert_open()
         await self._lifecycle.ensure_fresh()
         try:
-            payload = await self._request_json_with_refresh(endpoint, args)
+            status, payload = await self._request_json_with_refresh(endpoint, args)
         except FarmadNotFoundError:
             if not endpoint.not_found_is_none:
                 raise
-            payload = None
-        return endpoint.parse(payload, args)
+            status, payload = HTTPStatus.NOT_FOUND, None
+        return endpoint.parse(status if endpoint.parse_status else payload, args)
 
     async def _request_json_with_refresh[ArgsT, ModelT](
         self,
         endpoint: Endpoint[ArgsT, ModelT],
         args: ArgsT,
-    ) -> object:
+    ) -> tuple[int, object]:
         """Request one endpoint and retry once with refreshed tokens after a 401."""
         try:
             return await self._request_json_authenticated(endpoint, args)
@@ -668,7 +673,7 @@ class FarmadClient:
         self,
         endpoint: Endpoint[ArgsT, ModelT],
         args: ArgsT,
-    ) -> object:
+    ) -> tuple[int, object]:
         """Request one endpoint with the current bearer token."""
         params = {"api-version": endpoint.version}
         params.update(endpoint.params(args))
@@ -679,7 +684,7 @@ class FarmadClient:
         }
         if endpoint.ehealth and self._ehealth_cookie:
             headers["Cookie"] = self._ehealth_cookie
-        return await request_json(
+        return await request_json_with_status(
             self._owned_session.session,
             method=endpoint.method,
             url=f"{endpoint.base_url}{endpoint.url(args)}",

@@ -3,6 +3,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime
+from http import HTTPStatus
 from typing import Any
 
 import aiohttp
@@ -280,7 +281,11 @@ class PrescriptionArgs:
 
 @dataclass(frozen=True, slots=True)
 class Endpoint[ArgsT, ModelT]:
-    """One wire contract: method, url, params, body, and the parse step."""
+    """One wire contract: method, url, params, body, and the parse step.
+
+    An endpoint with parse_status set hands the HTTP status to parse in
+    place of the body.
+    """
 
     name: str
     method: str
@@ -293,6 +298,7 @@ class Endpoint[ArgsT, ModelT]:
     form_body: Callable[[ArgsT], aiohttp.FormData] | None = None
     not_found_is_none: bool = False
     ehealth: bool = False
+    parse_status: bool = False
 
 
 def _draft_products(products: tuple[DraftProduct, ...], patient_id: str) -> list[dict[str, Any]]:
@@ -828,10 +834,6 @@ def _optional_attachment_id(payload: Any) -> str | None:
     return None
 
 
-def _accept_ok(_payload: Any, _args: Any) -> bool:
-    return True
-
-
 SELF_ONBOARDING: Endpoint[SelfOnboardingArgs, bool] = Endpoint(
     name="self_onboarding",
     method="POST",
@@ -839,5 +841,6 @@ SELF_ONBOARDING: Endpoint[SelfOnboardingArgs, bool] = Endpoint(
     version="8.12",
     params=lambda _args: {},
     json_body=lambda args: {"apb": args.apb},
-    parse=_accept_ok,
+    parse=lambda status, _args: status != HTTPStatus.ACCEPTED,
+    parse_status=True,
 )

@@ -798,7 +798,7 @@ async def test_pay_basket_denied_answers_400() -> None:
 async def test_link_pharmacy_posts_apb() -> None:
     async with aiohttp.ClientSession() as session:
         with aioresponses() as m:
-            m.post(alb_url(f"/usermanagement/api/account/{ACCOUNT_ID}/self-onboarding"), payload={})
+            m.post(alb_url(f"/usermanagement/api/account/{ACCOUNT_ID}/self-onboarding"), body="")
             linked = await make_client(session).async_link_pharmacy("344107")
     assert linked is True
     request_log = m.requests
@@ -1044,3 +1044,25 @@ async def test_not_found_after_a_refresh_is_none() -> None:
             )
             product = await make_client(session).async_get_product_in_apb(APB, "0000000")
     assert product is None
+
+
+async def test_link_pharmacy_pending_acceptance_is_false() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                alb_url(f"/usermanagement/api/account/{ACCOUNT_ID}/self-onboarding"),
+                status=202,
+                body="",
+            )
+            linked = await make_client(session).async_link_pharmacy("344107")
+    assert linked is False
+
+
+async def test_link_pharmacy_with_explicit_account_id() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(alb_url("/usermanagement/api/account/other-account/self-onboarding"), body="")
+            linked = await make_client(session).async_link_pharmacy(
+                "344107", account_id="other-account"
+            )
+    assert linked is True

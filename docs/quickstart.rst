@@ -31,8 +31,8 @@ when you select it, and keep the apb number you passed for later calls.
 
    linked = await client.async_link_pharmacy("343602")
 
-The call returns ``True`` on success. A refused link raises instead of
-returning ``False``.
+The call returns ``True`` when the link is active right away and ``False``
+when the pharmacy still has to accept it. A refused link raises.
 
 Reads that need a patient id or an account id default to the
 ``patient_id`` and ``account_id`` properties, which come from the access

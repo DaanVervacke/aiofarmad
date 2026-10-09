@@ -96,7 +96,7 @@ Every pharmacy-scoped call takes an apb number, the identifier of one pharmacy. 
 linked = await client.async_link_pharmacy("343602")
 ```
 
-The call returns `True` on success. A refused link raises instead of returning `False`.
+The call returns `True` when the link is active right away and `False` when the pharmacy still has to accept it. A refused link raises.
 
 Calls against a pharmacy the account has no role at raise `FarmadAuthorizationError`.
 

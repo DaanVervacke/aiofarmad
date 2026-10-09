@@ -132,6 +132,31 @@ async def request_json(
     timeout: float = 30.0,  # noqa: ASYNC109
 ) -> Any:
     """Make a request and return the parsed JSON body."""
+    _status, payload = await request_json_with_status(
+        session,
+        method=method,
+        url=url,
+        headers=headers,
+        json_body=json_body,
+        form_body=form_body,
+        params=params,
+        timeout=timeout,
+    )
+    return payload
+
+
+async def request_json_with_status(
+    session: aiohttp.ClientSession,
+    *,
+    method: str,
+    url: str,
+    headers: dict[str, str] | None = None,
+    json_body: dict[str, Any] | None = None,
+    form_body: aiohttp.FormData | None = None,
+    params: dict[str, str] | None = None,
+    timeout: float = 30.0,  # noqa: ASYNC109
+) -> tuple[int, Any]:
+    """Make a request and return the HTTP status with the parsed JSON body."""
     async with request(
         session,
         method=method,
@@ -142,7 +167,7 @@ async def request_json(
         params=params,
         timeout=timeout,
     ) as response:
-        return await json_payload(response)
+        return response.status, await json_payload(response)
 
 
 async def json_payload(response: aiohttp.ClientResponse) -> Any:
