@@ -387,12 +387,14 @@ class FarmadClient:
         comment: str | None = None,
         unit_prices: tuple[tuple[str, float], ...] = (),
         pay_online: bool = False,
+        redirect_url: str | None = None,
     ) -> str | None:
         """Submit a draft basket as an order at one pharmacy.
 
         Paying at pickup is the default because most pharmacies do not
         allow online payments. Passing pay_online True against such a
-        pharmacy answers 400.
+        pharmacy answers 400. The redirect url is where the payment
+        provider sends the browser back after an online payment.
         """
         resolved = self._resolve_patient_id(patient_id)
         return await self._call(
@@ -405,6 +407,7 @@ class FarmadClient:
                 comment=comment,
                 unit_prices=unit_prices,
                 pay_online=pay_online,
+                redirect_url=redirect_url,
             ),
         )
 

@@ -166,7 +166,7 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
 
 `async_save_draft_basket` returns the draft id and `async_submit_basket` returns the order id. Both answer `None` when the response carries no id. `async_update_draft_basket` replaces the lines of an existing draft and `async_clear_draft_basket` deletes it.
 
-Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadCommunicationError` with `status` 400. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
+Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadCommunicationError` with `status` 400. With `pay_online=True`, `redirect_url` sets where the payment provider sends the browser back after paying. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
 
 ## Prescriptions
 

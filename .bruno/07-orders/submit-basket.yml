@@ -22,6 +22,6 @@ settings:
   followRedirects: false
   maxRedirects: 0
 docs: |-
-  Submits a draft basket as an order. This is a real transaction with the pharmacy.
+  Submits a draft basket as an order. This is a real transaction with the pharmacy. With preferPaymentAtPickup false, redirectUrl is where the payment provider sends the browser back.
 
   Mirrors FarmadClient::async_submit_basket.

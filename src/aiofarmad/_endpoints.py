@@ -219,6 +219,7 @@ class SubmitBasketArgs(PharmacyArgs):
     comment: str | None = None
     unit_prices: tuple[tuple[str, float], ...] = ()
     pay_online: bool = False
+    redirect_url: str | None = None
 
     def __post_init__(self) -> None:
         _require_non_empty(self, "apb", "basket_id", "patient_id")
@@ -477,7 +478,7 @@ SUBMIT_BASKET: Endpoint[SubmitBasketArgs, str | None] = Endpoint(
         "products": _draft_products(args.products, args.patient_id),
         "unitPrices": [{"productCnk": cnk, "price": price} for cnk, price in args.unit_prices],
         "preferPaymentAtPickup": not args.pay_online,
-        "redirectUrl": None,
+        "redirectUrl": args.redirect_url,
     },
     parse=lambda payload, _args: _optional_id(payload),
 )

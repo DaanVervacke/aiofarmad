@@ -376,6 +376,7 @@ async def test_submit_basket_sends_order_body() -> None:
                 comment="repeat order",
                 unit_prices=(("1122334", 4.95),),
                 pay_online=True,
+                redirect_url="https://example.com/paid",
             )
     assert basket_id == "basket-9"
     request_log = m.requests
@@ -388,6 +389,21 @@ async def test_submit_basket_sends_order_body() -> None:
     assert body["commentCustomer"] == "repeat order"
     assert body["preferPaymentAtPickup"] is False
     assert body["unitPrices"] == [{"productCnk": "1122334", "price": 4.95}]
+    assert body["redirectUrl"] == "https://example.com/paid"
+
+
+async def test_submit_basket_without_redirect_url_sends_null() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.patch(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/draft-9/submit"),
+                payload={"id": "basket-9"},
+            )
+            await make_client(session).async_submit_basket(APB, "draft-9")
+            calls = next(iter(m.requests.values()))
+    body = calls[0].kwargs["json"]
+    assert body["preferPaymentAtPickup"] is True
+    assert body["redirectUrl"] is None
 
 
 async def test_cancel_basket() -> None:
