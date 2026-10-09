@@ -12,11 +12,24 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Drop the unused PharmacyLinkResult model
 
+### Bug Fixes
+
+- Reject non-object answers from single-object endpoints
+- Map an undecodable or failing login page to library errors
+- Keep not-found-is-none after a token refresh retry
+- Report a pending pharmacy link and accept an explicit account id
+- Send the app user agent on token requests
+
 ### Documentation
 
 - Complete the readme against the current client
 - Correct the guides and add reading and error pages
 - Fix template, contributor, and changelog drift
+
+### Features
+
+- Raise a dedicated error for a missing account or patient id
+- Pass a redirect url when submitting an online-paid order
 
 ## [0.5.0] - 2026-10-02
 
