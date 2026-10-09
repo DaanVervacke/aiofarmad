@@ -55,6 +55,13 @@ DEFAULT_LANGUAGE = "nl"
 DEFAULT_PAGE_LIMIT = 25
 
 
+def _require_non_empty(args: object, *fields: str) -> None:
+    for field in fields:
+        if not getattr(args, field):
+            msg = f"{field} must not be empty"
+            raise ValueError(msg)
+
+
 @dataclass(frozen=True, slots=True)
 class AccountArgs:
     """The account to act on."""
@@ -69,9 +76,7 @@ class PharmacyArgs:
     apb: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb")
 
 
 @dataclass(frozen=True, slots=True)
@@ -81,9 +86,7 @@ class PatientArgs:
     patient_id: str
 
     def __post_init__(self) -> None:
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "patient_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -96,12 +99,7 @@ class SchemeDayArgs(PatientArgs):
     language: str = DEFAULT_LANGUAGE
 
     def __post_init__(self) -> None:
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "patient_id", "apb")
         for stamp in (self.from_, self.until):
             if stamp.tzinfo is None:
                 msg = "timezone-aware datetimes required"
@@ -120,12 +118,7 @@ class SchemeNondailyArgs(PatientArgs):
     language: str = DEFAULT_LANGUAGE
 
     def __post_init__(self) -> None:
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "patient_id", "apb")
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,15 +130,7 @@ class SchemeProductArgs(PatientArgs):
     language: str = DEFAULT_LANGUAGE
 
     def __post_init__(self) -> None:
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.cnk:
-            msg = "cnk must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "patient_id", "apb", "cnk")
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,9 +141,7 @@ class ConversationsArgs(PharmacyArgs):
     page: int = 0
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb")
         if self.limit < 1 or self.page < 0:
             msg = "limit must be positive and page must not be negative"
             raise ValueError(msg)
@@ -171,14 +154,9 @@ class ConversationMessagesArgs(ConversationsArgs):
     customer_account_id: str = ""
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "customer_account_id")
         if self.limit < 1 or self.page < 0:
             msg = "limit must be positive and page must not be negative"
-            raise ValueError(msg)
-        if not self.customer_account_id:
-            msg = "customer_account_id must not be empty"
             raise ValueError(msg)
 
 
@@ -191,12 +169,7 @@ class BasketsArgs(PharmacyArgs):
     take: int = 50
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "patient_id")
         if self.skip < 0 or self.take < 1:
             msg = "skip must not be negative and take must be positive"
             raise ValueError(msg)
@@ -209,12 +182,7 @@ class DraftArgs(PharmacyArgs):
     account_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -225,15 +193,7 @@ class DraftWriteArgs(DraftArgs):
     products: tuple[DraftProduct, ...] = ()
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "patient_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -245,18 +205,7 @@ class DraftUpdateArgs(DraftArgs):
     products: tuple[DraftProduct, ...] = ()
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
-        if not self.basket_id:
-            msg = "basket_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "patient_id", "basket_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -271,15 +220,7 @@ class SubmitBasketArgs(PharmacyArgs):
     pay_online: bool = False
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.basket_id:
-            msg = "basket_id must not be empty"
-            raise ValueError(msg)
-        if not self.patient_id:
-            msg = "patient_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "basket_id", "patient_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -289,12 +230,7 @@ class BasketIdArgs(PharmacyArgs):
     basket_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.basket_id:
-            msg = "basket_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "basket_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -305,15 +241,7 @@ class PayBasketArgs(PharmacyArgs):
     redirect_url: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.basket_id:
-            msg = "basket_id must not be empty"
-            raise ValueError(msg)
-        if not self.redirect_url:
-            msg = "redirect_url must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "basket_id", "redirect_url")
 
 
 @dataclass(frozen=True, slots=True)
@@ -323,12 +251,7 @@ class SelfOnboardingArgs(AccountArgs):
     apb: str
 
     def __post_init__(self) -> None:
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "account_id", "apb")
 
 
 @dataclass(frozen=True, slots=True)
@@ -336,7 +259,7 @@ class PrescriptionsArgs:
     """One page of prescriptions."""
 
     page: int = 0
-    language: str = "nl"
+    language: str = DEFAULT_LANGUAGE
 
     def __post_init__(self) -> None:
         if self.page < 0:
@@ -349,12 +272,10 @@ class PrescriptionArgs:
     """One prescription, addressed by its Recip-e id."""
 
     prescription_id: str
-    language: str = "nl"
+    language: str = DEFAULT_LANGUAGE
 
     def __post_init__(self) -> None:
-        if not self.prescription_id:
-            msg = "prescription_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "prescription_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -583,12 +504,7 @@ class ProductInApbArgs:
     apb: str
 
     def __post_init__(self) -> None:
-        if not self.cnk:
-            msg = "cnk must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "cnk", "apb")
 
 
 @dataclass(frozen=True, slots=True)
@@ -599,12 +515,7 @@ class ProductInApbByGtinArgs:
     apb: str
 
     def __post_init__(self) -> None:
-        if not self.gtin:
-            msg = "gtin must not be empty"
-            raise ValueError(msg)
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "gtin", "apb")
 
 
 @dataclass(frozen=True, slots=True)
@@ -618,12 +529,7 @@ class SearchProductsArgs:
     page: int = 1
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.query:
-            msg = "query must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "query")
         if self.limit < 1 or self.page < 1:
             msg = "limit and page must be positive"
             raise ValueError(msg)
@@ -679,9 +585,7 @@ class KavaProductArgs:
     cnk: str
 
     def __post_init__(self) -> None:
-        if not self.cnk:
-            msg = "cnk must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "cnk")
 
 
 KAVA_PRODUCT: Endpoint[KavaProductArgs, KavaProduct] = Endpoint(
@@ -702,12 +606,7 @@ class MessageDraftArgs(PharmacyArgs):
     account_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -725,15 +624,7 @@ class MessageDraftIdArgs(MessageDraftArgs):
     draft_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.draft_id:
-            msg = "draft_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "draft_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -753,18 +644,7 @@ class MessageAttachmentUploadArgs(MessageDraftIdArgs):
     content_type: str = "application/pdf"
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.draft_id:
-            msg = "draft_id must not be empty"
-            raise ValueError(msg)
-        if not self.filename:
-            msg = "filename must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "draft_id", "filename")
 
 
 @dataclass(frozen=True, slots=True)
@@ -774,15 +654,7 @@ class MessageAttachmentDeleteArgs(MessageDraftArgs):
     attachment_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.attachment_id:
-            msg = "attachment_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "attachment_id")
 
 
 @dataclass(frozen=True, slots=True)
@@ -792,15 +664,7 @@ class MessageMarkReadArgs(MessageDraftArgs):
     message_id: str
 
     def __post_init__(self) -> None:
-        if not self.apb:
-            msg = "apb must not be empty"
-            raise ValueError(msg)
-        if not self.account_id:
-            msg = "account_id must not be empty"
-            raise ValueError(msg)
-        if not self.message_id:
-            msg = "message_id must not be empty"
-            raise ValueError(msg)
+        _require_non_empty(self, "apb", "account_id", "message_id")
 
 
 def _attachment_form(args: MessageAttachmentUploadArgs) -> aiohttp.FormData:
