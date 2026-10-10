@@ -1,5 +1,7 @@
 """Token endpoint tests."""
 
+import asyncio
+
 import aiohttp
 import pytest
 from aioresponses import aioresponses
@@ -33,6 +35,33 @@ async def test_request_tokens_happy_path() -> None:
             )
             tokens = await async_request_tokens(session, BODY, timeout=5.0)
     assert tokens == {"access_token": "a", "refresh_token": "r", "expires_in": "36000"}
+
+
+async def test_request_tokens_keeps_an_integer_expiry_and_drops_other_types() -> None:
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(
+                TOKEN_URL,
+                payload={
+                    "access_token": "a",
+                    "expires_in": 36000,
+                    "flag": True,
+                    "nested": {"x": 1},
+                },
+            )
+            tokens = await async_request_tokens(session, BODY, timeout=5.0)
+    assert tokens == {"access_token": "a", "expires_in": "36000"}
+
+
+async def test_request_tokens_deadline_raises_the_library_timeout() -> None:
+    async def slow(_url: object, **_kwargs: object) -> None:
+        await asyncio.sleep(1)
+
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.post(TOKEN_URL, callback=slow, payload={"access_token": "a"})
+            with pytest.raises(FarmadTimeoutError):
+                await async_request_tokens(session, BODY, timeout=0.01)
 
 
 async def test_request_tokens_error_payload() -> None:

@@ -22,29 +22,35 @@ async def async_request_tokens(
     timeout: float,  # noqa: ASYNC109
 ) -> dict[str, str]:
     """Post a token request and return the token fields as strings."""
-    async with asyncio.timeout(timeout):
-        try:
-            async with session.post(
+    try:
+        async with (
+            asyncio.timeout(timeout),
+            session.post(
                 TOKEN_URL,
                 json=body,
                 headers={"Accept": "application/json", "User-Agent": USER_AGENT},
-            ) as response:
-                payload = await response.json(content_type=None)
-        except TimeoutError as err:
-            msg = "Token request timed out"
-            raise FarmadTimeoutError(msg) from err
-        except aiohttp.ClientError as err:
-            msg = f"Token request failed: {err}"
-            raise FarmadCommunicationError(msg) from err
-        except ValueError as err:
-            msg = "Token endpoint answered with a body that is not JSON"
-            raise FarmadInvalidResponseError(msg) from err
+            ) as response,
+        ):
+            payload = await response.json(content_type=None)
+    except TimeoutError as err:
+        msg = "Token request timed out"
+        raise FarmadTimeoutError(msg) from err
+    except aiohttp.ClientError as err:
+        msg = f"Token request failed: {err}"
+        raise FarmadCommunicationError(msg) from err
+    except ValueError as err:
+        msg = "Token endpoint answered with a body that is not JSON"
+        raise FarmadInvalidResponseError(msg) from err
     if not isinstance(payload, dict):
         msg = "Token endpoint answered with JSON that is not an object"
         raise FarmadInvalidResponseError(msg)
     if "access_token" not in payload:
         raise FarmadAuthenticationError(_auth_error_message(payload))
-    return {key: value for key, value in payload.items() if isinstance(value, str)}
+    return {
+        key: str(value)
+        for key, value in payload.items()
+        if isinstance(value, str) or (isinstance(value, int) and not isinstance(value, bool))
+    }
 
 
 def _auth_error_message(payload: dict[str, Any]) -> str:
