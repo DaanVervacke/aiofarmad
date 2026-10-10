@@ -75,7 +75,7 @@ KEY_REPLACEMENTS = NAME_FIELDS | EMAIL_FIELDS
 
 
 def redact_scalar(value: Any, key: str) -> Any:
-    """Replace one scalar in place when its key marks personal data."""
+    """Return the replacement for one scalar when its key marks personal data."""
     if key in KEY_REPLACEMENTS:
         return KEY_REPLACEMENTS[key]
     if isinstance(value, str):

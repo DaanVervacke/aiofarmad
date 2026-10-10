@@ -8,4 +8,4 @@ For endpoint changes, all of the following are present:
 - [ ] A typed `FarmadClient` method.
 - [ ] A row in `tests/fixtures/farmad_app_contract.json` matching the wire path the app bundle uses.
 - [ ] A redacted real payload under `tests/fixtures/`.
-- [ ] A Bruno mirror whose request and docs satisfy `scripts.check_bruno_drift`.
+- [ ] A Bruno mirror whose docs contain `Mirrors FarmadClient::<method>`, which `scripts.check_bruno_drift` checks.
