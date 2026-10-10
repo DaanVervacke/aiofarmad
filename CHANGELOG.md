@@ -15,6 +15,7 @@ Before 1.0, breaking changes ship as minor bumps.
 ### Documentation
 
 - Fix guide, contributor, and Bruno drift
+- Fix PR template, changelog steps, and redaction docstring
 
 ## [0.6.0] - 2026-10-09
 
