@@ -10,8 +10,11 @@ refresh token rotates on every use.
 ``access_token`` and ``refresh_token`` and pass them back on the next start.
 The client refreshes 30 seconds before the access token expires, retries a
 request once after a 401 when it holds a refresh token, and calls
-``on_token_refresh`` after a login and after every rotation. A stored pair logs in without the one-time-code step,
-because the refresh token keeps the session alive.
+``on_token_refresh`` after a login and after every rotation. The client logs
+an exception raised by the callback and does not raise it again, so a failed
+save leaves the stored pair stale while the client keeps working. A stored pair logs in
+without the one-time-code step, because the refresh token keeps the session
+alive.
 
 .. code-block:: python
 

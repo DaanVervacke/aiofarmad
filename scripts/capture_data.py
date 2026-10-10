@@ -1,4 +1,4 @@
-"""Dump every live payload the account can reach into captures/."""
+"""Dump the main live read payloads into captures/, except the draft basket and eHealth."""
 
 import asyncio
 import json
@@ -24,7 +24,7 @@ def load_env() -> dict[str, str]:
 
 
 def week_window() -> tuple[str, str]:
-    """The window from last Monday to next Sunday."""
+    """The window from Monday 00:00 UTC to Sunday 23:59:59.999 UTC of the current week."""
     today = datetime.now(UTC).date()
     monday = today - timedelta(days=today.weekday())
     start = datetime(monday.year, monday.month, monday.day, tzinfo=UTC)

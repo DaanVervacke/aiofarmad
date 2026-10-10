@@ -24,7 +24,7 @@ settings:
   followRedirects: false
   maxRedirects: 0
 docs: |-
-  One prescription by its Recept-e id. The answer is 401 until the eHealth
+  One prescription by its Recip-e id. The answer is 401 until the eHealth
   session cookie from a completed itsme consent is sent.
 
   Mirrors FarmadClient::async_get_prescription.

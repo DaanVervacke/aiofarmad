@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/customerbaskets/BASKET_ID/cancel'
   params:
   - name: api-version
-    value: 1.0
+    value: '1.0'
     type: query
   headers:
   - name: Accept

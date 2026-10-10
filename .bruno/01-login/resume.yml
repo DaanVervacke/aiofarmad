@@ -8,11 +8,11 @@ http:
   headers:
   - name: Accept
     value: application/json
-  auth: bearer
+  auth: none
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: false
   maxRedirects: 0
 docs: |-
-  Fifth hop. The answer redirects to the app callback with the authorization code attached.
+  Fifth hop. The answer redirects to the app callback with the authorization code attached. For an account with multi-factor authentication it redirects to /u/mfa-otp-challenge instead, where the client posts the state from the page and the one-time code, then follows the redirects to the callback.

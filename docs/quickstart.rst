@@ -42,8 +42,10 @@ token. When neither is available the call raises
 
 ``FarmadClient`` takes an optional ``aiohttp.ClientSession`` as its first
 argument. An injected session stays owned by the caller, and the client
-closes only a session it created. ``request_timeout`` sets the per-request
-timeout in seconds and defaults to 30. Use the client as an async context
+closes only a session it created. ``request_timeout`` sets the timeout in
+seconds for each API call and defaults to 30. The login applies it to the
+hosted login steps as a whole, again to the steps after a one-time code, and
+once to the token exchange. Use the client as an async context
 manager or call ``async_close`` when done.
 
 Accounts with multi-factor authentication pass an otp provider to the

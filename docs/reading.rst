@@ -45,6 +45,8 @@ default to the values the access token carries.
    * - ``async_has_technical_interruptions()``
      - Whether the Farmad platform reports an interruption
 
-The medication reads take a ``language`` argument that defaults to ``"nl"``.
-The conversation and basket reads are paged through ``limit`` and ``page``,
-or ``skip`` and ``take`` for baskets.
+The medication reads and the catalog search take a ``language`` argument
+that defaults to ``"nl"``. The conversation reads page through ``limit`` and
+``page`` with the first page at 0. The catalog search uses the same
+arguments with the first page at 1. The basket read pages through ``skip``
+and ``take``.

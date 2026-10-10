@@ -71,7 +71,7 @@ def environment_variables() -> dict[str, set[str]]:
 
 
 def constant_urls() -> list[tuple[str, str]]:
-    """Return the (name, url) http(s) constants declared in const.py."""
+    """Return the (name, url) https constants declared in const.py."""
     tree = ast.parse(CONST_PY.read_text(encoding="utf-8"))
     urls: list[tuple[str, str]] = []
     for node in tree.body:

@@ -5,4 +5,4 @@ info:
 request:
   auth: inherit
 docs: |-
-  Account and pharmacy identity. Run account first: it is where ACCOUNT_ID comes from.
+  Account and pharmacy identity. ACCOUNT_ID comes from FARMAD_ACCOUNT_ID in the environment, the account id claim of the access token.

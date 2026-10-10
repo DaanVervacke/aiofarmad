@@ -55,7 +55,7 @@ The wait for the code does not count against the request timeout. A rejected cod
 
 ## Token persistence
 
-Log in once, store the `access_token` and `refresh_token` of the `FarmadTokens` that `async_login` returns, and pass them back on the next start. The client refreshes 30 seconds before the access token expires, retries a request once after a 401 when it holds a refresh token, and calls `on_token_refresh` after a login and after every rotation.
+Log in once, store the `access_token` and `refresh_token` of the `FarmadTokens` that `async_login` returns, and pass them back on the next start. The client refreshes 30 seconds before the access token expires, retries a request once after a 401 when it holds a refresh token, and calls `on_token_refresh` after a login and after every rotation. The client logs an exception raised by the callback and does not raise it again, so a failed save leaves the stored pair stale while the client keeps working.
 
 ```python
 from datetime import UTC, datetime, timedelta
@@ -84,7 +84,7 @@ async def run(stored_access: str, stored_refresh: str) -> None:
 
 ## Client options
 
-`FarmadClient` takes an optional `aiohttp.ClientSession` as its first argument. An injected session stays owned by the caller, and the client closes only a session it created. `request_timeout` sets the per-request timeout in seconds and defaults to 30. Use the client as an async context manager or call `async_close` when done.
+`FarmadClient` takes an optional `aiohttp.ClientSession` as its first argument. An injected session stays owned by the caller, and the client closes only a session it created. `request_timeout` sets the timeout in seconds for each API call and defaults to 30. The login applies it to the hosted login steps as a whole, again to the steps after a one-time code, and once to the token exchange. Use the client as an async context manager or call `async_close` when done.
 
 The `account_id` and `patient_id` properties come from the current access token. Methods that take an optional `account_id` or `patient_id` fall back to them and raise `FarmadMissingIdentifierError`, a subclass of `FarmadAuthenticationError`, when neither is available.
 
@@ -133,6 +133,9 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
     draft = await client.async_get_message_draft("343602")
     if draft is None:
         draft = await client.async_save_message_draft("343602", "hello")
+    if draft is None:
+        msg = "the pharmacy returned no draft"
+        raise RuntimeError(msg)
     await client.async_update_message_draft("343602", draft.id, "hello pharmacy")
     await client.async_upload_message_attachment(
         "343602", draft.id, "note.pdf", Path("note.pdf").read_bytes()
@@ -144,7 +147,7 @@ Sending consumes the draft: the next `async_get_message_draft` answers `None` un
 
 ## Ordering
 
-Write calls build a draft, submit it, and can cancel a submitted order before the pharmacy processes it:
+Write calls build a draft, submit it, and can ask the pharmacy to cancel a submitted order:
 
 ```python
 from aiofarmad import DraftProduct, FarmadClient
@@ -172,7 +175,7 @@ Orders are paid at pickup by default. Most pharmacies do not allow online paymen
 
 Prescriptions sit behind the Belgian eHealth platform, and Farmad gates the eHealth session to the browser that completed the itsme consent. Tested against the platform: replaying a live consent session from any non-browser client, with the exact cookies, the exact tokens, and a browser TLS fingerprint, answers 401 every time. No cookie transfer, token pairing, or fingerprint trick carries the session out of the browser.
 
-The library models this honestly:
+The library handles the gate as follows:
 
 - `async_get_prescriptions` and `async_get_prescription` carry the verified wire paths.
 - Every eHealth call from a non-browser client raises `FarmadEhealthAuthorizationRequiredError`, without burning a refresh token cycle.
@@ -182,14 +185,14 @@ Until Farmad changes the platform, prescriptions work in the web app only.
 
 ## Errors
 
-Every exception derives from `FarmadError`, which carries the HTTP `status` when one applies.
+Every API, transport, and authentication error derives from `FarmadError`, which carries the HTTP `status` when one applies. Invalid arguments, such as an empty apb or a datetime without a timezone, raise `ValueError` before any request is sent.
 
 | Exception | Parent | Meaning |
 | --- | --- | --- |
-| `FarmadAuthenticationError` | `FarmadError` | Credentials or tokens were rejected |
+| `FarmadAuthenticationError` | `FarmadError` | Credentials or tokens are missing or were rejected |
 | `FarmadMfaRequiredError` | `FarmadAuthenticationError` | The login needed a one-time code and no otp provider was passed |
 | `FarmadMissingIdentifierError` | `FarmadAuthenticationError` | No account or patient id was passed and the token carries none |
-| `FarmadAuthorizationError` | `FarmadError` | The account has no role at this pharmacy (403) |
+| `FarmadAuthorizationError` | `FarmadError` | The pharmacy refused the call (403), usually because the account has no role there |
 | `FarmadEhealthAuthorizationRequiredError` | `FarmadError` | The eHealth consent is missing |
 | `FarmadCommunicationError` | `FarmadError` | The API is unreachable or answered with a failure |
 | `FarmadTimeoutError` | `FarmadCommunicationError` | A request exceeded the configured timeout |

@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/usermanagement/api/account/{{ACCOUNT_ID}}/self-onboarding'
   params:
   - name: api-version
-    value: 8.12
+    value: '8.12'
     type: query
   headers:
   - name: Content-Type
@@ -15,7 +15,7 @@ http:
   - name: Accept
     value: application/json
   body: {"apb":"{{APB}}"}
-  auth: none
+  auth: bearer
 settings:
   encodeUrl: true
   timeout: 0

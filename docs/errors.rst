@@ -1,8 +1,10 @@
 Errors
 ======
 
-Every exception derives from :class:`aiofarmad.FarmadError`, which carries
-the HTTP ``status`` when one applies.
+Every API, transport, and authentication error derives from
+:class:`aiofarmad.FarmadError`, which carries the HTTP ``status`` when one
+applies. Invalid arguments, such as an empty apb or a datetime without a
+timezone, raise ``ValueError`` before any request is sent.
 
 .. list-table::
    :header-rows: 1
@@ -12,7 +14,7 @@ the HTTP ``status`` when one applies.
      - Meaning
    * - ``FarmadAuthenticationError``
      - ``FarmadError``
-     - Credentials or tokens were rejected
+     - Credentials or tokens are missing or were rejected
    * - ``FarmadMfaRequiredError``
      - ``FarmadAuthenticationError``
      - The login needed a one-time code and no otp provider was passed
@@ -21,7 +23,7 @@ the HTTP ``status`` when one applies.
      - No account or patient id was passed and the token carries none
    * - ``FarmadAuthorizationError``
      - ``FarmadError``
-     - The account has no role at this pharmacy (403)
+     - The pharmacy refused the call (403), usually because the account has no role there
    * - ``FarmadEhealthAuthorizationRequiredError``
      - ``FarmadError``
      - The eHealth consent is missing

@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/usermanagement/api/organization/{{APB}}'
   params:
   - name: api-version
-    value: 8.12
+    value: '8.12'
     type: query
   headers:
   - name: Accept

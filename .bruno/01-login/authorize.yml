@@ -8,7 +8,7 @@ http:
   headers:
   - name: Accept
     value: application/json
-  auth: bearer
+  auth: none
 settings:
   encodeUrl: true
   timeout: 0

@@ -188,7 +188,7 @@ class TokenLifecycle:
                 seq, access_token, refresh_token = self._pending.popleft()
                 if seq < self._rotation_seq:
                     _LOGGER.debug(
-                        "rotation %d superseded by rotation %d; dropping stale delivery",
+                        "rotation %d superseded by rotation %d, dropping stale delivery",
                         seq,
                         self._rotation_seq,
                     )

@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/drafts/{{ACCOUNT_ID}}'
   params:
   - name: api-version
-    value: 1.0
+    value: '1.0'
     type: query
   headers:
   - name: Content-Type
@@ -15,7 +15,7 @@ http:
   - name: Accept
     value: application/json
   body: {"patientId":"{{PATIENT_ID}}","products":[{"productCnk":"CNK","quantityOrdered":1,"patientId":"{{PATIENT_ID}}"}]}
-  auth: none
+  auth: bearer
 settings:
   encodeUrl: true
   timeout: 0

@@ -1,4 +1,4 @@
-"""Live probe: run every read endpoint against the real Farmad API."""
+"""Live probe: run the main read endpoints against the real Farmad API."""
 
 import asyncio
 import re
@@ -23,7 +23,7 @@ def load_credentials() -> dict[str, str]:
 
 
 def week_window() -> tuple[datetime, datetime]:
-    """The window from last Monday to next Sunday."""
+    """The window from Monday 00:00 UTC to Sunday 23:59:59.999 UTC of the current week."""
     today = datetime.now(UTC).date()
     monday = today - timedelta(days=today.weekday())
     start = datetime(monday.year, monday.month, monday.day, tzinfo=UTC)

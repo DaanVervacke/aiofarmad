@@ -1,12 +1,12 @@
 Orders
 ======
 
-Order placement builds a draft, submits it, and can cancel a submitted order
-before the pharmacy processes it.
+Order placement builds a draft, submits it, and can ask the pharmacy to
+cancel a submitted order.
 
 .. code-block:: python
 
-   from aiofarmad import DraftProduct, FarmadClient
+   from aiofarmad import DraftProduct, FarmadAuthorizationError, FarmadClient
 
    products = (DraftProduct(product_cnk="1234567", quantity=1),)
 
@@ -22,7 +22,10 @@ before the pharmacy processes it.
            unit_prices=(("1234567", 4.95),),
        )
        if order_id is not None:
-           await client.async_cancel_basket("343602", order_id)
+           try:
+               await client.async_cancel_basket("343602", order_id)
+           except FarmadAuthorizationError:
+               print("the pharmacy keeps the order")
 
 Submitting an order is a real transaction with the pharmacy. The pharmacy
 sees it, and someone pays or cancels it.
@@ -35,7 +38,9 @@ it, and ``async_get_draft_basket`` reads it back or answers ``None``.
 
 Orders are paid at pickup by default. Most pharmacies do not allow online
 payments, and passing ``pay_online=True`` there raises
-:class:`aiofarmad.FarmadCommunicationError` with ``status`` 400.
+:class:`aiofarmad.FarmadCommunicationError` with ``status`` 400. With
+``pay_online=True``, ``redirect_url`` sets where the payment provider sends
+the browser back after paying.
 ``async_pay_basket`` starts an online payment for a pharmacy that allows it
 and returns the raw session the app hands to a browser, because the checkout
 runs at the payment provider.

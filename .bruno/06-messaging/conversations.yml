@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/messaging/api/message/{{APB}}'
   params:
   - name: api-version
-    value: 4.0
+    value: '4.0'
     type: query
   - name: Limit
     value: 25

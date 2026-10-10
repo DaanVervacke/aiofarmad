@@ -2,7 +2,7 @@
 
 
 class FarmadError(Exception):
-    """Base class for every error this library raises."""
+    """Base class for every API, transport, and authentication error this library raises."""
 
     def __init__(self, message: str, status: int | None = None) -> None:
         super().__init__(message)
@@ -18,7 +18,7 @@ class FarmadTimeoutError(FarmadCommunicationError):
 
 
 class FarmadAuthenticationError(FarmadError):
-    """Login failed because the credentials or tokens were rejected."""
+    """The credentials or tokens are missing or were rejected."""
 
 
 class FarmadMissingIdentifierError(FarmadAuthenticationError):

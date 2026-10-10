@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/customerbasket/api/{{APB}}/customerbaskets'
   params:
   - name: api-version
-    value: 1.0
+    value: '1.0'
     type: query
   - name: PatientId
     value: '{{PATIENT_ID}}'

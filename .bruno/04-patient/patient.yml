@@ -7,7 +7,7 @@ http:
   url: '{{albBaseUrl}}/patientmanagement/api/patients/{{PATIENT_ID}}'
   params:
   - name: api-version
-    value: 2.0
+    value: '2.0'
     type: query
   headers:
   - name: Accept

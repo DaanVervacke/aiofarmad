@@ -5,4 +5,4 @@ info:
 request:
   auth: inherit
 docs: |-
-  The scripted login, one request per hop. The client runs all five in one session with a shared cookie jar.
+  The scripted login, one request per hop. The client runs all five in one session with a shared cookie jar, then exchanges the authorization code and the PKCE verifier at /oauth/token for the first token pair.

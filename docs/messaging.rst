@@ -20,6 +20,9 @@ the text, attach files, and send.
     draft = await client.async_get_message_draft("343602")
     if draft is None:
         draft = await client.async_save_message_draft("343602", "hello")
+    if draft is None:
+        msg = "the pharmacy returned no draft"
+        raise RuntimeError(msg)
     await client.async_update_message_draft("343602", draft.id, "hello pharmacy")
     await client.async_upload_message_attachment(
         "343602", draft.id, "note.pdf", Path("note.pdf").read_bytes()
