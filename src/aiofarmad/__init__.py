@@ -14,6 +14,7 @@ from .exceptions import (
     FarmadMfaRequiredError,
     FarmadMissingIdentifierError,
     FarmadNotFoundError,
+    FarmadRejectedError,
     FarmadTimeoutError,
 )
 from .models import (
@@ -82,6 +83,7 @@ __all__ = [
     "FarmadMissingIdentifierError",
     "FarmadNotFoundError",
     "FarmadPatient",
+    "FarmadRejectedError",
     "FarmadTimeoutError",
     "FarmadTokens",
     "KavaProduct",

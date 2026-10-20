@@ -16,6 +16,7 @@ from aiofarmad.exceptions import (
     FarmadCommunicationError,
     FarmadInvalidResponseError,
     FarmadNotFoundError,
+    FarmadRejectedError,
     FarmadTimeoutError,
 )
 
@@ -39,6 +40,8 @@ async def test_request_maps_status_errors() -> None:
             m.get(f"{BASE}/a", status=401)
             m.get(f"{BASE}/b", status=403)
             m.get(f"{BASE}/c", status=404)
+            m.get(f"{BASE}/h", status=400)
+            m.get(f"{BASE}/i", status=422)
             m.get(f"{BASE}/d", status=500)
             with pytest.raises(FarmadAuthenticationError):
                 async with request(session, method="GET", url=f"{BASE}/a"):
@@ -48,6 +51,12 @@ async def test_request_maps_status_errors() -> None:
                     pass
             with pytest.raises(FarmadNotFoundError):
                 async with request(session, method="GET", url=f"{BASE}/c"):
+                    pass
+            with pytest.raises(FarmadRejectedError):
+                async with request(session, method="GET", url=f"{BASE}/h"):
+                    pass
+            with pytest.raises(FarmadRejectedError):
+                async with request(session, method="GET", url=f"{BASE}/i"):
                     pass
             with pytest.raises(FarmadCommunicationError):
                 async with request(session, method="GET", url=f"{BASE}/d"):
@@ -147,7 +156,7 @@ async def test_error_message_carries_body_detail() -> None:
                 status=400,
                 body='{"title":"Bad Request","detail":"online payments are off"}',
             )
-            with pytest.raises(FarmadCommunicationError, match="online payments are off"):
+            with pytest.raises(FarmadRejectedError, match="online payments are off"):
                 await request_json(session, method="GET", url=f"{BASE}/rejected")
 
 

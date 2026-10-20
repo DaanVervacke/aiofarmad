@@ -24,6 +24,7 @@ from aiofarmad import (
     FarmadInvalidResponseError,
     FarmadMissingIdentifierError,
     FarmadNotFoundError,
+    FarmadRejectedError,
 )
 
 from .conftest import (
@@ -816,7 +817,7 @@ async def test_pay_basket_denied_answers_400() -> None:
                 status=400,
                 payload={},
             )
-            with pytest.raises(FarmadCommunicationError):
+            with pytest.raises(FarmadRejectedError):
                 await make_client(session).async_pay_basket(APB, "basket-9", "https://x/")
 
 

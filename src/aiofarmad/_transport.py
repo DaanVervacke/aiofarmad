@@ -21,6 +21,7 @@ from .exceptions import (
     FarmadError,
     FarmadInvalidResponseError,
     FarmadNotFoundError,
+    FarmadRejectedError,
     FarmadTimeoutError,
 )
 
@@ -99,7 +100,13 @@ async def _raise_for_status(response: aiohttp.ClientResponse) -> None:
     if response.status == HTTPStatus.NOT_FOUND:
         msg = "The Farmad API has no such object (404)"
         raise FarmadNotFoundError(msg, status=404)
-    if response.status >= HTTPStatus.BAD_REQUEST:
+    if HTTPStatus.BAD_REQUEST <= response.status < HTTPStatus.INTERNAL_SERVER_ERROR:
+        detail = await _error_detail(response)
+        msg = f"Farmad API error {response.status}"
+        if detail:
+            msg = f"{msg}: {detail}"
+        raise FarmadRejectedError(msg, status=response.status)
+    if response.status >= HTTPStatus.INTERNAL_SERVER_ERROR:
         detail = await _error_detail(response)
         msg = f"Farmad API error {response.status}"
         if detail:

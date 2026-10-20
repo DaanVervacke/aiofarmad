@@ -37,6 +37,10 @@ class FarmadEhealthAuthorizationRequiredError(FarmadError):
     """Prescriptions are unavailable until the eHealth consent is completed."""
 
 
+class FarmadRejectedError(FarmadError):
+    """The Farmad API refused the request."""
+
+
 class FarmadInvalidResponseError(FarmadCommunicationError):
     """A response carried an unusable payload, such as JSON that is not an object."""
 
