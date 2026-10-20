@@ -12,6 +12,10 @@ Before 1.0, breaking changes ship as minor bumps.
 
 - Raise FarmadRejectedError when the API refuses a request
 
+### Maintenance
+
+- Raise the aiohttp floor to the patched 3.14.4
+
 ## [0.6.3] - 2026-10-10
 
 ### Documentation
