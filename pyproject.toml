@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "aiofarmad"
-version = "0.6.4"
+version = "0.6.5"
 description = "Unofficial asynchronous Python library to interact with the Mijn Farmad Apotheek API"
 readme = "README.md"
 license = "MIT"
