@@ -15,6 +15,7 @@ from .exceptions import (
     FarmadMissingIdentifierError,
     FarmadMissingPriceError,
     FarmadNotFoundError,
+    FarmadPriceLookupError,
     FarmadRejectedError,
     FarmadTimeoutError,
 )
@@ -85,6 +86,7 @@ __all__ = [
     "FarmadMissingPriceError",
     "FarmadNotFoundError",
     "FarmadPatient",
+    "FarmadPriceLookupError",
     "FarmadRejectedError",
     "FarmadTimeoutError",
     "FarmadTokens",

@@ -53,5 +53,9 @@ class FarmadNotFoundError(FarmadCommunicationError):
     """A requested object does not exist."""
 
 
+class FarmadPriceLookupError(FarmadCommunicationError):
+    """A price lookup in the pharmacy catalog failed before the order was submitted."""
+
+
 class FarmadClientClosedError(FarmadError):
     """The client was closed, so no further requests can be made."""

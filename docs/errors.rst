@@ -45,6 +45,9 @@ timezone, raise ``ValueError`` before any request is sent.
    * - ``FarmadNotFoundError``
      - ``FarmadCommunicationError``
      - The requested object does not exist (404)
+   * - ``FarmadPriceLookupError``
+     - ``FarmadCommunicationError``
+     - A price lookup in the pharmacy catalog failed before the order was submitted
    * - ``FarmadClientClosedError``
      - ``FarmadError``
      - The client was closed

@@ -25,6 +25,7 @@ from aiofarmad import (
     FarmadMissingIdentifierError,
     FarmadMissingPriceError,
     FarmadNotFoundError,
+    FarmadPriceLookupError,
     FarmadRejectedError,
 )
 
@@ -531,6 +532,31 @@ async def test_submit_basket_without_a_catalog_price_raises(
             )
             with pytest.raises(FarmadMissingPriceError, match="lists no price"):
                 await make_client(session).async_submit_basket(APB, "draft-9", products=products)
+    assert all(key[0] != "PATCH" for key in m.requests)
+
+
+@pytest.mark.parametrize(
+    ("catalog_kwargs", "expected_status"),
+    [
+        pytest.param({"status": 500, "payload": {}}, 500, id="server-error"),
+        pytest.param({"exception": TimeoutError()}, None, id="timeout"),
+    ],
+)
+async def test_submit_basket_price_lookup_failure_raises(
+    catalog_kwargs: dict[str, Any],
+    expected_status: int | None,
+) -> None:
+    products = (DraftProduct(product_cnk="3093242", quantity=1),)
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                **catalog_kwargs,
+            )
+            with pytest.raises(FarmadPriceLookupError, match="price lookup") as excinfo:
+                await make_client(session).async_submit_basket(APB, "draft-9", products=products)
+    assert excinfo.value.status == expected_status
+    assert excinfo.value.__cause__ is not None
     assert all(key[0] != "PATCH" for key in m.requests)
 
 

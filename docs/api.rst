@@ -91,4 +91,5 @@ Exceptions
 .. autoclass:: aiofarmad.FarmadMissingPriceError
 .. autoclass:: aiofarmad.FarmadInvalidResponseError
 .. autoclass:: aiofarmad.FarmadNotFoundError
+.. autoclass:: aiofarmad.FarmadPriceLookupError
 .. autoclass:: aiofarmad.FarmadClientClosedError

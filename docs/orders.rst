@@ -38,7 +38,9 @@ it, and ``async_get_draft_basket`` reads it back or answers ``None``.
 ``unit_prices`` is optional and is filled from the catalog: a product
 without a passed price gets the promo price when one runs and otherwise
 the sales price. The catalog listing no price raises
-:class:`aiofarmad.FarmadMissingPriceError` before the order is submitted.
+:class:`aiofarmad.FarmadMissingPriceError` and a failing lookup raises
+:class:`aiofarmad.FarmadPriceLookupError`, both before the order is
+submitted.
 
 Orders are paid at pickup by default. Most pharmacies do not allow online
 payments, and passing ``pay_online=True`` there raises

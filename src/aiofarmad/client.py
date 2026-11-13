@@ -81,10 +81,12 @@ from .const import USER_AGENT
 from .exceptions import (
     FarmadAuthenticationError,
     FarmadClientClosedError,
+    FarmadCommunicationError,
     FarmadEhealthAuthorizationRequiredError,
     FarmadMissingIdentifierError,
     FarmadMissingPriceError,
     FarmadNotFoundError,
+    FarmadPriceLookupError,
 )
 from .models import (
     BasketPayment,
@@ -400,8 +402,9 @@ class FarmadClient:
         A product without a passed unit price gets the current catalog
         price, the promo price when one runs and otherwise the sales
         price, because the API refuses an order without unit prices.
-        The catalog listing no price for a product raises
-        FarmadMissingPriceError before the order is submitted.
+        The catalog listing no price raises FarmadMissingPriceError and
+        a failing price lookup raises FarmadPriceLookupError, both
+        before the order is submitted.
         """
         resolved = self._resolve_patient_id(patient_id)
         unit_prices = await self._complete_unit_prices(apb, products, unit_prices)
@@ -654,14 +657,19 @@ class FarmadClient:
 
         A product gets the promo price when one runs and otherwise the
         sales price, the same rule the pharmacy app applies. The
-        catalog listing no price raises FarmadMissingPriceError.
+        catalog listing no price raises FarmadMissingPriceError and a
+        failing lookup raises FarmadPriceLookupError.
         """
         prices = dict(unit_prices)
         for product in products:
             cnk = product.product_cnk
             if cnk in prices:
                 continue
-            found = await self.async_get_product_in_apb(apb, cnk)
+            try:
+                found = await self.async_get_product_in_apb(apb, cnk)
+            except FarmadCommunicationError as err:
+                msg = f"The price lookup for product {cnk} at pharmacy {apb} failed"
+                raise FarmadPriceLookupError(msg, status=err.status) from err
             price = found.price if found is not None else None
             unit_price: float | None = None
             if price is not None:
