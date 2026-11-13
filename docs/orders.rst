@@ -42,7 +42,7 @@ the sales price. The catalog listing no price raises
 
 Orders are paid at pickup by default. Most pharmacies do not allow online
 payments, and passing ``pay_online=True`` there raises
-:class:`aiofarmad.FarmadCommunicationError` with ``status`` 400. With
+:class:`aiofarmad.FarmadRejectedError` with ``status`` 400. With
 ``pay_online=True``, ``redirect_url`` sets where the payment provider sends
 the browser back after paying.
 ``async_pay_basket`` starts an online payment for a pharmacy that allows it

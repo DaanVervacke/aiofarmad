@@ -170,7 +170,7 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
 
 `unit_prices` is optional and is filled from the catalog: a product without a passed price gets the promo price when one runs and otherwise the sales price. The catalog listing no price raises `FarmadMissingPriceError` before the order is submitted.
 
-Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadCommunicationError` with `status` 400. With `pay_online=True`, `redirect_url` sets where the payment provider sends the browser back after paying. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
+Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadRejectedError` with `status` 400. With `pay_online=True`, `redirect_url` sets where the payment provider sends the browser back after paying. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
 
 ## Prescriptions
 
@@ -195,6 +195,7 @@ Every API, transport, and authentication error derives from `FarmadError`, which
 | `FarmadMissingIdentifierError` | `FarmadAuthenticationError` | No account or patient id was passed and the token carries none |
 | `FarmadAuthorizationError` | `FarmadError` | The pharmacy refused the call (403), usually because the account has no role there |
 | `FarmadEhealthAuthorizationRequiredError` | `FarmadError` | The eHealth consent is missing |
+| `FarmadRejectedError` | `FarmadError` | The API refused the request, such as a validation failure |
 | `FarmadMissingPriceError` | `FarmadError` | The pharmacy catalog lists no price for a product in the order |
 | `FarmadCommunicationError` | `FarmadError` | The API is unreachable or answered with a failure |
 | `FarmadTimeoutError` | `FarmadCommunicationError` | A request exceeded the configured timeout |
