@@ -1,5 +1,7 @@
 """Transport tests: error mapping, ownership, and payload handling."""
 
+import logging
+
 import aiohttp
 import pytest
 from aioresponses import aioresponses
@@ -158,6 +160,17 @@ async def test_error_message_carries_body_detail() -> None:
             )
             with pytest.raises(FarmadRejectedError, match="online payments are off"):
                 await request_json(session, method="GET", url=f"{BASE}/rejected")
+
+
+async def test_error_body_is_logged_at_debug(caplog: pytest.LogCaptureFixture) -> None:
+    caplog.set_level(logging.DEBUG, logger="aiofarmad._transport")
+    body = '{"title":"Bad Request","detail":"unit prices are required"}'
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(f"{BASE}/logged", status=400, body=body)
+            with pytest.raises(FarmadRejectedError):
+                await request_json(session, method="GET", url=f"{BASE}/logged")
+    assert f"Farmad API error 400: {body}" in caplog.text
 
 
 async def test_error_message_survives_binary_body() -> None:

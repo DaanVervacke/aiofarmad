@@ -101,16 +101,10 @@ async def _raise_for_status(response: aiohttp.ClientResponse) -> None:
         msg = "The Farmad API has no such object (404)"
         raise FarmadNotFoundError(msg, status=404)
     if HTTPStatus.BAD_REQUEST <= response.status < HTTPStatus.INTERNAL_SERVER_ERROR:
-        detail = await _error_detail(response)
-        msg = f"Farmad API error {response.status}"
-        if detail:
-            msg = f"{msg}: {detail}"
+        msg = await _error_message(response)
         raise FarmadRejectedError(msg, status=response.status)
     if response.status >= HTTPStatus.INTERNAL_SERVER_ERROR:
-        detail = await _error_detail(response)
-        msg = f"Farmad API error {response.status}"
-        if detail:
-            msg = f"{msg}: {detail}"
+        msg = await _error_message(response)
         raise FarmadCommunicationError(msg, status=response.status)
 
 
@@ -125,6 +119,16 @@ async def _error_detail(response: aiohttp.ClientResponse) -> str:
     if len(text) > _ERROR_DETAIL_LIMIT:
         return text[:_ERROR_DETAIL_LIMIT]
     return text.strip()
+
+
+async def _error_message(response: aiohttp.ClientResponse) -> str:
+    """Build the error message and log the response body at debug level."""
+    detail = await _error_detail(response)
+    msg = f"Farmad API error {response.status}"
+    if detail:
+        _LOGGER.debug("Farmad API error %s: %s", response.status, detail)
+        msg = f"{msg}: {detail}"
+    return msg
 
 
 async def request_json(
