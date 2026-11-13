@@ -19,7 +19,6 @@ cancel a submitted order.
            "343602",
            draft_id,
            products=products,
-           unit_prices=(("1234567", 4.95),),
        )
        if order_id is not None:
            try:
@@ -35,6 +34,11 @@ returns the order id. Both answer ``None`` when the response carries no id.
 ``async_update_draft_basket``
 replaces the lines of an existing draft, ``async_clear_draft_basket`` deletes
 it, and ``async_get_draft_basket`` reads it back or answers ``None``.
+
+``unit_prices`` is optional and is filled from the catalog: a product
+without a passed price gets the promo price when one runs and otherwise
+the sales price. The catalog listing no price raises
+:class:`aiofarmad.FarmadMissingPriceError` before the order is submitted.
 
 Orders are paid at pickup by default. Most pharmacies do not allow online
 payments, and passing ``pay_online=True`` there raises

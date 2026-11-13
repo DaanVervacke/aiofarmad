@@ -83,6 +83,7 @@ from .exceptions import (
     FarmadClientClosedError,
     FarmadEhealthAuthorizationRequiredError,
     FarmadMissingIdentifierError,
+    FarmadMissingPriceError,
     FarmadNotFoundError,
 )
 from .models import (
@@ -395,8 +396,15 @@ class FarmadClient:
         allow online payments. Passing pay_online True against such a
         pharmacy answers 400. The redirect url is where the payment
         provider sends the browser back after an online payment.
+
+        A product without a passed unit price gets the current catalog
+        price, the promo price when one runs and otherwise the sales
+        price, because the API refuses an order without unit prices.
+        The catalog listing no price for a product raises
+        FarmadMissingPriceError before the order is submitted.
         """
         resolved = self._resolve_patient_id(patient_id)
+        unit_prices = await self._complete_unit_prices(apb, products, unit_prices)
         return await self._call(
             SUBMIT_BASKET,
             SubmitBasketArgs(
@@ -635,6 +643,34 @@ class FarmadClient:
             SELF_ONBOARDING,
             SelfOnboardingArgs(account_id=resolved, apb=apb),
         )
+
+    async def _complete_unit_prices(
+        self,
+        apb: str,
+        products: tuple[DraftProduct, ...],
+        unit_prices: tuple[tuple[str, float], ...],
+    ) -> tuple[tuple[str, float], ...]:
+        """Fill the unit prices the caller did not pass from the pharmacy catalog.
+
+        A product gets the promo price when one runs and otherwise the
+        sales price, the same rule the pharmacy app applies. The
+        catalog listing no price raises FarmadMissingPriceError.
+        """
+        prices = dict(unit_prices)
+        for product in products:
+            cnk = product.product_cnk
+            if cnk in prices:
+                continue
+            found = await self.async_get_product_in_apb(apb, cnk)
+            price = found.price if found is not None else None
+            unit_price: float | None = None
+            if price is not None:
+                unit_price = price.promo_price_online or price.sales_price
+            if unit_price is None:
+                msg = f"The catalog of pharmacy {apb} lists no price for product {cnk}"
+                raise FarmadMissingPriceError(msg)
+            prices[cnk] = unit_price
+        return tuple(prices.items())
 
     async def _call[ArgsT, ModelT](
         self,

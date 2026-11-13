@@ -23,6 +23,7 @@ from aiofarmad import (
     FarmadEhealthAuthorizationRequiredError,
     FarmadInvalidResponseError,
     FarmadMissingIdentifierError,
+    FarmadMissingPriceError,
     FarmadNotFoundError,
     FarmadRejectedError,
 )
@@ -55,6 +56,17 @@ def first_request_key(
             return recorded_method, recorded_url
     msg = f"no recorded request for {method} {url_prefix}"
     raise AssertionError(msg)
+
+
+def submitted_basket_body(m: aioresponses) -> Any:
+    """Return the JSON body sent to the basket submit endpoint."""
+    request_log = m.requests
+    key = first_request_key(
+        request_log,
+        "PATCH",
+        f"https://alb-prod.procura.farmad.be/customerbasket/api/{APB}/customerbaskets/draft-9/submit",
+    )
+    return request_log[key][0].kwargs["json"]
 
 
 def make_client(session: aiohttp.ClientSession | None = None) -> FarmadClient:
@@ -380,13 +392,7 @@ async def test_submit_basket_sends_order_body() -> None:
                 redirect_url="https://example.com/paid",
             )
     assert basket_id == "basket-9"
-    request_log = m.requests
-    key = first_request_key(
-        request_log,
-        "PATCH",
-        f"https://alb-prod.procura.farmad.be/customerbasket/api/{APB}/customerbaskets/draft-9/submit",
-    )
-    body = request_log[key][0].kwargs["json"]
+    body = submitted_basket_body(m)
     assert body["commentCustomer"] == "repeat order"
     assert body["preferPaymentAtPickup"] is False
     assert body["unitPrices"] == [{"productCnk": "1122334", "price": 4.95}]
@@ -405,6 +411,127 @@ async def test_submit_basket_without_redirect_url_sends_null() -> None:
     body = calls[0].kwargs["json"]
     assert body["preferPaymentAtPickup"] is True
     assert body["redirectUrl"] is None
+
+
+@pytest.mark.parametrize(
+    ("price_info", "expected_price"),
+    [
+        pytest.param({}, 3.1, id="sales-price"),
+        pytest.param(
+            {"currentPriceInfo": {"salesPrice": 3.1, "promoPriceOnline": 2.5}},
+            2.5,
+            id="promo-wins",
+        ),
+        pytest.param(
+            {"currentPriceInfo": {"salesPrice": 3.1, "promoPriceOnline": 0.0}},
+            3.1,
+            id="zero-promo-falls-back",
+        ),
+    ],
+)
+async def test_submit_basket_fills_unit_prices_from_the_catalog(
+    load_fixture: Callable[[str], Any],
+    price_info: dict[str, Any],
+    expected_price: float,
+) -> None:
+    payload = {**load_fixture("product_in_apb.json"), **price_info}
+    products = (DraftProduct(product_cnk="3093242", quantity=1),)
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                payload=payload,
+            )
+            m.patch(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/draft-9/submit"),
+                payload={"id": "basket-9"},
+            )
+            basket_id = await make_client(session).async_submit_basket(
+                APB, "draft-9", products=products
+            )
+    assert basket_id == "basket-9"
+    body = submitted_basket_body(m)
+    assert body["unitPrices"] == [{"productCnk": "3093242", "price": expected_price}]
+
+
+async def test_submit_basket_merges_passed_and_catalog_prices(
+    load_fixture: Callable[[str], Any],
+) -> None:
+    products = (
+        DraftProduct(product_cnk="1122334", quantity=1),
+        DraftProduct(product_cnk="3093242", quantity=2),
+    )
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                payload=load_fixture("product_in_apb.json"),
+            )
+            m.patch(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/draft-9/submit"),
+                payload={"id": "basket-9"},
+            )
+            basket_id = await make_client(session).async_submit_basket(
+                APB,
+                "draft-9",
+                products=products,
+                unit_prices=(("1122334", 4.95),),
+            )
+    assert basket_id == "basket-9"
+    body = submitted_basket_body(m)
+    assert body["unitPrices"] == [
+        {"productCnk": "1122334", "price": 4.95},
+        {"productCnk": "3093242", "price": 3.1},
+    ]
+
+
+async def test_submit_basket_with_unit_prices_skips_the_catalog() -> None:
+    products = (DraftProduct(product_cnk="3093242", quantity=1),)
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.patch(
+                alb_url(f"/customerbasket/api/{APB}/customerbaskets/draft-9/submit"),
+                payload={"id": "basket-9"},
+            )
+            basket_id = await make_client(session).async_submit_basket(
+                APB,
+                "draft-9",
+                products=products,
+                unit_prices=(("3093242", 3.1),),
+            )
+    assert basket_id == "basket-9"
+    assert all(key[0] != "GET" for key in m.requests)
+
+
+@pytest.mark.parametrize(
+    ("status", "price_info"),
+    [
+        pytest.param(404, {}, id="product-not-found"),
+        pytest.param(200, {"currentPriceInfo": None}, id="price-info-null"),
+        pytest.param(
+            200,
+            {"currentPriceInfo": {"salesPrice": None, "promoPriceOnline": None}},
+            id="price-fields-null",
+        ),
+    ],
+)
+async def test_submit_basket_without_a_catalog_price_raises(
+    load_fixture: Callable[[str], Any],
+    status: int,
+    price_info: dict[str, Any],
+) -> None:
+    products = (DraftProduct(product_cnk="3093242", quantity=1),)
+    payload = {**load_fixture("product_in_apb.json"), **price_info}
+    async with aiohttp.ClientSession() as session:
+        with aioresponses() as m:
+            m.get(
+                catalog_url(f"/api/catalog/products/3093242/{APB}"),
+                status=status,
+                payload=payload,
+            )
+            with pytest.raises(FarmadMissingPriceError, match="lists no price"):
+                await make_client(session).async_submit_basket(APB, "draft-9", products=products)
+    assert all(key[0] != "PATCH" for key in m.requests)
 
 
 async def test_cancel_basket() -> None:

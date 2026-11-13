@@ -87,6 +87,7 @@ Exceptions
 .. autoclass:: aiofarmad.FarmadMissingIdentifierError
 .. autoclass:: aiofarmad.FarmadAuthorizationError
 .. autoclass:: aiofarmad.FarmadEhealthAuthorizationRequiredError
+.. autoclass:: aiofarmad.FarmadMissingPriceError
 .. autoclass:: aiofarmad.FarmadInvalidResponseError
 .. autoclass:: aiofarmad.FarmadNotFoundError
 .. autoclass:: aiofarmad.FarmadClientClosedError
