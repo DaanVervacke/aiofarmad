@@ -168,7 +168,7 @@ async with FarmadClient(access_token=..., refresh_token=...) as client:
 
 `async_save_draft_basket` returns the draft id and `async_submit_basket` returns the order id. Both answer `None` when the response carries no id. `async_update_draft_basket` replaces the lines of an existing draft and `async_clear_draft_basket` deletes it.
 
-`unit_prices` is optional and is filled from the catalog: a product without a passed price gets the promo price when one runs and otherwise the sales price. The catalog listing no price raises `FarmadMissingPriceError` before the order is submitted.
+`unit_prices` is optional and is filled from the catalog: a product without a passed price gets the promo price when one runs and otherwise the sales price. The catalog listing no price raises `FarmadMissingPriceError` and a failing lookup raises `FarmadPriceLookupError`, both before the order is submitted.
 
 Orders are paid at pickup by default. Most pharmacies do not allow online payments, and asking for one there raises `FarmadRejectedError` with `status` 400. With `pay_online=True`, `redirect_url` sets where the payment provider sends the browser back after paying. `async_pay_basket` starts an online payment for a pharmacy that allows it and returns the raw session the app hands to a browser, because the checkout itself runs at the payment provider. Cancelling a submitted order is the pharmacy's decision: customer accounts regularly get `FarmadAuthorizationError` from `async_cancel_basket`.
 
@@ -201,6 +201,7 @@ Every API, transport, and authentication error derives from `FarmadError`, which
 | `FarmadTimeoutError` | `FarmadCommunicationError` | A request exceeded the configured timeout |
 | `FarmadInvalidResponseError` | `FarmadCommunicationError` | A response payload was unusable |
 | `FarmadNotFoundError` | `FarmadCommunicationError` | The requested object does not exist (404) |
+| `FarmadPriceLookupError` | `FarmadCommunicationError` | A price lookup in the pharmacy catalog failed before the order was submitted |
 | `FarmadClientClosedError` | `FarmadError` | The client was closed |
 
 ## Development
