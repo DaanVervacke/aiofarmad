@@ -27,6 +27,12 @@ timezone, raise ``ValueError`` before any request is sent.
    * - ``FarmadEhealthAuthorizationRequiredError``
      - ``FarmadError``
      - The eHealth consent is missing
+   * - ``FarmadRejectedError``
+     - ``FarmadError``
+     - The API refused the request, such as a validation failure
+   * - ``FarmadMissingPriceError``
+     - ``FarmadError``
+     - The pharmacy catalog lists no price for a product in the order
    * - ``FarmadCommunicationError``
      - ``FarmadError``
      - The API is unreachable or answered with a failure

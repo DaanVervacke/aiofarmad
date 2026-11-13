@@ -41,6 +41,10 @@ class FarmadRejectedError(FarmadError):
     """The Farmad API refused the request."""
 
 
+class FarmadMissingPriceError(FarmadError):
+    """The pharmacy catalog lists no price for a product in the order."""
+
+
 class FarmadInvalidResponseError(FarmadCommunicationError):
     """A response carried an unusable payload, such as JSON that is not an object."""
 
